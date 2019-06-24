@@ -36,6 +36,17 @@ class Tank extends BaseDrawObject {
         this.positionX = startPositionX;
         this.positionY = startPositionY;
         this.speed = speed;
+        this._towers = [
+            new DoubleBarreledTankTower(startPositionX, startPositionY),
+            new SimpleTankTower(startPositionX, startPositionY)
+        ];
+        this.tower = this._towers[1];
+    }
+
+    changeTower() {
+        var tankTower = this._towers.filter((el) => el != this.tower)[0];
+        tankTower.setPosition(this.positionX, this.positionY);
+        this.tower = tankTower;
     }
 
     move(direction) {
@@ -97,13 +108,13 @@ class Tank extends BaseDrawObject {
     }
 
     fire() {
-        return new Bullet(this.positionX, this.positionY - 20);
+        return this.tower.fire();
     }
 
     draw(ctx) {
         this._drawBumper(ctx);
-        this._drawTower(ctx);
-        this._drawRifle(ctx);
+        this.tower.setPosition(this.positionX, this.positionY);
+        this.tower.draw(ctx);
     }
 
     _drawBumper(ctx) {
@@ -112,6 +123,68 @@ class Tank extends BaseDrawObject {
             this.positionY - this._bumberHeight / 2,
             this._bumberWidth,
             this._bumberHeight);
+    }
+}
+
+class TankTower {
+    draw(ctx) { }
+
+    fire() { }
+}
+
+class DoubleBarreledTankTower extends TankTower {
+    constructor(positionX, positionY) {
+        super();
+        this.positionX = positionX;
+        this.positionY = positionY;
+
+        this.rifle1Position = 7;
+        this.rifle2Position = -5;
+    }
+
+    draw(ctx) {
+        this._drawTower(ctx);
+        this._drawRifle(ctx, this.rifle1Position);
+        this._drawRifle(ctx, this.rifle2Position);
+    }
+
+    _drawTower(ctx) {
+        ctx.fillStyle = Colors.green;
+
+        ctx.beginPath();
+        ctx.arc(this.positionX, this.positionY, 10, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    _drawRifle(ctx, x) {
+        ctx.fillStyle = Colors.black;
+        ctx.fillRect(this.positionX - x, this.positionY - 20, 3, 12);
+    }
+
+    setPosition(positionX, positionY) {
+        this.positionX = positionX;
+        this.positionY = positionY;
+    }
+
+    fire() {
+        return [
+            new Bullet(this.positionX - this.rifle1Position, this.positionY - 20),
+            new Bullet(this.positionX - this.rifle2Position, this.positionY - 20)
+        ];
+    }
+}
+
+class SimpleTankTower extends TankTower {
+    constructor(positionX, positionY) {
+        super();
+
+        this.positionX = positionX;
+        this.positionY = positionY;
+    }
+
+    draw(ctx) {
+        this._drawTower(ctx);
+        this._drawRifle(ctx);
     }
 
     _drawTower(ctx) {
@@ -125,6 +198,15 @@ class Tank extends BaseDrawObject {
     _drawRifle(ctx) {
         ctx.fillStyle = Colors.black;
         ctx.fillRect(this.positionX - 1, this.positionY - 21, 3, 12);
+    }
+
+    setPosition(positionX, positionY) {
+        this.positionX = positionX;
+        this.positionY = positionY;
+    }
+
+    fire() {
+        return [new Bullet(this.positionX, this.positionY - 20)];
     }
 }
 
@@ -201,15 +283,16 @@ class TankGame {
         game.run();
 
         function tankFire() {
-            console.log('fire');
-            var bullet = tank.fire();
-            game.scene.addDrawObject(bullet);
-            var event = new ClashPhysicEvent(bullet, ghosts);
-            game.scene.addPhysicEvent(event);
+            var bullets = tank.fire();
+            for (var bullet of bullets) {
+                game.scene.addDrawObject(bullet);
+                var event = new ClashPhysicEvent(bullet, ghosts);
+                game.scene.addPhysicEvent(event);
+            }
         }
 
         document.addEventListener('keydown', function (event) {
-
+            console.log(event);
             switch (event.code) {
                 case 'ArrowUp':
                     tank.move('up');
@@ -225,6 +308,9 @@ class TankGame {
                     break;
                 case 'Space':
                     tankFire();
+                    break;
+                case 'KeyC':
+                    tank.changeTower();
                     break;
                 default:
                     break;
