@@ -1,0 +1,193 @@
+Array.prototype.remove = function (obj) {
+    var index = this.indexOf(obj);
+
+    if (index == -1)
+        return index;
+
+    this.splice(index, 1);
+    return index;
+}
+
+class MathLib {
+    static getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    }
+
+    static getTurnDot(x, y, angle) {
+        if (typeof angle == 'string')
+            angle = parseInt(angle);
+
+        if (isNaN(angle))
+            return null;
+
+        var angleRadians = angle / 180.0 * Math.PI;
+
+        var x1 = x * Math.cos(angleRadians) + y * Math.sin(angleRadians);
+        var y1 = - x * Math.sin(angleRadians) + y * Math.cos(angleRadians);
+
+        return { x: Math.round(x1), y: Math.round(y1) };
+    }
+}
+
+class Colors {
+    static black = "#000000";
+    static green = '#66ff66';
+    static orange = '#ff6600';
+    static purple = '#ff0066';
+    static blue = "#3366ff";
+    static red = "#ff1a1a";
+    static violet = '#6666ff';
+
+    static getRandomColor() {
+        var colors = [this.green, this.orange, this.purple, this.blue];
+        var randomColorNumber = MathLib.getRandomInt(colors.length);
+        return colors[randomColorNumber];
+    }
+}
+
+class BasePhysicEvent {
+    fire(scene) {
+
+    }
+}
+
+class ClashPhysicEvent extends BasePhysicEvent {
+    isCancelled = false;
+    constructor(fromObject, toObjects) {
+        super();
+        this.fromObject = fromObject;
+        this.toObjects = toObjects;
+    }
+
+    fire(scene) {
+        if (this.isCancelled) {
+            console.log('isCancel');
+            return;
+        }
+
+        var fromWidth = this.fromObject.width / 2;
+        var fromHeight = this.fromObject.height / 2;
+        var fromPositionX = this.fromObject.positionX;
+        var fromPositionY = this.fromObject.positionY;
+
+        for (var i = 0; i < this.toObjects.length; i++) {
+            var toObject = this.toObjects[i];
+            var toWidth = toObject.width / 2;
+            var toHeight = toObject.height / 2;
+            var toPositionX = toObject.positionX;
+            var toPositionY = toObject.positionY;
+
+            if (fromWidth + fromPositionY >= toPositionY - toWidth && fromPositionY - fromWidth <= toPositionY + toWidth &&
+                fromPositionX - fromHeight <= toHeight + toPositionX && fromPositionX + fromHeight >= toPositionX - toHeight) {
+                console.log('gatcha');
+                this.isCancelled = true;
+                scene.removeDrawObject(this.fromObject);
+                scene.removeDrawObject(toObject);
+                this.toObjects.remove(toObject);
+
+                scene.removeEvent(this);
+                break;
+            }
+        }
+    }
+}
+
+class BaseDrawObject {
+    draw(ctx) {
+
+    }
+
+    toString() {
+        return "DrawObject";
+    }
+}
+
+class Scene {
+    _drawObjects = [];
+    _events = [];
+
+    constructor(canvasId, width, height) {
+        var scene = document.getElementById(canvasId);
+        height -= 20;
+
+        scene.height = height;
+        scene.width = width;
+
+        this._ctx = scene.getContext('2d');
+
+        this._width = width;
+        this._height = height;
+    }
+
+    addDrawObject(drawObject) {
+        if (!drawObject.draw) {
+            return;
+        }
+
+        this._drawObjects.push(drawObject);
+    }
+
+    addDrawObjects(drawObjects) {
+        if (!drawObjects.push)
+            return;
+
+        for (var i = 0; i < drawObjects.length; i++) {
+            this.addDrawObject(drawObjects[i]);
+        }
+    }
+
+    removeDrawObject(drawObject) {
+        if (!drawObject.draw)
+            return;
+
+        this._drawObjects.remove(drawObject);
+    }
+
+    addPhysicEvent(event) {
+        this._events.push(event);
+    }
+
+    removeEvent(event) {
+        this._events.remove(event);
+    }
+
+    clear() {
+        this._ctx.clearRect(0, 0, this._width, this._height);
+    }
+
+    update() {
+        this.clear();
+        for (var i = 0; i < this._drawObjects.length; i++) {
+            this._drawObjects[i].draw(this._ctx);
+        }
+
+        for (var i = 0; i < this._events.length; i++) {
+            this._events[i].fire(this);
+        }
+    }
+
+    destroy() {
+        this._ctx = null;
+        this._drawObjects = [];
+        this._events = [];
+    }
+}
+
+class Game {
+    constructor(canvasId, width, height) {
+        this.scene = new Scene(canvasId, width, height);
+    }
+
+    run() {
+        this._interval = setInterval(this.scene.update.bind(this.scene), 50);
+    }
+
+    stop() {
+        clearInterval(this._interval);
+    }
+
+    destroy() {
+        this.stop();
+        this.scene.destroy();
+    }
+}
