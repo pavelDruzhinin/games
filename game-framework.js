@@ -61,7 +61,6 @@ class ClashPhysicEvent extends BasePhysicEvent {
 
     fire(scene) {
         if (this.isCancelled) {
-            console.log('isCancel');
             return;
         }
 
@@ -70,8 +69,7 @@ class ClashPhysicEvent extends BasePhysicEvent {
         var fromPositionX = this.fromObject.positionX;
         var fromPositionY = this.fromObject.positionY;
 
-        for (var i = 0; i < this.toObjects.length; i++) {
-            var toObject = this.toObjects[i];
+        for (var toObject of this.toObjects) {
             var toWidth = toObject.width / 2;
             var toHeight = toObject.height / 2;
             var toPositionX = toObject.positionX;
@@ -79,7 +77,6 @@ class ClashPhysicEvent extends BasePhysicEvent {
 
             if (fromWidth + fromPositionY >= toPositionY - toWidth && fromPositionY - fromWidth <= toPositionY + toWidth &&
                 fromPositionX - fromHeight <= toHeight + toPositionX && fromPositionX + fromHeight >= toPositionX - toHeight) {
-                console.log('gatcha');
                 this.isCancelled = true;
                 scene.removeDrawObject(this.fromObject);
                 scene.removeDrawObject(toObject);
@@ -131,8 +128,8 @@ class Scene {
         if (!drawObjects.push)
             return;
 
-        for (var i = 0; i < drawObjects.length; i++) {
-            this.addDrawObject(drawObjects[i]);
+        for (var drawObject of drawObjects) {
+            this.addDrawObject(drawObject);
         }
     }
 
@@ -157,12 +154,13 @@ class Scene {
 
     update() {
         this.clear();
-        for (var i = 0; i < this._drawObjects.length; i++) {
-            this._drawObjects[i].draw(this._ctx);
+
+        for (var drawObject of this._drawObjects) {
+            drawObject.draw(this._ctx);
         }
 
-        for (var i = 0; i < this._events.length; i++) {
-            this._events[i].fire(this);
+        for (var event of this._events) {
+            event.fire(this);
         }
     }
 
