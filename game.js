@@ -172,7 +172,7 @@ class ImageTankBumber extends TankBumber {
         super(positionX, positionY);
 
         this._image = new Image();
-        this._image.src = "/Users/paveldruzinin/Projects/games/assets/img/tank bumper.png";
+        this._image.src = "https://raw.githubusercontent.com/pavelDruzhinin/games/master/assets/img/tank%20bumper.png";
     }
 
     draw(ctx) {
@@ -233,7 +233,7 @@ class ImageTankTower extends TankTower {
         super(positionX, positionY);
 
         this._image = new Image(100, 200);
-        this._image.src = "/Users/paveldruzinin/Projects/games/assets/img/tank tower.png";
+        this._image.src = "https://raw.githubusercontent.com/pavelDruzhinin/games/master/assets/img/tank%20tower.png";
     }
 
     draw(ctx) {
