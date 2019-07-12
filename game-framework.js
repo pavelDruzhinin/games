@@ -13,14 +13,18 @@ class MathLib {
         return Math.floor(Math.random() * Math.floor(max));
     }
 
-    static getTurnDot(x, y, angle) {
+    static getAngleRadians(angle) {
+        return angle / 180.0 * Math.PI;
+    }
+
+    static getTurnPoint(x, y, angle) {
         if (typeof angle == 'string')
             angle = parseInt(angle);
 
         if (isNaN(angle))
             return null;
 
-        var angleRadians = angle / 180.0 * Math.PI;
+        var angleRadians = this.getAngleRadians(angle);
 
         var x1 = x * Math.cos(angleRadians) + y * Math.sin(angleRadians);
         var y1 = - x * Math.sin(angleRadians) + y * Math.cos(angleRadians);
@@ -46,13 +50,11 @@ class Colors {
 }
 
 class BasePhysicEvent {
-    fire(scene) {
-
-    }
+    fire(scene) { }
 }
 
 class ClashPhysicEvent extends BasePhysicEvent {
-    isCancelled = false;
+    _isCancelled = false;
     constructor(fromObject, toObjects) {
         super();
         this.fromObject = fromObject;
@@ -60,7 +62,7 @@ class ClashPhysicEvent extends BasePhysicEvent {
     }
 
     fire(scene) {
-        if (this.isCancelled) {
+        if (this._isCancelled) {
             return;
         }
 
@@ -77,7 +79,7 @@ class ClashPhysicEvent extends BasePhysicEvent {
 
             if (fromWidth + fromPositionY >= toPositionY - toWidth && fromPositionY - fromWidth <= toPositionY + toWidth &&
                 fromPositionX - fromHeight <= toHeight + toPositionX && fromPositionX + fromHeight >= toPositionX - toHeight) {
-                this.isCancelled = true;
+                this._isCancelled = true;
                 scene.removeDrawObject(this.fromObject);
                 scene.removeDrawObject(toObject);
                 this.toObjects.remove(toObject);
@@ -90,9 +92,7 @@ class ClashPhysicEvent extends BasePhysicEvent {
 }
 
 class BaseDrawObject {
-    draw(ctx) {
-
-    }
+    draw(ctx) { }
 
     toString() {
         return "DrawObject";
@@ -182,6 +182,22 @@ class Game {
 
     stop() {
         clearInterval(this._interval);
+    }
+
+    registerKeyBoardEvents(keyboardEvents) {
+        document.addEventListener('keydown', function (event) {
+            console.log(event);
+            if (!keyboardEvents.hasOwnProperty(event.code))
+                return;
+
+            var keyboardEvent = keyboardEvents[event.code];
+            if (typeof keyboardEvent != 'function') {
+                console.warn(`Event for key ${event.code} is not a function`);
+                return;
+            }
+
+            keyboardEvent();
+        });
     }
 
     destroy() {
