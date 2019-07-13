@@ -242,8 +242,8 @@ class RechargeTankTower {
         }
     }
 
-    start() {
-        this.startRifflePosition = this.endRifflePosition;
+    start(devicePixelRatio) {
+        this.startRifflePosition = this.endRifflePosition * devicePixelRatio;
     }
 }
 
@@ -277,7 +277,7 @@ class SimpleTankTower extends TankTower {
         if (this._recharge.inProccess)
             return [];
 
-        this._recharge.start();
+        this._recharge.start(this.deviceRatio);
 
         return [new Bullet((this.positionX + 1 * this.deviceRatio), (this.positionY - 45 * this.deviceRatio))];
     }
@@ -326,7 +326,7 @@ class DoubleBarreledTankTower extends TankTower {
         if (this._recharge.inProccess)
             return [];
 
-        this._recharge.start();
+        this._recharge.start(this.deviceRatio);
 
         return [
             new Bullet(this.positionX - this.rifle1Position * this.deviceRatio + 1 * this.deviceRatio, this.positionY + this._correctPositionY * this.deviceRatio),
