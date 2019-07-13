@@ -212,7 +212,7 @@ class GameContext {
     static get local() { return '/Users/paveldruzinin/Projects/games'; }
 
     static getFullPath(path) {
-        var context = this.local;
+        var context = this.production;
         return `${context}${path}`;
     }
 }
