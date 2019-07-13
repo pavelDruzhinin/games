@@ -40,7 +40,6 @@ class Tank extends BaseDrawObject {
         this.speed = speed;
         this._bumber = new ImageTankBumber(startPositionX, startPositionY);
         this._towers = [
-            new ImageTankTower(startPositionX, startPositionY),
             new SimpleTankTower(startPositionX, startPositionY),
             new DoubleBarreledTankTower(startPositionX, startPositionY)
         ];
@@ -171,8 +170,7 @@ class ImageTankBumber extends TankBumber {
     constructor(positionX, positionY) {
         super(positionX, positionY);
 
-        this._image = new Image();
-        this._image.src = "https://raw.githubusercontent.com/pavelDruzhinin/games/master/assets/img/tank%20bumper.png";
+        this._image = new GameImage("/assets/img/tank bumper.png");
     }
 
     draw(ctx) {
@@ -211,8 +209,6 @@ class SimpleTankBumber extends TankBumber {
     }
 }
 
-
-
 class TankTower {
     constructor(positionX, positionY) {
         this.setPosition(positionX, positionY);
@@ -228,20 +224,38 @@ class TankTower {
     }
 }
 
-class ImageTankTower extends TankTower {
+class SimpleTankTower extends TankTower {
     constructor(positionX, positionY) {
         super(positionX, positionY);
 
-        this._image = new Image(100, 200);
-        this._image.src = "https://raw.githubusercontent.com/pavelDruzhinin/games/master/assets/img/tank%20tower.png";
+        this._towerImage = new GameImage("/assets/img/tank tower.png");
+        this._towerRiffleImage = new GameImage("/assets/img/tank riffle.png");
+
+        this._rechargeStartRifflePosition = 0;
+    }
+
+    get _rechargeInProccess() { return this._rechargeStartRifflePosition > 0; }
+
+    recharge() {
+        this._rechargeStartRifflePosition = 8;
     }
 
     draw(ctx) {
-        ctx.drawImage(this._image, this.positionX - 15, this.positionY - 45, 30, 60);
+        if (this._rechargeInProccess) {
+            this._rechargeStartRifflePosition--;
+        }
+
+        ctx.drawImage(this._towerRiffleImage, this.positionX, this.positionY - 45 + this._rechargeStartRifflePosition, 3, 30);
+        ctx.drawImage(this._towerImage, this.positionX - 14, this.positionY - 15, 30, 30);
     }
 
     fire(ctx) {
-        return [new Bullet(this.positionX, this.positionY - 45)];
+        if (this._rechargeInProccess)
+            return [];
+
+        this.recharge();
+
+        return [new Bullet(this.positionX + 1, this.positionY - 45)];
     }
 }
 
@@ -278,34 +292,6 @@ class DoubleBarreledTankTower extends TankTower {
             new Bullet(this.positionX - this.rifle1Position, this.positionY + this._correctPositionY),
             new Bullet(this.positionX - this.rifle2Position, this.positionY + this._correctPositionY)
         ];
-    }
-}
-
-class SimpleTankTower extends TankTower {
-    constructor(positionX, positionY) {
-        super(positionX, positionY);
-    }
-
-    draw(ctx) {
-        this._drawTower(ctx);
-        this._drawRifle(ctx);
-    }
-
-    _drawTower(ctx) {
-        ctx.fillStyle = Colors.red;
-
-        ctx.beginPath();
-        ctx.arc(this.positionX, this.positionY, 10, 0, 2 * Math.PI);
-        ctx.fill();
-    }
-
-    _drawRifle(ctx) {
-        ctx.fillStyle = Colors.black;
-        ctx.fillRect(this.positionX - 1, this.positionY - 21, 3, 12);
-    }
-
-    fire() {
-        return [new Bullet(this.positionX, this.positionY - 20)];
     }
 }
 

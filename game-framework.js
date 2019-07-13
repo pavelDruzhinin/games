@@ -205,3 +205,21 @@ class Game {
         this.scene.destroy();
     }
 }
+
+class GameContext {
+    static get production() { return 'https://raw.githubusercontent.com/pavelDruzhinin/games/master'; }
+
+    static get local() { return '/Users/paveldruzinin/Projects/games'; }
+
+    static getFullPath(path) {
+        var context = this.local;
+        return `${context}${path}`;
+    }
+}
+
+class GameImage extends Image {
+    constructor(path) {
+        super();
+        this.src = GameContext.getFullPath(path);
+    }
+}
