@@ -207,8 +207,6 @@ class Game {
 }
 
 class GameContext {
-    static get local() { return '/Users/paveldruzinin/Projects/games'; }
-
     static getFullPath(path) {
         var context = GameEnvironment.context;
         return `${context}${path}`;
