@@ -207,12 +207,10 @@ class Game {
 }
 
 class GameContext {
-    static get production() { return 'https://raw.githubusercontent.com/pavelDruzhinin/games/master'; }
-
     static get local() { return '/Users/paveldruzinin/Projects/games'; }
 
     static getFullPath(path) {
-        var context = this.production;
+        var context = GameEnvironment.context;
         return `${context}${path}`;
     }
 }
