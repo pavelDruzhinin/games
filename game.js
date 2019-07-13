@@ -12,18 +12,18 @@ class Bullet extends BaseDrawObject {
     get width() { return this._radius * 2; }
     get height() { return this._radius * 2; }
 
-    draw(ctx) {
+    draw(ctx, deviceRatio) {
         ctx.fillStyle = Colors.red;
 
         ctx.beginPath();
-        ctx.arc(this.positionX, this.positionY, this._radius, 0, 2 * Math.PI);
+        ctx.arc(this.positionX, this.positionY, this._radius * deviceRatio, 0, 2 * Math.PI);
         ctx.fill();
 
-        this.move();
+        this.move(deviceRatio);
     }
 
-    move() {
-        this.positionY -= this._speed;
+    move(deviceRatio) {
+        this.positionY -= this._speed * deviceRatio;
     }
 }
 
@@ -61,16 +61,16 @@ class Tank extends BaseDrawObject {
 
         switch (direction) {
             case 'up':
-                this.positionY -= this.speed;
+                this.positionY -= this.speed * this.deviceRatio;
                 break;
             case 'right':
-                this.positionX += this.speed;
+                this.positionX += this.speed * this.deviceRatio;
                 break;
             case 'left':
-                this.positionX -= this.speed;
+                this.positionX -= this.speed * this.deviceRatio;
                 break;
             case 'down':
-                this.positionY += this.speed;
+                this.positionY += this.speed * this.deviceRatio;
                 break;
         }
     }
@@ -132,11 +132,12 @@ class Tank extends BaseDrawObject {
         return this.tower.fire();
     }
 
-    draw(ctx) {
+    draw(ctx, deviceRatio) {
+        this.deviceRatio = deviceRatio;
         this._bumber.setPosition(this.positionX, this.positionY);
-        this._bumber.draw(ctx);
+        this._bumber.draw(ctx, deviceRatio);
         this.tower.setPosition(this.positionX, this.positionY);
-        this.tower.draw(ctx);
+        this.tower.draw(ctx, deviceRatio);
     }
 }
 
@@ -150,7 +151,7 @@ class TankBumber {
         this.positionY = positionY;
     }
 
-    draw(ctx) { }
+    draw(ctx, deviceRatio) { }
 
     turn(isLeft) {
         var angle = isLeft ? -90 : 90;
@@ -173,14 +174,16 @@ class ImageTankBumber extends TankBumber {
         this._image = new GameImage("/assets/img/tank bumper.png");
     }
 
-    draw(ctx) {
+    draw(ctx, deviceRatio) {
         ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY); // sets scale and origin
         ctx.rotate(MathLib.getAngleRadians(this._angle));
+        var bumperWidth = this._bumberWidth * deviceRatio;
+        var bumperHeight = this._bumberHeight * deviceRatio;
 
-        ctx.drawImage(this._image, -this._bumberWidth / 2,
-            -this._bumberHeight / 2,
-            this._bumberWidth,
-            this._bumberHeight);
+        ctx.drawImage(this._image, -bumperWidth / 2,
+            -bumperHeight / 2,
+            bumperWidth,
+            bumperHeight);
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
@@ -254,11 +257,20 @@ class SimpleTankTower extends TankTower {
         this._recharge = new RechargeTankTower(8, 1);
     }
 
-    draw(ctx) {
+    draw(ctx, deviceRatio) {
         this._recharge.process();
-
-        ctx.drawImage(this._towerRiffleImage, this.positionX, this.positionY - 45 + this._recharge.startRifflePosition, 3, 30);
-        ctx.drawImage(this._towerImage, this.positionX - 14, this.positionY - 15, 30, 30);
+        //ctx.imageSmoothingEnabled = false;
+        this.deviceRatio = deviceRatio;
+        ctx.drawImage(this._towerRiffleImage,
+            this.positionX,
+            (this.positionY - 45 * deviceRatio + this._recharge.startRifflePosition),
+            3 * deviceRatio,
+            30 * deviceRatio);
+        ctx.drawImage(this._towerImage,
+            (this.positionX - 14 * deviceRatio),
+            (this.positionY - 15 * deviceRatio),
+            30 * deviceRatio,
+            30 * deviceRatio);
     }
 
     fire(ctx) {
@@ -267,7 +279,7 @@ class SimpleTankTower extends TankTower {
 
         this._recharge.start();
 
-        return [new Bullet(this.positionX + 1, this.positionY - 45)];
+        return [new Bullet((this.positionX + 1 * this.deviceRatio), (this.positionY - 45 * this.deviceRatio))];
     }
 }
 
@@ -285,23 +297,29 @@ class DoubleBarreledTankTower extends TankTower {
         this._correctPositionY = -28;
     }
 
-    draw(ctx) {
+    draw(ctx, deviceRatio) {
         this._recharge.process();
+        this.deviceRatio = deviceRatio;
 
-        this._drawRifle(ctx, this.rifle1Position);
-        this._drawRifle(ctx, this.rifle2Position);
-        this._drawTower(ctx);
+        this._drawRifle(ctx, this.rifle1Position, deviceRatio);
+        this._drawRifle(ctx, this.rifle2Position, deviceRatio);
+        this._drawTower(ctx, deviceRatio);
     }
 
-    _drawTower(ctx) {
-        ctx.drawImage(this._towerImage, this.positionX - 14, this.positionY - 15, 30, 30);
+    _drawTower(ctx, deviceRatio) {
+        ctx.drawImage(this._towerImage,
+            this.positionX - 14 * deviceRatio,
+            this.positionY - 15 * deviceRatio,
+            30 * deviceRatio,
+            30 * deviceRatio);
     }
 
-    _drawRifle(ctx, x) {
+    _drawRifle(ctx, x, deviceRatio) {
         ctx.drawImage(this._towerRiffleImage,
-            this.positionX - x,
-            this.positionY + this._recharge.startRifflePosition + this._correctPositionY,
-            3, 15)
+            this.positionX - x * deviceRatio,
+            this.positionY + this._recharge.startRifflePosition + this._correctPositionY * deviceRatio,
+            3 * deviceRatio,
+            15 * deviceRatio);
     }
 
     fire() {
@@ -311,8 +329,8 @@ class DoubleBarreledTankTower extends TankTower {
         this._recharge.start();
 
         return [
-            new Bullet(this.positionX - this.rifle1Position + 1, this.positionY + this._correctPositionY),
-            new Bullet(this.positionX - this.rifle2Position + 1, this.positionY + this._correctPositionY)
+            new Bullet(this.positionX - this.rifle1Position * this.deviceRatio + 1 * this.deviceRatio, this.positionY + this._correctPositionY * this.deviceRatio),
+            new Bullet(this.positionX - this.rifle2Position * this.deviceRatio + 1 * this.deviceRatio, this.positionY + this._correctPositionY * this.deviceRatio)
         ];
     }
 }
@@ -333,20 +351,20 @@ class Ghost extends BaseDrawObject {
     get height() { return this._radius * 2; }
     get width() { return this._radius * 2; }
 
-    draw(ctx) {
+    draw(ctx, deviceRatio) {
         ctx.fillStyle = this._ghostColor;
         ctx.beginPath();
-        ctx.arc(this.positionX, this.positionY, this._radius, 0, 2 * Math.PI);
+        ctx.arc(this.positionX, this.positionY, this._radius * deviceRatio, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.fillStyle = Colors.black;
 
-        this.move();
+        this.move(deviceRatio);
     }
 
-    move() {
+    move(deviceRatio) {
         //this.positionX -= MathLib.getRandomInt(2);
-        this.positionY += MathLib.getRandomInt(2) * this._speedLevel;
+        this.positionY += MathLib.getRandomInt(2) * this._speedLevel * deviceRatio;
     }
 }
 
@@ -359,11 +377,10 @@ class TankGame {
     get sceneWidth() { return 800; }
     get sceneHeight() { return window.innerHeight; }
 
-
     start() {
         var game = new Game("scene", this.sceneWidth, this.sceneHeight);
-        var tank = new Tank(this.sceneWidth / 2, this.sceneHeight - 50, 10);
-        var ghosts = this.generateGhosts(this._ghostCount, this._ghostSpeedLevel, this.sceneWidth);
+        var tank = new Tank(game.scene.width / 2, game.scene.height - 50, 10);
+        var ghosts = this.generateGhosts(this._ghostCount, this._ghostSpeedLevel, game.scene.width);
 
         var keyboardsEvents = {
             'ArrowUp': () => tank.move('up'),

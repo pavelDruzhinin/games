@@ -66,14 +66,14 @@ class ClashPhysicEvent extends BasePhysicEvent {
             return;
         }
 
-        var fromWidth = this.fromObject.width / 2;
-        var fromHeight = this.fromObject.height / 2;
+        var fromWidth = this.fromObject.width / 2 * scene.devicePixelRatio;
+        var fromHeight = this.fromObject.height / 2 * scene.devicePixelRatio;
         var fromPositionX = this.fromObject.positionX;
         var fromPositionY = this.fromObject.positionY;
 
         for (var toObject of this.toObjects) {
-            var toWidth = toObject.width / 2;
-            var toHeight = toObject.height / 2;
+            var toWidth = toObject.width / 2 * scene.devicePixelRatio;
+            var toHeight = toObject.height / 2 * scene.devicePixelRatio;
             var toPositionX = toObject.positionX;
             var toPositionY = toObject.positionY;
 
@@ -102,18 +102,22 @@ class BaseDrawObject {
 class Scene {
     _drawObjects = [];
     _events = [];
-
+    get devicePixelRatio() { return (('devicePixelRatio' in window) && (window.devicePixelRatio > 1)) ? window.devicePixelRatio : 1; }
     constructor(canvasId, width, height) {
+
         var scene = document.getElementById(canvasId);
         height -= 20;
 
-        scene.height = height;
-        scene.width = width;
+        scene.height = height * this.devicePixelRatio;
+        scene.width = width * this.devicePixelRatio;
+
+        scene.style.width = width + 'px';
+        scene.style.height = height + 'px';
 
         this._ctx = scene.getContext('2d');
 
-        this._width = width;
-        this._height = height;
+        this.width = scene.width;
+        this.height = scene.height;
     }
 
     addDrawObject(drawObject) {
@@ -149,14 +153,14 @@ class Scene {
     }
 
     clear() {
-        this._ctx.clearRect(0, 0, this._width, this._height);
+        this._ctx.clearRect(0, 0, this.width, this.height);
     }
 
     update() {
         this.clear();
 
         for (var drawObject of this._drawObjects) {
-            drawObject.draw(this._ctx);
+            drawObject.draw(this._ctx, this.devicePixelRatio);
         }
 
         for (var event of this._events) {
