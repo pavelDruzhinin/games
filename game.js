@@ -379,7 +379,7 @@ class TankGame {
 
     start() {
         var game = new Game("scene", this.sceneWidth, this.sceneHeight);
-        var tank = new Tank(game.scene.width / 2, game.scene.height - 50, 10);
+        var tank = new Tank(game.scene.width / 2, game.scene.height - 50 * game.scene.devicePixelRatio, 10);
         var ghosts = this.generateGhosts(this._ghostCount, this._ghostSpeedLevel, game.scene.width);
 
         var keyboardsEvents = {
