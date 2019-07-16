@@ -1,29 +1,80 @@
-class Bullet extends BaseDrawObject {
-    constructor(startPositionX, startPositionY) {
+class BaseBullet extends BaseDrawObject {
+    constructor(positionX, positionY, radius, speed) {
         super();
+        this.positionX = positionX;
+        this.positionY = positionY;
 
-        this.positionX = startPositionX;
-        this.positionY = startPositionY;
-
-        this._radius = 3;
-        this._speed = 20;
+        this._radius = radius;
+        this._speed = speed;
     }
 
     get width() { return this._radius * 2; }
     get height() { return this._radius * 2; }
 
     draw(ctx, deviceRatio) {
+        this._drawBullet(ctx, deviceRatio);
+        this.move(deviceRatio);
+    }
+
+    _drawBullet(ctx, deviceRatio) {
+
+    }
+
+    move(deviceRatio) {
+        this.positionY -= this._speed * deviceRatio;
+    }
+}
+
+class Bullet extends BaseBullet {
+    constructor(startPositionX, startPositionY) {
+        super(startPositionX, startPositionY, 3, 20);
+    }
+
+    _drawBullet(ctx, deviceRatio) {
         ctx.fillStyle = Colors.red;
 
         ctx.beginPath();
         ctx.arc(this.positionX, this.positionY, this._radius * deviceRatio, 0, 2 * Math.PI);
         ctx.fill();
+    }
+}
 
-        this.move(deviceRatio);
+class Shrapnel extends BaseBullet {
+    constructor(startPositionX, startPositionY) {
+        super(startPositionX, startPositionY, 6, 40);
+
+        this._shrapnelImage = new GameImage("/assets/img/bullet.png");
+        this.strikingDistance = 500;
     }
 
-    move(deviceRatio) {
-        this.positionY -= this._speed * deviceRatio;
+    _drawBullet(ctx, devicePixelRatio) {
+        ctx.drawImage(this._shrapnelImage, this.positionX, this.positionY, 3 * devicePixelRatio, 7 * devicePixelRatio);
+    }
+
+    createStrikeAnimation() {
+        return new BangAnimation();
+    }
+}
+
+class BangAnimation extends BaseAnimation {
+    constructor() {
+        super();
+
+        this._bangImage = new GameImage("/assets/img/bang.png");
+        this._increaseCoefEnd = 14;
+        this._increaseCoef = 1;
+    }
+
+    get isDestroy() { return this._increaseCoef >= this._increaseCoefEnd; }
+
+    _draw(ctx, deviceRatio) {
+        if (this.isDestroy)
+            return;
+
+        var radius = 3 * deviceRatio * this._increaseCoef;
+
+        ctx.drawImage(this._bangImage, this.positionX - radius / 2, this.positionY - radius / 2, radius, radius);
+        this._increaseCoef += 1;
     }
 }
 
@@ -254,7 +305,7 @@ class SimpleTankTower extends TankTower {
         this._towerImage = new GameImage("/assets/img/tank tower.png");
         this._towerRiffleImage = new GameImage("/assets/img/tank riffle.png");
 
-        this._recharge = new RechargeTankTower(8, 1);
+        this._recharge = new RechargeTankTower(6, 1);
     }
 
     draw(ctx, deviceRatio) {
@@ -279,7 +330,7 @@ class SimpleTankTower extends TankTower {
 
         this._recharge.start(this.deviceRatio);
 
-        return [new Bullet((this.positionX + 1 * this.deviceRatio), (this.positionY - 45 * this.deviceRatio))];
+        return [new Shrapnel((this.positionX), (this.positionY - 50 * this.deviceRatio))];
     }
 }
 
@@ -290,7 +341,7 @@ class DoubleBarreledTankTower extends TankTower {
         this._towerImage = new GameImage("/assets/img/tank tower.png");
         this._towerRiffleImage = new GameImage("/assets/img/tank riffle.png");
 
-        this._recharge = new RechargeTankTower(5, 0.5);
+        this._recharge = new RechargeTankTower(4, 0.5);
 
         this.rifle1Position = 7;
         this.rifle2Position = -5;
@@ -400,8 +451,14 @@ class TankGame {
             var bullets = tank.fire();
             for (var bullet of bullets) {
                 game.scene.addDrawObject(bullet);
-                var event = new ClashPhysicEvent(bullet, ghosts);
+                let event = new ClashPhysicEvent(bullet, ghosts);
                 game.scene.addPhysicEvent(event);
+
+                if (bullet.strikingDistance && bullet.createStrikeAnimation) {
+                    var animation = bullet.createStrikeAnimation();
+                    let event = new StrikingDistancePhysicEvent(bullet, bullet.positionY, bullet.strikingDistance, animation);
+                    game.scene.addPhysicEvent(event);
+                }
             }
         }
 

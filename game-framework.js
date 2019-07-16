@@ -91,6 +91,32 @@ class ClashPhysicEvent extends BasePhysicEvent {
     }
 }
 
+class StrikingDistancePhysicEvent extends BasePhysicEvent {
+    _isCancelled = false;
+    constructor(object, startPositionY, strikingDistance, animation) {
+        super();
+
+        this._object = object;
+        this._strikingPosition = startPositionY - strikingDistance;
+        this._animation = animation;
+    }
+
+    fire(scene) {
+        if (this._isCancelled)
+            return;
+
+        if (this._object.positionY <= this._strikingPosition) {
+            if (this._animation) {
+                this._animation.setPosition(this._object.positionX, this._strikingPosition);
+                scene.addAnimation(this._animation);
+            }
+
+            scene.removeDrawObject(this._object);
+            scene.removeEvent(this);
+        }
+    }
+}
+
 class BaseDrawObject {
     draw(ctx) { }
 
@@ -99,9 +125,38 @@ class BaseDrawObject {
     }
 }
 
+
+class BaseAnimation {
+    constructor() {
+
+    }
+
+    get isDestroy() { return false; }
+
+    animate(ctx, scene) {
+        if (this.isDestroy) {
+            this.destroy(scene);
+            return;
+        }
+
+        this._draw(ctx, scene.devicePixelRatio);
+    }
+    _draw(ctx, devicePixelRatio) { }
+    setPosition(positionX, positionY) {
+        this.positionX = positionX;
+        this.positionY = positionY;
+    }
+
+    destroy(scene) {
+        scene.removeAnimation(this);
+    }
+}
+
+
 class Scene {
     _drawObjects = [];
     _events = [];
+    _animations = [];
     get devicePixelRatio() { return (('devicePixelRatio' in window) && (window.devicePixelRatio > 1)) ? window.devicePixelRatio : 1; }
     constructor(canvasId, width, height) {
 
@@ -152,6 +207,14 @@ class Scene {
         this._events.remove(event);
     }
 
+    addAnimation(animation) {
+        this._animations.push(animation);
+    }
+
+    removeAnimation(animation) {
+        this._animations.remove(animation);
+    }
+
     clear() {
         this._ctx.clearRect(0, 0, this.width, this.height);
     }
@@ -165,6 +228,10 @@ class Scene {
 
         for (var event of this._events) {
             event.fire(this);
+        }
+
+        for (var animation of this._animations) {
+            animation.animate(this._ctx, this);
         }
     }
 
