@@ -55,10 +55,11 @@ class BasePhysicEvent {
 
 class ClashPhysicEvent extends BasePhysicEvent {
     _isCancelled = false;
-    constructor(fromObject, toObjects) {
+    constructor(fromObject, toObjects, animation) {
         super();
         this.fromObject = fromObject;
         this.toObjects = toObjects;
+        this.animation = animation;
     }
 
     fire(scene) {
@@ -83,7 +84,10 @@ class ClashPhysicEvent extends BasePhysicEvent {
                 scene.removeDrawObject(this.fromObject);
                 scene.removeDrawObject(toObject);
                 this.toObjects.remove(toObject);
-
+                if (this.animation) {
+                    this.animation.setPosition(fromPositionX, fromPositionY);
+                    scene.addAnimation(this.animation);
+                }
                 scene.removeEvent(this);
                 break;
             }

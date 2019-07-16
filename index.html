@@ -12,9 +12,12 @@
             display: flex;
         }
 
-        .settings {
+        .settings {}
+
+        .ml-20 {
             margin-left: 20px;
         }
+
 
         .form-group {
             margin-bottom: 10px;
@@ -27,7 +30,7 @@
             margin-right: 10px;
         }
 
-        .form-control {
+        input.form-control {
             padding: 8px;
             border-radius: 3px;
             border: 1px solid #999;
@@ -41,24 +44,34 @@
             border: none;
             margin-top: 8px;
         }
+
+        .game-menu {}
     </style>
 </head>
 
 <body>
     <canvas id="scene" width="800" height="800"></canvas>
-    <form class="settings">
-        <h3>Game settings</h3>
-        <div class="form-group">
-            <label>Ghost count</label>
-            <input id="ghostCount" class="form-control" type="text" placeholder="Ghost count" value="10" />
-        </div>
-        <div class="form-group">
-            <label>Ghost speed level</label>
-            <input id="ghostSpeedLevel" class="form-control" type="text" placeholder="Ghost speed level" value="1" />
-        </div>
-        <button id="startNewGame" class="btn" type="button">Start new game</button>
-    </form>
+    <div class="game-menu">
+        <form class="settings ml-20">
+            <h3>Game settings</h3>
+            <div class="form-group">
+                <label>Ghost count</label>
+                <input id="ghostCount" class="form-control" type="text" placeholder="Ghost count" value="10" />
+            </div>
+            <div class="form-group">
+                <label>Ghost speed level</label>
+                <input id="ghostSpeedLevel" class="form-control" type="text" placeholder="Ghost speed level"
+                    value="1" />
+            </div>
+            <button id="startNewGame" class="btn" type="button">Start new game</button>
+        </form>
+        <form class="tank-ammunition-panel ml-20">
+            <h3>Tank ammunition</h3>
+            <div class="tank-ammunition-panel-inner">
 
+            </div>
+        </form>
+    </div>
     <script src="game-framework.env.js"></script>
     <script src="game-framework.js"></script>
     <script src="game.js"></script>

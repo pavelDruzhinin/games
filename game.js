@@ -78,10 +78,59 @@ class BangAnimation extends BaseAnimation {
     }
 }
 
+class TankAmunnition {
+    _ammunitions = new Map();
+    _observables = [];
+
+    constructor() {
+        this.bullets = 0;
+        this.shrapnels = 0;
+    }
+
+    get bullets() { return this._give('bullets'); }
+    set bullets(value) { this._ammunitions.set('bullets', value); }
+    get shrapnels() { return this._give('shrapnels'); }
+    set shrapnels(value) { this._ammunitions.set('shrapnels', value); }
+
+    add(ammunition) {
+        for (var addShell of ammunition._ammunitions) {
+            var shells = this._ammunitions.get(addShell[0]);
+            if (shells == undefined) {
+                console.warn(`Nonknown shells in ammunitions: ${addShell[0]}`);
+                continue;
+            }
+            var addShells = parseInt(addShell[1]);
+            this._ammunitions.set(addShell[0], shells + addShells);
+        }
+    }
+
+    _give(key) {
+        var shells = this._ammunitions.get(key);
+        if (!shells)
+            return false;
+
+        shells--;
+        this.fireChangeEvent(key, shells);
+        this._ammunitions.set(key, shells);
+        return true;
+    }
+
+    onchange(observable) {
+        this._observables.push(observable);
+    }
+    fireChangeEvent(key, value) {
+        for (var observable of this._observables) {
+            if (typeof observable == 'function')
+                observable(key, value);
+        }
+    }
+}
+
 class Tank extends BaseDrawObject {
     _currentDirection = 'up';
     _bumberHeight = 40;
     _bumberWidth = 30;
+    _ammunition = new TankAmunnition();
 
     constructor(startPositionX, startPositionY, speed) {
         super();
@@ -95,6 +144,10 @@ class Tank extends BaseDrawObject {
             new DoubleBarreledTankTower(startPositionX, startPositionY)
         ];
         this.tower = this._towers[0];
+    }
+
+    addAmunnition(ammunition) {
+        this._ammunition.add(ammunition);
     }
 
     changeTower() {
@@ -180,7 +233,7 @@ class Tank extends BaseDrawObject {
     }
 
     fire() {
-        return this.tower.fire();
+        return this.tower.fire(this._ammunition);
     }
 
     draw(ctx, deviceRatio) {
@@ -324,9 +377,12 @@ class SimpleTankTower extends TankTower {
             30 * deviceRatio);
     }
 
-    fire(ctx) {
+    fire(ammunition) {
         if (this._recharge.inProccess)
             return [];
+
+        if (!ammunition.shrapnels)
+            return;
 
         this._recharge.start(this.deviceRatio);
 
@@ -380,8 +436,10 @@ class DoubleBarreledTankTower extends TankTower {
         this._recharge.start(this.deviceRatio);
 
         return [
-            new Bullet(this.positionX - this.rifle1Position * this.deviceRatio + 1 * this.deviceRatio, this.positionY + this._correctPositionY * this.deviceRatio),
-            new Bullet(this.positionX - this.rifle2Position * this.deviceRatio + 1 * this.deviceRatio, this.positionY + this._correctPositionY * this.deviceRatio)
+            new Bullet(this.positionX - this.rifle1Position * this.deviceRatio + 1 * this.deviceRatio,
+                this.positionY + this._correctPositionY * this.deviceRatio),
+            new Bullet(this.positionX - this.rifle2Position * this.deviceRatio + 1 * this.deviceRatio,
+                this.positionY + this._correctPositionY * this.deviceRatio)
         ];
     }
 }
@@ -419,6 +477,36 @@ class Ghost extends BaseDrawObject {
     }
 }
 
+class TankPanelAmmunition {
+    constructor(ammunition) {
+        this._panel = document.getElementsByClassName('tank-ammunition-panel-inner')[0];
+        this.init(ammunition);
+
+        ammunition.onchange(this.change);
+    }
+
+    init(ammunition) {
+        var sections = [];
+        for (var shells of ammunition._ammunitions) {
+            var section = this.drawPanelSection(shells[0], shells[1]);
+            sections.push(section);
+        }
+
+        this._panel.innerHTML = sections.join('');
+    }
+
+    change(key, value) {
+        document.getElementById(key).innerText = value;
+    }
+
+    drawPanelSection(key, value) {
+        return '<div class="form-group">' +
+            `<label>${key}</label>` +
+            `<span id="${key}">${value}</span>` +
+            '</div>';
+    }
+}
+
 class TankGame {
     constructor(ghostCount, ghostSpeedLevel) {
         this._ghostCount = ghostCount;
@@ -431,6 +519,15 @@ class TankGame {
     start() {
         var game = new Game("scene", this.sceneWidth, this.sceneHeight);
         var tank = new Tank(game.scene.width / 2, game.scene.height - 50 * game.scene.devicePixelRatio, 10);
+
+        var startTankAmmunition = new TankAmunnition();
+        startTankAmmunition.bullets = 20;
+        startTankAmmunition.shrapnels = 30;
+
+        tank.addAmunnition(startTankAmmunition);
+
+        var tankPanelAmmunition = new TankPanelAmmunition(tank._ammunition);
+
         var ghosts = this.generateGhosts(this._ghostCount, this._ghostSpeedLevel, game.scene.width);
 
         var keyboardsEvents = {
@@ -451,11 +548,11 @@ class TankGame {
             var bullets = tank.fire();
             for (var bullet of bullets) {
                 game.scene.addDrawObject(bullet);
-                let event = new ClashPhysicEvent(bullet, ghosts);
+                var animation = typeof bullet.createStrikeAnimation == 'function' ? bullet.createStrikeAnimation() : null;
+                let event = new ClashPhysicEvent(bullet, ghosts, animation);
                 game.scene.addPhysicEvent(event);
 
-                if (bullet.strikingDistance && bullet.createStrikeAnimation) {
-                    var animation = bullet.createStrikeAnimation();
+                if (bullet.strikingDistance && animation) {
                     let event = new StrikingDistancePhysicEvent(bullet, bullet.positionY, bullet.strikingDistance, animation);
                     game.scene.addPhysicEvent(event);
                 }
@@ -499,6 +596,8 @@ document.getElementById('startNewGame')
             document.activeElement.blur();
         }
     });
+
+
 
 function getIntValueFromInput(inputId, defaultValue) {
     var value = document.getElementById(inputId).value;
