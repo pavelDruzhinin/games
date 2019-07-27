@@ -129,6 +129,22 @@ class BaseDrawObject {
     }
 }
 
+class BaseDrawObjectPart {
+    setPosition(parentPositionX, parentPositionY) {
+        this.positionX = parentPositionX;
+        this.positionY = parentPositionY;
+    }
+
+    draw(ctx, devicePixelRatio, positionX, positionY) {
+        this.setPosition(positionX, positionY);
+        this._drawPart(ctx, devicePixelRatio);
+    }
+
+    _drawPart(ctx, devicePixelRatio) {
+
+    }
+}
+
 
 class BaseAnimation {
     constructor() {
