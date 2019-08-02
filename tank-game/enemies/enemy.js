@@ -24,7 +24,6 @@ class Enemy extends BaseDrawObject {
 
 
 
-
     move(deviceRatio) {
         this.positionY += MathLib.getRandomInt(2) * this._speedLevel * deviceRatio;
     }
