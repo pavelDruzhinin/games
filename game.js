@@ -232,7 +232,7 @@ class TankGame {
             for (var bullet of bullets) {
                 game.scene.addDrawObject(bullet);
                 var animation = typeof bullet.createStrikeAnimation == 'function' ? bullet.createStrikeAnimation() : null;
-                let event = new ClashPhysicEvent(bullet, ghosts, animation);
+                let event = new ClashPhysicEvent(bullet, enemies, animation);
                 game.scene.addPhysicEvent(event);
 
                 if (bullet.strikingDistance && animation) {

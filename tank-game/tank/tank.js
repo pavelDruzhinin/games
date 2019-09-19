@@ -1,3 +1,30 @@
+class Damage extends BaseDrawObject {
+    constructor(positionX, positionY) {
+        super();
+        this.health = 100;
+        this.setPosition(positionX, positionY);
+    }
+
+    draw(ctx, deviceRatio) {
+        ctx.rect(this.positionX, this.positionY, this.health, 10);
+        ctx.fillStyle = Colors.green;
+        ctx.fillRect(this.positionX, this.positionY, this.health, 10);
+    }
+
+    setPosition(positionX, positionY) {
+        this.positionX = positionX;
+        this.positionY = positionY;
+    }
+
+    remove(damage) {
+        this.health -= damage;
+    }
+
+    isLastDamage(damage) {
+        return this.health - damage < 0;
+    }
+}
+
 class Tank extends BaseDrawObject {
     _currentDirection = 'up';
     _bumberHeight = 40;
@@ -16,6 +43,8 @@ class Tank extends BaseDrawObject {
             new DoubleBarreledTankTower(startPositionX, startPositionY)
         ];
         this.tower = this._towers[0];
+
+        this._damage = new Damage(startPositionX - 50, startPositionY + 60);
     }
 
     addAmunnition(ammunition) {
@@ -80,9 +109,9 @@ class Tank extends BaseDrawObject {
 
             this._bumber.turn(true);
         }
-        console.log('previous current direction', this._currentDirection);
+        // console.log('previous current direction', this._currentDirection);
         this._currentDirection = directions[currentDirectionIndex];
-        console.log('next', this._currentDirection);
+        // console.log('next', this._currentDirection);
     }
 
     getCurrentDirectionScope(directions, currentIndex) {
@@ -114,5 +143,8 @@ class Tank extends BaseDrawObject {
         this._bumber.draw(ctx, deviceRatio);
         this.tower.setPosition(this.positionX, this.positionY);
         this.tower.draw(ctx, deviceRatio);
+        this._damage.setPosition(this.positionX - 50, this.positionY + 60);
+        this._damage.draw(ctx, deviceRatio);
     }
 }
+

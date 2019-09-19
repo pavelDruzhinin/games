@@ -1,6 +1,7 @@
 class Bullet extends BaseBullet {
     constructor(startPositionX, startPositionY) {
         super(startPositionX, startPositionY, 3, 20);
+        this.damage = 10;
     }
 
     _drawBullet(ctx, deviceRatio) {

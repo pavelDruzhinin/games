@@ -9,20 +9,20 @@ class Enemy extends BaseDrawObject {
         this._head = new EnemyHead();
         this._gun1 = new EnemyGun();
         this._gun2 = new EnemyGun();
-
+        this._damage = new Damage(startPositionX, startPositionY - 20);
+        this.width = 30;
+        this.height = 60;
     }
 
     draw(ctx, deviceRatio) {
         this._head.draw(ctx, deviceRatio, this.positionX, this.positionY);
         this._gun1.draw(ctx, deviceRatio, this.positionX - 12 * deviceRatio, this.positionY + 30 * deviceRatio);
         this._gun2.draw(ctx, deviceRatio, this.positionX + 50 * deviceRatio, this.positionY + 30 * deviceRatio);
+        this._damage.setPosition(this.positionX, this.positionY - 20);
+        this._damage.draw(ctx, deviceRatio);
 
         this.move(deviceRatio);
     }
-
-
-
-
 
     move(deviceRatio) {
         this.positionY += MathLib.getRandomInt(2) * this._speedLevel * deviceRatio;

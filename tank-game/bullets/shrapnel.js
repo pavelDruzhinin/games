@@ -4,6 +4,7 @@ class Shrapnel extends BaseBullet {
 
         this._shrapnelImage = new GameImage("/assets/img/bullet.png");
         this.strikingDistance = 500;
+        this.damage = 30;
     }
 
     _drawBullet(ctx, devicePixelRatio) {
