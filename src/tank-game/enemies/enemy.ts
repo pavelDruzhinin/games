@@ -1,5 +1,6 @@
 import { BaseDrawObject, BaseDrawObjectPart, MathLib, GameImage } from "../game-framework";
 import { Bullet } from "../bullets/bullet";
+import { Damage } from "../tank/tank";
 
 export class Enemy extends BaseDrawObject {
     public positionX: number;

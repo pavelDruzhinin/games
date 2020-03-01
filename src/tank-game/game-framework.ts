@@ -51,12 +51,16 @@ export class Colors {
 }
 
 export class BasePhysicEvent {
-    fire(scene) { }
+    fire(scene: any) { }
 }
 
 export class ClashPhysicEvent extends BasePhysicEvent {
-    _isCancelled = false;
-    constructor(fromObject, toObjects, animation) {
+    private _isCancelled = false;
+    fromObject: any;
+    toObjects: any;
+    animation: any;
+
+    constructor(fromObject: any, toObjects: any, animation: any) {
         super();
         this.fromObject = fromObject;
         this.toObjects = toObjects;
@@ -102,8 +106,12 @@ export class ClashPhysicEvent extends BasePhysicEvent {
 }
 
 export class StrikingDistancePhysicEvent extends BasePhysicEvent {
-    _isCancelled = false;
-    constructor(object, startPositionY, strikingDistance, animation) {
+    private _isCancelled = false;
+    private _object: any;
+    private _strikingPosition: number;
+    private _animation: BaseAnimation;
+
+    constructor(object: any, startPositionY: number, strikingDistance: number, animation: BaseAnimation) {
         super();
 
         this._object = object;
@@ -111,7 +119,7 @@ export class StrikingDistancePhysicEvent extends BasePhysicEvent {
         this._animation = animation;
     }
 
-    fire(scene) {
+    fire(scene: any) {
         if (this._isCancelled)
             return;
 
@@ -186,7 +194,7 @@ export class BaseAnimation {
 
 export class Scene {
     _drawObjects: List<BaseDrawObject> = new List<BaseDrawObject>();
-    _events: List<BaseDrawObject> = new List<BaseDrawObject>();
+    _events: List<BasePhysicEvent> = new List<BasePhysicEvent>();
     _animations: List<BaseAnimation> = new List<BaseAnimation>();
     _ctx: any;
     width: number;
@@ -194,7 +202,7 @@ export class Scene {
 
     constructor(canvasId: string, width: number, height: number) {
 
-        let scene: HTMLCanvasElement = document.getElementById(canvasId);
+        let scene: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById(canvasId);
         height -= 20;
 
         scene.height = height * this.devicePixelRatio;
@@ -234,7 +242,7 @@ export class Scene {
         if (!drawObject.draw)
             return;
 
-        this._drawObjects.emove(drawObject);
+        this._drawObjects.remove(drawObject);
     }
 
     addPhysicEvent(event: any) {
@@ -245,11 +253,11 @@ export class Scene {
         this._events.remove(event);
     }
 
-    addAnimation(animationL) {
+    addAnimation(animation: BaseAnimation) {
         this._animations.push(animation);
     }
 
-    removeAnimation(animation) {
+    removeAnimation(animation: BaseAnimation) {
         this._animations.remove(animation);
     }
 
@@ -275,13 +283,16 @@ export class Scene {
 
     destroy() {
         this._ctx = null;
-        this._drawObjects = [];
-        this._events = [];
+        this._drawObjects = new List<BaseDrawObject>();
+        this._events = new List<BasePhysicEvent>();
     }
 }
 
 export class Game {
-    constructor(canvasId, width, height) {
+    public scene: Scene;
+    private _interval: number;
+
+    constructor(canvasId: string, width: number, height: number) {
         this.scene = new Scene(canvasId, width, height);
     }
 
@@ -293,7 +304,7 @@ export class Game {
         clearInterval(this._interval);
     }
 
-    registerKeyBoardEvents(keyboardEvents) {
+    registerKeyBoardEvents(keyboardEvents: any) {
         document.addEventListener('keydown', function (event) {
             if (!keyboardEvents.hasOwnProperty(event.code))
                 return;
@@ -315,14 +326,14 @@ export class Game {
 }
 
 export class GameContext {
-    static getFullPath(path) {
+    static getFullPath(path: string) {
         var context = GameEnvironment.context;
         return `${context}${path}`;
     }
 }
 
 export class GameImage extends Image {
-    constructor(path) {
+    constructor(path: string) {
         super();
         this.src = GameContext.getFullPath(path);
     }
