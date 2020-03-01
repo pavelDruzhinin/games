@@ -6,9 +6,9 @@ export class TankTower {
         this.setPosition(positionX, positionY);
     }
 
-    draw(ctx: any) { }
+    draw(ctx: any, deviceRatio: number) { }
 
-    fire() { }
+    fire(ammunition: any) { }
 
     setPosition(positionX: any, positionY: any) {
         this.positionX = positionX;

@@ -1,7 +1,12 @@
 import { Tank } from "./tank/tank";
+import { BaseDrawObject } from "./game-framework";
 
-class RechargeTankTower {
-    constructor(endRifflePosition, step) {
+export class RechargeTankTower {
+    startRifflePosition: number;
+    endRifflePosition: any;
+    _step: any;
+
+    constructor(endRifflePosition: any, step: any) {
         this.startRifflePosition = 0;
         this.endRifflePosition = endRifflePosition;
         this._step = step;
@@ -15,13 +20,13 @@ class RechargeTankTower {
         }
     }
 
-    start(devicePixelRatio) {
+    start(devicePixelRatio: number) {
         this.startRifflePosition = this.endRifflePosition * devicePixelRatio;
     }
 }
 
 class Ghost extends BaseDrawObject {
-    constructor(startPositionX, startPositionY, speedLevel) {
+    constructor(startPositionX: number, startPositionY: number, speedLevel: any) {
         super();
 
         this.positionX = startPositionX;

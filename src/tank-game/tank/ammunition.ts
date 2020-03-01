@@ -3,8 +3,8 @@ export class TankAmunnition {
     _observables: any[] = [];
 
     constructor() {
-        this.bullets = 0;
-        this.shrapnels = 0;
+        this.bullets = false;
+        this.shrapnels = false;
     }
 
     get bullets() { return this._give('bullets'); }

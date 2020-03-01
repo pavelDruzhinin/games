@@ -1,7 +1,14 @@
 import { TankTower } from "./tank-tower";
+import { Shrapnel } from "../bullets/shrapnel";
+import { GameImage } from "../game-framework";
+import { RechargeTankTower } from "../game";
 
 export class SimpleTankTower extends TankTower {
-    constructor(positionX, positionY) {
+    _towerImage: any;
+    _towerRiffleImage: any;
+    _recharge: any;
+    deviceRatio: number;
+    constructor(positionX: number, positionY: number) {
         super(positionX, positionY);
 
         this._towerImage = new GameImage("/assets/img/tank tower.png");
@@ -10,7 +17,7 @@ export class SimpleTankTower extends TankTower {
         this._recharge = new RechargeTankTower(6, 1);
     }
 
-    draw(ctx, deviceRatio) {
+    draw(ctx: any, deviceRatio: number) {
         this._recharge.process();
         //ctx.imageSmoothingEnabled = false;
         this.deviceRatio = deviceRatio;
@@ -26,7 +33,7 @@ export class SimpleTankTower extends TankTower {
             30 * deviceRatio);
     }
 
-    fire(ammunition) {
+    fire(ammunition: any) {
         if (this._recharge.inProccess)
             return [];
 

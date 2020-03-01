@@ -1,4 +1,5 @@
 import { MathLib, GameImage } from "../game-framework";
+import { BaseTankBumber } from "./base-tank-bumper";
 
 export class SimpleTankBumber extends BaseTankBumber {
     _bumberHeight = 55;

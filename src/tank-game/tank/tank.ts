@@ -35,7 +35,7 @@ export class Damage extends BaseDrawObject {
     }
 }
 
-export class Tank implements BaseDrawObject {
+export class Tank extends BaseDrawObject {
     _currentDirection = 'up';
     _bumberHeight = 40;
     _bumberWidth = 30;
@@ -162,7 +162,7 @@ export class Tank implements BaseDrawObject {
         this.tower.setPosition(this.positionX, this.positionY);
         this.tower.draw(ctx, deviceRatio);
         this._damage.setPosition(this.positionX - 50, this.positionY + 60);
-        this._damage.draw(ctx, deviceRatio);
+        this._damage.draw(ctx);
     }
 }
 

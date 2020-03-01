@@ -1,5 +1,7 @@
 import { TankTower } from "./tank-tower";
 import { GameImage } from "../game-framework";
+import { RechargeTankTower } from "../game";
+import { Bullet } from "../bullets/bullet";
 
 export class DoubleBarreledTankTower extends TankTower {
     _towerImage: any;
