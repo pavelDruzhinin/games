@@ -17,7 +17,7 @@ export class List<T> extends Array<T> {
         }
         return index;
     }
-    remove(obj: T) {
+    remove(obj: any) {
         const index = typeof obj == "function" ? this.firstIndex(obj) : this.indexOf(obj);
         if (index == -1) return;
         this.splice(index, 1);

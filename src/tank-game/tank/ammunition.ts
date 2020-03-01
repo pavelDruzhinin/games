@@ -24,7 +24,7 @@ export class TankAmunnition {
         }
     }
 
-    private _give(key: string) {
+    private _give(key: string): any {
         var shells = this._ammunitions.get(key);
         if (!shells)
             return false;

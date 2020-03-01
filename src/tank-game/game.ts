@@ -1,5 +1,7 @@
 import { Tank } from "./tank/tank";
-import { BaseDrawObject } from "./game-framework";
+import { TankAmunnition } from "./tank/ammunition";
+import { BaseDrawObject, MathLib, Colors, Game, ClashPhysicEvent, StrikingDistancePhysicEvent } from "./game-framework";
+import { Enemy } from "./enemies/enemy";
 
 export class RechargeTankTower {
     startRifflePosition: number;
@@ -26,6 +28,12 @@ export class RechargeTankTower {
 }
 
 class Ghost extends BaseDrawObject {
+    public positionX: number;
+    public positionY: number;
+    private _radius: number;
+    private _ghostColor: string;
+    private _speedLevel: any;
+
     constructor(startPositionX: number, startPositionY: number, speedLevel: any) {
         super();
 
@@ -41,7 +49,7 @@ class Ghost extends BaseDrawObject {
     get height() { return this._radius * 2; }
     get width() { return this._radius * 2; }
 
-    draw(ctx, deviceRatio) {
+    draw(ctx: any, deviceRatio: any) {
         ctx.fillStyle = this._ghostColor;
         ctx.beginPath();
         ctx.arc(this.positionX, this.positionY, this._radius * deviceRatio, 0, 2 * Math.PI);
@@ -52,21 +60,22 @@ class Ghost extends BaseDrawObject {
         this.move(deviceRatio);
     }
 
-    move(deviceRatio) {
+    move(deviceRatio: any) {
         //this.positionX -= MathLib.getRandomInt(2);
         this.positionY += MathLib.getRandomInt(2) * this._speedLevel * deviceRatio;
     }
 }
 
 class TankPanelAmmunition {
-    constructor(ammunition) {
+    private _panel: any;
+    constructor(ammunition: any) {
         this._panel = document.getElementsByClassName('tank-ammunition-panel-inner')[0];
         this.init(ammunition);
 
         ammunition.onchange(this.change);
     }
 
-    init(ammunition) {
+    init(ammunition: any) {
         var sections = [];
         for (var shells of ammunition._ammunitions) {
             var section = this.drawPanelSection(shells[0], shells[1]);
@@ -76,11 +85,11 @@ class TankPanelAmmunition {
         this._panel.innerHTML = sections.join('');
     }
 
-    change(key, value) {
+    change(key: any, value: any) {
         document.getElementById(key).innerText = value;
     }
 
-    drawPanelSection(key, value) {
+    drawPanelSection(key: any, value: any) {
         return '<div class="form-group">' +
             `<label>${key}</label>` +
             `<span id="${key}">${value}</span>` +
@@ -89,9 +98,13 @@ class TankPanelAmmunition {
 }
 
 class TankGame {
-    constructor(enemyCount, enemySpeedLevel) {
-        this._enemyCount = enemyCount;
-        this._enemySpeedLevel = enemySpeedLevel;
+    public enemyCount: any;
+    public enemySpeedLevel: any;
+    tankPanelAmmunition: TankPanelAmmunition;
+    game: Game;
+    constructor(enemyCount: any, enemySpeedLevel: any) {
+        this.enemyCount = enemyCount;
+        this.enemySpeedLevel = enemySpeedLevel;
     }
 
     get sceneWidth() { return 800; }
@@ -111,7 +124,7 @@ class TankGame {
         this.tankPanelAmmunition = new TankPanelAmmunition(tank._ammunition);
 
         // var ghosts = this.generateGhosts(this._enemyCount, this._enemySpeedLevel, game.scene.width);
-        var enemies = this.generateEnemies(this._enemyCount, this._enemySpeedLevel, game.scene.width);
+        var enemies = this.generateEnemies(this.enemyCount, this.enemySpeedLevel, game.scene.width);
 
         var keyboardsEvents = {
             'ArrowUp': () => tank.move('up'),
@@ -150,7 +163,7 @@ class TankGame {
         this.start();
     }
 
-    generateGhosts(enemyCount, enemySpeedLevel, sceneWidth) {
+    generateGhosts(enemyCount: any, enemySpeedLevel: any, sceneWidth: any) {
         var ghostArray = [];
         for (var i = 0; i < enemyCount; i++) {
             let randomX = Math.random();
@@ -162,7 +175,7 @@ class TankGame {
         return ghostArray;
     }
 
-    generateEnemies(enemyCount, enemySpeedLevel, sceneWidth) {
+    generateEnemies(enemyCount: any, enemySpeedLevel: any, sceneWidth: any) {
         var enemies = [];
         for (var i = 0; i < enemyCount; i++) {
             let randomX = Math.random();
@@ -188,55 +201,56 @@ document.getElementById('startNewGame')
 
         // Remove focus from any focused element
         if (document.activeElement) {
-            document.activeElement.blur();
+            (<HTMLElement>document.activeElement).blur();
         }
     });
 
 
 
-function getIntValueFromInput(inputId, defaultValue) {
-    var value = document.getElementById(inputId).value;
+function getIntValueFromInput(inputId: any, defaultValue: any) {
+    var value = (<HTMLInputElement>document.getElementById(inputId)).value;
     var intValue = parseInt(value);
     return isNaN(intValue) ? defaultValue : intValue;
 }
 
 //old
-class Wall extends BaseDrawObject {
-    constructor(positionX, positionY, side) {
-        super();
+// class Wall extends BaseDrawObject {
 
-        this.positionX = positionX;
-        this.positionY = positionY;
-        this._side = side;
-    }
+//     constructor(positionX: any, positionY: any, side: any) {
+//         super();
 
-    draw(ctx) {
-        switch (this._side) {
-            case 'right':
-                ctx.fillRect(this.positionX, this.positionY, 1, 20);
-                break;
-            case 'left':
-                ctx.fillRect(this.positionX, this.positionY, 20, 1);
-                break;
-            default:
-                break;
-        }
-    }
-}
+//         this.positionX = positionX;
+//         this.positionY = positionY;
+//         this._side = side;
+//     }
 
-function generateWalls() {
-    var wallSize = 40;
-    var wallsCount = sceneWidth / wallSize;
-    var wallsArray = [];
-    for (var i = 0; i < wallsCount; i++) {
-        for (var j = 0; j < wallsCount; j++) {
-            var rightWall = new Wall(wallSize * i, wallSize * j, 'right');
-            var leftWall = new Wall(wallSize * i, wallSize * j, 'left');
+//     draw(ctx) {
+//         switch (this._side) {
+//             case 'right':
+//                 ctx.fillRect(this.positionX, this.positionY, 1, 20);
+//                 break;
+//             case 'left':
+//                 ctx.fillRect(this.positionX, this.positionY, 20, 1);
+//                 break;
+//             default:
+//                 break;
+//         }
+//     }
+// }
 
-            wallsArray.push(rightWall);
-            wallsArray.push(leftWall);
-        }
-    }
+// function generateWalls() {
+//     var wallSize = 40;
+//     var wallsCount = sceneWidth / wallSize;
+//     var wallsArray = [];
+//     for (var i = 0; i < wallsCount; i++) {
+//         for (var j = 0; j < wallsCount; j++) {
+//             var rightWall = new Wall(wallSize * i, wallSize * j, 'right');
+//             var leftWall = new Wall(wallSize * i, wallSize * j, 'left');
 
-    return wallsArray;
-}
+//             wallsArray.push(rightWall);
+//             wallsArray.push(leftWall);
+//         }
+//     }
+
+//     return wallsArray;
+// }

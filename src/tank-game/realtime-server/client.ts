@@ -1,6 +1,9 @@
+/// <reference path="..\\..\\..\\node_modules\\@heroiclabs\\nakama-js\\dist\\client.d.ts" />
+
 class NakamaClient {
+    private _client: any;
     constructor() {
-        this._client = client;
+        this._client = this.connect();
     }
 
     connect() {

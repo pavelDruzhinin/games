@@ -15,7 +15,7 @@ export class Damage extends BaseDrawObject {
         this.setPosition(positionX, positionY);
     }
 
-    draw(ctx: any): void {
+    draw(ctx: any, deviceRatio: any): void {
         ctx.rect(this.positionX, this.positionY, this.health, 10);
         ctx.fillStyle = Colors.green;
         ctx.fillRect(this.positionX, this.positionY, this.health, 10);
@@ -162,7 +162,7 @@ export class Tank extends BaseDrawObject {
         this.tower.setPosition(this.positionX, this.positionY);
         this.tower.draw(ctx, deviceRatio);
         this._damage.setPosition(this.positionX - 50, this.positionY + 60);
-        this._damage.draw(ctx);
+        this._damage.draw(ctx, deviceRatio);
     }
 }
 
