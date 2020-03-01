@@ -1,6 +1,6 @@
-class TankAmunnition {
+export class TankAmunnition {
     _ammunitions = new Map();
-    _observables = [];
+    _observables: any[] = [];
 
     constructor() {
         this.bullets = 0;
@@ -12,7 +12,7 @@ class TankAmunnition {
     get shrapnels() { return this._give('shrapnels'); }
     set shrapnels(value) { this._ammunitions.set('shrapnels', value); }
 
-    add(ammunition) {
+    add(ammunition: any) {
         for (var addShell of ammunition._ammunitions) {
             var shells = this._ammunitions.get(addShell[0]);
             if (shells == undefined) {
@@ -24,7 +24,7 @@ class TankAmunnition {
         }
     }
 
-    _give(key) {
+    private _give(key: string) {
         var shells = this._ammunitions.get(key);
         if (!shells)
             return false;
@@ -35,10 +35,11 @@ class TankAmunnition {
         return true;
     }
 
-    onchange(observable) {
+    onchange(observable: any) {
         this._observables.push(observable);
     }
-    fireChangeEvent(key, value) {
+
+    fireChangeEvent(key: string, value: any) {
         for (var observable of this._observables) {
             if (typeof observable == 'function')
                 observable(key, value);
