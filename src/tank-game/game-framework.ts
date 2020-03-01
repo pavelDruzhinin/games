@@ -1,23 +1,24 @@
-Array.prototype.remove = function (obj) {
-    var index = this.indexOf(obj);
+// Array.prototype.remove = function (obj) {
+//     var index = this.indexOf(obj);
 
-    if (index == -1)
-        return index;
+//     if (index == -1)
+//         return index;
 
-    this.splice(index, 1);
-    return index;
-}
+//     this.splice(index, 1);
+//     return index;
+// }
+import { List } from "../common/list";
 
 class MathLib {
-    static getRandomInt(max) {
+    static getRandomInt(max: number) {
         return Math.floor(Math.random() * Math.floor(max));
     }
 
-    static getAngleRadians(angle) {
+    static getAngleRadians(angle: number) {
         return angle / 180.0 * Math.PI;
     }
 
-    static getTurnPoint(x, y, angle) {
+    static getTurnPoint(x: number, y: number, angle: number) {
         if (typeof angle == 'string')
             angle = parseInt(angle);
 
@@ -62,7 +63,7 @@ class ClashPhysicEvent extends BasePhysicEvent {
         this.animation = animation;
     }
 
-    fire(scene) {
+    public fire(scene: any): void {
         if (this._isCancelled) {
             return;
         }
@@ -127,7 +128,7 @@ class StrikingDistancePhysicEvent extends BasePhysicEvent {
 }
 
 class BaseDrawObject {
-    draw(ctx) { }
+    draw(ctx: any) { }
 
     toString() {
         return "DrawObject";
@@ -135,30 +136,33 @@ class BaseDrawObject {
 }
 
 class BaseDrawObjectPart {
-    setPosition(parentPositionX, parentPositionY) {
+    positionX: number;
+    positionY: number;
+    setPosition(parentPositionX: number, parentPositionY: number) {
         this.positionX = parentPositionX;
         this.positionY = parentPositionY;
     }
 
-    draw(ctx, devicePixelRatio, positionX, positionY) {
+    draw(ctx: any, devicePixelRatio: number, positionX: number, positionY: number) {
         this.setPosition(positionX, positionY);
         this._drawPart(ctx, devicePixelRatio);
     }
 
-    _drawPart(ctx, devicePixelRatio) {
+    _drawPart(ctx: any, devicePixelRatio: number) {
 
     }
 }
 
 
-class BaseAnimation {
+export class BaseAnimation {
+    positionX: number;
+    positionY: number;
     constructor() {
-
     }
 
-    get isDestroy() { return false; }
+    get isDestroy(): boolean { return false; }
 
-    animate(ctx, scene) {
+    animate(ctx: any, scene: any) {
         if (this.isDestroy) {
             this.destroy(scene);
             return;
@@ -166,26 +170,31 @@ class BaseAnimation {
 
         this._draw(ctx, scene.devicePixelRatio);
     }
-    _draw(ctx, devicePixelRatio) { }
-    setPosition(positionX, positionY) {
+
+    _draw(ctx: any, devicePixelRatio: any) { }
+
+    setPosition(positionX: number, positionY: number) {
         this.positionX = positionX;
         this.positionY = positionY;
     }
 
-    destroy(scene) {
+    destroy(scene: any) {
         scene.removeAnimation(this);
     }
 }
 
 
 class Scene {
-    _drawObjects = [];
-    _events = [];
-    _animations = [];
-    get devicePixelRatio() { return (('devicePixelRatio' in window) && (window.devicePixelRatio > 1)) ? window.devicePixelRatio : 1; }
-    constructor(canvasId, width, height) {
+    _drawObjects: List<BaseDrawObject> = new List<BaseDrawObject>();
+    _events: List<BaseDrawObject> = new List<BaseDrawObject>();
+    _animations: List<BaseAnimation> = new List<BaseAnimation>();
+    _ctx: any;
+    width: number;
+    height: number;
 
-        var scene = document.getElementById(canvasId);
+    constructor(canvasId: string, width: number, height: number) {
+
+        let scene: HTMLCanvasElement = document.getElementById(canvasId);
         height -= 20;
 
         scene.height = height * this.devicePixelRatio;
@@ -200,7 +209,11 @@ class Scene {
         this.height = scene.height;
     }
 
-    addDrawObject(drawObject) {
+    get devicePixelRatio(): number {
+        return (('devicePixelRatio' in window) && (window.devicePixelRatio > 1)) ? window.devicePixelRatio : 1; 
+    }
+
+    addDrawObject(drawObject: BaseDrawObject) {
         if (!drawObject.draw) {
             return;
         }
@@ -208,7 +221,7 @@ class Scene {
         this._drawObjects.push(drawObject);
     }
 
-    addDrawObjects(drawObjects) {
+    addDrawObjects(drawObjects: BaseDrawObject[]) {
         if (!drawObjects.push)
             return;
 
@@ -217,22 +230,22 @@ class Scene {
         }
     }
 
-    removeDrawObject(drawObject) {
+    removeDrawObject(drawObject: BaseDrawObject) {
         if (!drawObject.draw)
             return;
 
-        this._drawObjects.remove(drawObject);
+        this._drawObjects. emove(drawObject);
     }
 
-    addPhysicEvent(event) {
+    addPhysicEvent(event: any) {
         this._events.push(event);
     }
 
-    removeEvent(event) {
+    removeEvent(event: any) {
         this._events.remove(event);
     }
 
-    addAnimation(animation) {
+    addAnimation(animationL ) {
         this._animations.push(animation);
     }
 
@@ -273,7 +286,7 @@ class Game {
     }
 
     run() {
-        this._interval = setInterval(this.scene.update.bind(this.scene), 50);
+        this._interval = setInterval(this.scene.update.bind(this.scene), 60);
     }
 
     stop() {

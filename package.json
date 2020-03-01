@@ -1,0 +1,22 @@
+{
+  "name": "games",
+  "version": "1.0.0",
+  "description": "You can play a game here: https://paveldruzhinin.github.io/games/",
+  "main": "game-framework.env.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pavelDruzhinin/games.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pavelDruzhinin/games/issues"
+  },
+  "homepage": "https://github.com/pavelDruzhinin/games#readme",
+  "devDependencies": {
+    "typescript": "^3.8.3"
+  }
+}

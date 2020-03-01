@@ -1,5 +1,5 @@
 class Damage extends BaseDrawObject {
-    constructor(positionX, positionY) {
+    constructor(positionX: number, positionY: number) {
         super();
         this.health = 100;
         this.setPosition(positionX, positionY);
@@ -101,6 +101,7 @@ class Tank extends BaseDrawObject {
                 currentDirectionIndex = 0;
 
             this._bumber.turn();
+            this.tower.turn();
 
         } else {
             currentDirectionIndex--;
@@ -108,6 +109,7 @@ class Tank extends BaseDrawObject {
                 currentDirectionIndex = directions.length - 1;
 
             this._bumber.turn(true);
+            this.tower.turn();
         }
         // console.log('previous current direction', this._currentDirection);
         this._currentDirection = directions[currentDirectionIndex];
@@ -137,7 +139,7 @@ class Tank extends BaseDrawObject {
         return this.tower.fire(this._ammunition);
     }
 
-    draw(ctx, deviceRatio) {
+    draw(ctx: any, deviceRatio: number) {
         this.deviceRatio = deviceRatio;
         this._bumber.setPosition(this.positionX, this.positionY);
         this._bumber.draw(ctx, deviceRatio);
