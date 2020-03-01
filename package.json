@@ -5,7 +5,8 @@
   "main": "game-framework.env.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node_modules/typescript/bin/tsc"
+    "build": "node_modules\\typescript\\bin\\tsc",
+    "build mac": "node_modules/typescript/bin/tsc"
   },
   "repository": {
     "type": "git",

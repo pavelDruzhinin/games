@@ -9,7 +9,7 @@
 // }
 import { List } from "../common/list";
 
-class MathLib {
+export class MathLib {
     static getRandomInt(max: number) {
         return Math.floor(Math.random() * Math.floor(max));
     }
@@ -34,7 +34,7 @@ class MathLib {
     }
 }
 
-class Colors {
+export class Colors {
     static black = "#000000";
     static green = '#66ff66';
     static orange = '#ff6600';
@@ -50,11 +50,11 @@ class Colors {
     }
 }
 
-class BasePhysicEvent {
+export class BasePhysicEvent {
     fire(scene) { }
 }
 
-class ClashPhysicEvent extends BasePhysicEvent {
+export class ClashPhysicEvent extends BasePhysicEvent {
     _isCancelled = false;
     constructor(fromObject, toObjects, animation) {
         super();
@@ -101,7 +101,7 @@ class ClashPhysicEvent extends BasePhysicEvent {
     }
 }
 
-class StrikingDistancePhysicEvent extends BasePhysicEvent {
+export class StrikingDistancePhysicEvent extends BasePhysicEvent {
     _isCancelled = false;
     constructor(object, startPositionY, strikingDistance, animation) {
         super();
@@ -127,7 +127,7 @@ class StrikingDistancePhysicEvent extends BasePhysicEvent {
     }
 }
 
-class BaseDrawObject {
+export class BaseDrawObject {
     draw(ctx: any) { }
 
     toString() {
@@ -135,7 +135,7 @@ class BaseDrawObject {
     }
 }
 
-class BaseDrawObjectPart {
+export class BaseDrawObjectPart {
     positionX: number;
     positionY: number;
     setPosition(parentPositionX: number, parentPositionY: number) {
@@ -184,7 +184,7 @@ export class BaseAnimation {
 }
 
 
-class Scene {
+export class Scene {
     _drawObjects: List<BaseDrawObject> = new List<BaseDrawObject>();
     _events: List<BaseDrawObject> = new List<BaseDrawObject>();
     _animations: List<BaseAnimation> = new List<BaseAnimation>();
@@ -210,7 +210,7 @@ class Scene {
     }
 
     get devicePixelRatio(): number {
-        return (('devicePixelRatio' in window) && (window.devicePixelRatio > 1)) ? window.devicePixelRatio : 1; 
+        return (('devicePixelRatio' in window) && (window.devicePixelRatio > 1)) ? window.devicePixelRatio : 1;
     }
 
     addDrawObject(drawObject: BaseDrawObject) {
@@ -234,7 +234,7 @@ class Scene {
         if (!drawObject.draw)
             return;
 
-        this._drawObjects. emove(drawObject);
+        this._drawObjects.emove(drawObject);
     }
 
     addPhysicEvent(event: any) {
@@ -245,7 +245,7 @@ class Scene {
         this._events.remove(event);
     }
 
-    addAnimation(animationL ) {
+    addAnimation(animationL) {
         this._animations.push(animation);
     }
 
@@ -280,7 +280,7 @@ class Scene {
     }
 }
 
-class Game {
+export class Game {
     constructor(canvasId, width, height) {
         this.scene = new Scene(canvasId, width, height);
     }
@@ -314,14 +314,14 @@ class Game {
     }
 }
 
-class GameContext {
+export class GameContext {
     static getFullPath(path) {
         var context = GameEnvironment.context;
         return `${context}${path}`;
     }
 }
 
-class GameImage extends Image {
+export class GameImage extends Image {
     constructor(path) {
         super();
         this.src = GameContext.getFullPath(path);
