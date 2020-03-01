@@ -1,5 +1,4 @@
-import { BaseAnimation } from "../game-framework";
-
+import { BaseAnimation, GameImage } from "../game-framework";
 
 export class BangAnimation extends BaseAnimation {
     constructor() {
