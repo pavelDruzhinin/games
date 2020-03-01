@@ -201,6 +201,7 @@ class TankGame {
     start() {
         var game = new Game("scene", this.sceneWidth, this.sceneHeight);
         var tank = new Tank(game.scene.width / 2, game.scene.height - 50 * game.scene.devicePixelRatio, 10);
+        var client = new NakamaClient();
 
         var startTankAmmunition = new TankAmunnition();
         startTankAmmunition.bullets = 20;
