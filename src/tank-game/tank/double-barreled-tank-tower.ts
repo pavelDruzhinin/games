@@ -1,5 +1,15 @@
-class DoubleBarreledTankTower extends TankTower {
-    constructor(positionX, positionY) {
+import { TankTower } from "./tank-tower";
+import { GameImage } from "../game-framework";
+
+export class DoubleBarreledTankTower extends TankTower {
+    _towerImage: any;
+    _towerRiffleImage: any;
+    _recharge: any;
+    rifle1Position: number;
+    rifle2Position: number;
+    _correctPositionY: number;
+    deviceRatio: number;
+    constructor(positionX: number, positionY: number) {
         super(positionX, positionY);
 
         this._towerImage = new GameImage("/assets/img/tank tower.png");
@@ -12,7 +22,7 @@ class DoubleBarreledTankTower extends TankTower {
         this._correctPositionY = -28;
     }
 
-    draw(ctx, deviceRatio) {
+    draw(ctx: any, deviceRatio: number) {
         this._recharge.process();
         this.deviceRatio = deviceRatio;
 
@@ -21,7 +31,7 @@ class DoubleBarreledTankTower extends TankTower {
         this._drawTower(ctx, deviceRatio);
     }
 
-    _drawTower(ctx, deviceRatio) {
+    _drawTower(ctx: any, deviceRatio: number) {
         ctx.drawImage(this._towerImage,
             this.positionX - 14 * deviceRatio,
             this.positionY - 15 * deviceRatio,
@@ -29,7 +39,7 @@ class DoubleBarreledTankTower extends TankTower {
             30 * deviceRatio);
     }
 
-    _drawRifle(ctx, x, deviceRatio) {
+    _drawRifle(ctx: any, x: number, deviceRatio: number) {
         ctx.drawImage(this._towerRiffleImage,
             this.positionX - x * deviceRatio,
             this.positionY + this._recharge.startRifflePosition + this._correctPositionY * deviceRatio,
