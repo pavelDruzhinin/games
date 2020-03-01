@@ -1,6 +1,10 @@
 import { BaseAnimation, GameImage } from "../game-framework";
 
 export class BangAnimation extends BaseAnimation {
+    private _bangImage: GameImage;
+    private _increaseCoefEnd: number;
+    private _increaseCoef: number;
+
     constructor() {
         super();
 
@@ -11,7 +15,7 @@ export class BangAnimation extends BaseAnimation {
 
     get isDestroy() { return this._increaseCoef >= this._increaseCoefEnd; }
 
-    _draw(ctx, deviceRatio) {
+    _draw(ctx: any, deviceRatio: any) {
         if (this.isDestroy)
             return;
 

@@ -128,7 +128,7 @@ export class StrikingDistancePhysicEvent extends BasePhysicEvent {
 }
 
 export class BaseDrawObject {
-    draw(ctx: any) { }
+    draw(ctx: any, deviceRatio: any) { }
 
     toString() {
         return "DrawObject";

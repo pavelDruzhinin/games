@@ -1,5 +1,18 @@
-class Enemy extends BaseDrawObject {
-    constructor(startPositionX, startPositionY, speedLevel) {
+import { BaseDrawObject, BaseDrawObjectPart, MathLib, GameImage } from "../game-framework";
+import { Bullet } from "../bullets/bullet";
+
+export class Enemy extends BaseDrawObject {
+    public positionX: number;
+    public positionY: number;
+    private _speedLevel: number;
+    private _head: EnemyHead;
+    private _gun1: EnemyGun;
+    private _gun2: EnemyGun;
+    private _damage: Damage;
+    public width: number;
+    public height: number;
+
+    constructor(startPositionX: any, startPositionY: any, speedLevel: any) {
         super();
 
         this.positionX = startPositionX;
@@ -14,7 +27,7 @@ class Enemy extends BaseDrawObject {
         this.height = 60;
     }
 
-    draw(ctx, deviceRatio) {
+    draw(ctx: any, deviceRatio: any) {
         this._head.draw(ctx, deviceRatio, this.positionX, this.positionY);
         this._gun1.draw(ctx, deviceRatio, this.positionX - 12 * deviceRatio, this.positionY + 30 * deviceRatio);
         this._gun2.draw(ctx, deviceRatio, this.positionX + 50 * deviceRatio, this.positionY + 30 * deviceRatio);
@@ -24,7 +37,7 @@ class Enemy extends BaseDrawObject {
         this.move(deviceRatio);
     }
 
-    move(deviceRatio) {
+    move(deviceRatio: any) {
         this.positionY += MathLib.getRandomInt(2) * this._speedLevel * deviceRatio;
     }
 
@@ -34,6 +47,10 @@ class Enemy extends BaseDrawObject {
 }
 
 class EnemyHead extends BaseDrawObjectPart {
+    private _imageHead: GameImage;
+    public width: number;
+    public height: number;
+
     constructor() {
         super();
 
@@ -42,7 +59,7 @@ class EnemyHead extends BaseDrawObjectPart {
         this.height = 75;
     }
 
-    _drawPart(ctx, deviceRatio) {
+    _drawPart(ctx: any, deviceRatio: any) {
         ctx.drawImage(this._imageHead,
             this.positionX,
             this.positionY,
@@ -52,6 +69,10 @@ class EnemyHead extends BaseDrawObjectPart {
 }
 
 class EnemyGun extends BaseDrawObjectPart {
+    private _imageGun: GameImage;
+    public width: number;
+    public height: number;
+    public _pistols: EnemyGunPistol[];
 
     constructor() {
         super();
@@ -69,7 +90,7 @@ class EnemyGun extends BaseDrawObjectPart {
         ];
     }
 
-    _drawPart(ctx, deviceRatio) {
+    _drawPart(ctx: any, deviceRatio: any) {
         ctx.drawImage(this._imageGun, this.positionX, this.positionY, this.width * deviceRatio, this.height * deviceRatio);
         for (var i = 0; i < this._pistols.length; i++) {
             this._pistols[i].draw(ctx, deviceRatio, this.positionX + this._pistols[i].width * deviceRatio * i, this.positionY + 10 * deviceRatio);
@@ -82,6 +103,10 @@ class EnemyGun extends BaseDrawObjectPart {
 }
 
 class EnemyGunPistol extends BaseDrawObjectPart {
+    private _imageGunPistol: GameImage;
+    public width: number;
+    public height: number;
+
     constructor() {
         super();
 
@@ -91,7 +116,7 @@ class EnemyGunPistol extends BaseDrawObjectPart {
         this.height = 20;
     }
 
-    _drawPart(ctx, deviceRatio) {
+    _drawPart(ctx: any, deviceRatio: any) {
         ctx.drawImage(this._imageGunPistol, this.positionX, this.positionY, this.width * deviceRatio, this.height * deviceRatio);
     }
 }
