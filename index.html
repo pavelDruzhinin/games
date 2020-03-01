@@ -55,12 +55,12 @@
         <form class="settings ml-20">
             <h3>Game settings</h3>
             <div class="form-group">
-                <label>Ghost count</label>
-                <input id="ghostCount" class="form-control" type="text" placeholder="Ghost count" value="10" />
+                <label>Enemy count</label>
+                <input id="enemyCount" class="form-control" type="text" placeholder="Enemy count" value="10" />
             </div>
             <div class="form-group">
-                <label>Ghost speed level</label>
-                <input id="ghostSpeedLevel" class="form-control" type="text" placeholder="Ghost speed level"
+                <label>Enemy speed level</label>
+                <input id="enemySpeedLevel" class="form-control" type="text" placeholder="Enemy speed level"
                     value="1" />
             </div>
             <button id="startNewGame" class="btn" type="button">Start new game</button>
@@ -74,6 +74,15 @@
     </div>
     <script src="game-framework.env.js"></script>
     <script src="game-framework.js"></script>
+    <script src="tank-game/bullets/base-bullet.js"></script>
+    <script src="tank-game/bullets/bullet.js"></script>
+    <script src="tank-game/bullets/shrapnel.js"></script>
+    <script src="tank-game/animations/bang-animation.js"></script>
+    <script src="tank-game/tank/ammunition.js"></script>
+    <script src="tank-game/tank/tank.js"></script>
+    <script src="tank-game/tank/base-tank-bumper.js"></script>
+    <script src="tank-game/tank/simple-tank-bumper.js"></script>
+    <script src="tank-game/enemies/enemy.js"></script>
     <script src="game.js"></script>
 </body>
 

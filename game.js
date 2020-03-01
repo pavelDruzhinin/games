@@ -1,321 +1,3 @@
-class BaseBullet extends BaseDrawObject {
-    constructor(positionX, positionY, radius, speed) {
-        super();
-        this.positionX = positionX;
-        this.positionY = positionY;
-
-        this._radius = radius;
-        this._speed = speed;
-    }
-
-    get width() { return this._radius * 2; }
-    get height() { return this._radius * 2; }
-
-    draw(ctx, deviceRatio) {
-        this._drawBullet(ctx, deviceRatio);
-        this.move(deviceRatio);
-    }
-
-    _drawBullet(ctx, deviceRatio) {
-
-    }
-
-    move(deviceRatio) {
-        this.positionY -= this._speed * deviceRatio;
-    }
-}
-
-class Bullet extends BaseBullet {
-    constructor(startPositionX, startPositionY) {
-        super(startPositionX, startPositionY, 3, 20);
-    }
-
-    _drawBullet(ctx, deviceRatio) {
-        ctx.fillStyle = Colors.red;
-
-        ctx.beginPath();
-        ctx.arc(this.positionX, this.positionY, this._radius * deviceRatio, 0, 2 * Math.PI);
-        ctx.fill();
-    }
-}
-
-class Shrapnel extends BaseBullet {
-    constructor(startPositionX, startPositionY) {
-        super(startPositionX, startPositionY, 6, 40);
-
-        this._shrapnelImage = new GameImage("/assets/img/bullet.png");
-        this.strikingDistance = 500;
-    }
-
-    _drawBullet(ctx, devicePixelRatio) {
-        ctx.drawImage(this._shrapnelImage, this.positionX, this.positionY, 3 * devicePixelRatio, 7 * devicePixelRatio);
-    }
-
-    createStrikeAnimation() {
-        return new BangAnimation();
-    }
-}
-
-class BangAnimation extends BaseAnimation {
-    constructor() {
-        super();
-
-        this._bangImage = new GameImage("/assets/img/bang.png");
-        this._increaseCoefEnd = 14;
-        this._increaseCoef = 1;
-    }
-
-    get isDestroy() { return this._increaseCoef >= this._increaseCoefEnd; }
-
-    _draw(ctx, deviceRatio) {
-        if (this.isDestroy)
-            return;
-
-        var radius = 3 * deviceRatio * this._increaseCoef;
-
-        ctx.drawImage(this._bangImage, this.positionX - radius / 2, this.positionY - radius / 2, radius, radius);
-        this._increaseCoef += 1;
-    }
-}
-
-class TankAmunnition {
-    _ammunitions = new Map();
-    _observables = [];
-
-    constructor() {
-        this.bullets = 0;
-        this.shrapnels = 0;
-    }
-
-    get bullets() { return this._give('bullets'); }
-    set bullets(value) { this._ammunitions.set('bullets', value); }
-    get shrapnels() { return this._give('shrapnels'); }
-    set shrapnels(value) { this._ammunitions.set('shrapnels', value); }
-
-    add(ammunition) {
-        for (var addShell of ammunition._ammunitions) {
-            var shells = this._ammunitions.get(addShell[0]);
-            if (shells == undefined) {
-                console.warn(`Nonknown shells in ammunitions: ${addShell[0]}`);
-                continue;
-            }
-            var addShells = parseInt(addShell[1]);
-            this._ammunitions.set(addShell[0], shells + addShells);
-        }
-    }
-
-    _give(key) {
-        var shells = this._ammunitions.get(key);
-        if (!shells)
-            return false;
-
-        shells--;
-        this.fireChangeEvent(key, shells);
-        this._ammunitions.set(key, shells);
-        return true;
-    }
-
-    onchange(observable) {
-        this._observables.push(observable);
-    }
-    fireChangeEvent(key, value) {
-        for (var observable of this._observables) {
-            if (typeof observable == 'function')
-                observable(key, value);
-        }
-    }
-}
-
-class Tank extends BaseDrawObject {
-    _currentDirection = 'up';
-    _bumberHeight = 40;
-    _bumberWidth = 30;
-    _ammunition = new TankAmunnition();
-
-    constructor(startPositionX, startPositionY, speed) {
-        super();
-
-        this.positionX = startPositionX;
-        this.positionY = startPositionY;
-        this.speed = speed;
-        this._bumber = new ImageTankBumber(startPositionX, startPositionY);
-        this._towers = [
-            new SimpleTankTower(startPositionX, startPositionY),
-            new DoubleBarreledTankTower(startPositionX, startPositionY)
-        ];
-        this.tower = this._towers[0];
-    }
-
-    addAmunnition(ammunition) {
-        this._ammunition.add(ammunition);
-    }
-
-    changeTower() {
-        var tankTower = this._towers.filter((el) => el != this.tower)[0];
-        tankTower.setPosition(this.positionX, this.positionY);
-
-        this.tower = tankTower;
-    }
-
-    move(direction) {
-        if (this._currentDirection != direction) {
-            this._turn(direction);
-            return;
-        }
-
-        switch (direction) {
-            case 'up':
-                this.positionY -= this.speed * this.deviceRatio;
-                break;
-            case 'right':
-                this.positionX += this.speed * this.deviceRatio;
-                break;
-            case 'left':
-                this.positionX -= this.speed * this.deviceRatio;
-                break;
-            case 'down':
-                this.positionY += this.speed * this.deviceRatio;
-                break;
-        }
-    }
-
-    _turn(direction) {
-        var directions = ['up', 'right', 'down', 'left'];
-
-        var currentDirectionIndex = directions.indexOf(this._currentDirection);
-
-        var currentDirectionScope = this.getCurrentDirectionScope(directions, currentDirectionIndex);
-        console.log(currentDirectionScope);
-
-        var currentDirectionScopeIndex = currentDirectionScope.indexOf(this._currentDirection);
-        var whereDirectionIndex = currentDirectionScope.indexOf(direction);
-
-        if (whereDirectionIndex == -1) {
-            whereDirectionIndex = 2;
-        }
-
-        if (whereDirectionIndex > currentDirectionScopeIndex) {
-            currentDirectionIndex++;
-            if (currentDirectionIndex > directions.length - 1)
-                currentDirectionIndex = 0;
-
-            this._bumber.turn();
-
-        } else {
-            currentDirectionIndex--;
-            if (currentDirectionIndex < 0)
-                currentDirectionIndex = directions.length - 1;
-
-            this._bumber.turn(true);
-        }
-        console.log('previous current direction', this._currentDirection);
-        this._currentDirection = directions[currentDirectionIndex];
-        console.log('next', this._currentDirection);
-    }
-
-    getCurrentDirectionScope(directions, currentIndex) {
-        var scope = [directions[currentIndex]];
-        var nextIndex = currentIndex + 1;
-        var prevIndex = currentIndex - 1;
-
-        if (nextIndex > directions.length - 1) {
-            nextIndex = 0;
-        }
-
-        if (prevIndex < 0) {
-            prevIndex = directions.length - 1;
-        }
-
-        scope.unshift(directions[prevIndex]);
-        scope.push(directions[nextIndex]);
-        console.log('scope indexes', prevIndex, currentIndex, nextIndex);
-        return scope;
-    }
-
-    fire() {
-        return this.tower.fire(this._ammunition);
-    }
-
-    draw(ctx, deviceRatio) {
-        this.deviceRatio = deviceRatio;
-        this._bumber.setPosition(this.positionX, this.positionY);
-        this._bumber.draw(ctx, deviceRatio);
-        this.tower.setPosition(this.positionX, this.positionY);
-        this.tower.draw(ctx, deviceRatio);
-    }
-}
-
-class TankBumber {
-    constructor(positionX, positionY) {
-        this.setPosition(positionX, positionY);
-    }
-
-    setPosition(positionX, positionY) {
-        this.positionX = positionX;
-        this.positionY = positionY;
-    }
-
-    draw(ctx, deviceRatio) { }
-
-    turn(isLeft) {
-        var angle = isLeft ? -90 : 90;
-
-        var newPoint = MathLib.getTurnPoint(this._bumberWidth, this._bumberHeight, angle);
-
-        this._bumberWidth = newPoint.x;
-        this._bumberHeight = newPoint.y;
-    }
-}
-
-class ImageTankBumber extends TankBumber {
-    _bumberHeight = 55;
-    _bumberWidth = 40;
-    _angle = 0;
-
-    constructor(positionX, positionY) {
-        super(positionX, positionY);
-
-        this._image = new GameImage("/assets/img/tank bumper.png");
-    }
-
-    draw(ctx, deviceRatio) {
-        ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY); // sets scale and origin
-        ctx.rotate(MathLib.getAngleRadians(this._angle));
-        var bumperWidth = this._bumberWidth * deviceRatio;
-        var bumperHeight = this._bumberHeight * deviceRatio;
-
-        ctx.drawImage(this._image, -bumperWidth / 2,
-            -bumperHeight / 2,
-            bumperWidth,
-            bumperHeight);
-
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
-
-    turn(isLeft) {
-        var angle = isLeft ? -90 : 90;
-
-        this._angle += angle;
-    }
-}
-
-class SimpleTankBumber extends TankBumber {
-    _bumberHeight = 40;
-    _bumberWidth = 30;
-
-    constructor(positionX, positionY) {
-        super(positionX, positionY);
-    }
-
-    draw(ctx) {
-        ctx.fillStyle = Colors.violet;
-        ctx.fillRect(this.positionX - this._bumberWidth / 2,
-            this.positionY - this._bumberHeight / 2,
-            this._bumberWidth,
-            this._bumberHeight);
-    }
-}
-
 class TankTower {
     constructor(positionX, positionY) {
         this.setPosition(positionX, positionY);
@@ -508,9 +190,9 @@ class TankPanelAmmunition {
 }
 
 class TankGame {
-    constructor(ghostCount, ghostSpeedLevel) {
-        this._ghostCount = ghostCount;
-        this._ghostSpeedLevel = ghostSpeedLevel;
+    constructor(enemyCount, enemySpeedLevel) {
+        this._enemyCount = enemyCount;
+        this._enemySpeedLevel = enemySpeedLevel;
     }
 
     get sceneWidth() { return 800; }
@@ -526,9 +208,10 @@ class TankGame {
 
         tank.addAmunnition(startTankAmmunition);
 
-        var tankPanelAmmunition = new TankPanelAmmunition(tank._ammunition);
+        this.tankPanelAmmunition = new TankPanelAmmunition(tank._ammunition);
 
-        var ghosts = this.generateGhosts(this._ghostCount, this._ghostSpeedLevel, game.scene.width);
+        // var ghosts = this.generateGhosts(this._enemyCount, this._enemySpeedLevel, game.scene.width);
+        var enemies = this.generateEnemies(this._enemyCount, this._enemySpeedLevel, game.scene.width);
 
         var keyboardsEvents = {
             'ArrowUp': () => tank.move('up'),
@@ -539,7 +222,7 @@ class TankGame {
             'KeyC': () => tank.changeTower()
         };
 
-        game.scene.addDrawObjects(ghosts);
+        game.scene.addDrawObjects(enemies);
         game.scene.addDrawObject(tank);
         game.registerKeyBoardEvents(keyboardsEvents);
         game.run();
@@ -549,7 +232,7 @@ class TankGame {
             for (var bullet of bullets) {
                 game.scene.addDrawObject(bullet);
                 var animation = typeof bullet.createStrikeAnimation == 'function' ? bullet.createStrikeAnimation() : null;
-                let event = new ClashPhysicEvent(bullet, ghosts, animation);
+                let event = new ClashPhysicEvent(bullet, enemies, animation);
                 game.scene.addPhysicEvent(event);
 
                 if (bullet.strikingDistance && animation) {
@@ -567,27 +250,39 @@ class TankGame {
         this.start();
     }
 
-    generateGhosts(ghostCount, ghostSpeedLevel, sceneWidth) {
+    generateGhosts(enemyCount, enemySpeedLevel, sceneWidth) {
         var ghostArray = [];
-        for (var i = 0; i < ghostCount; i++) {
+        for (var i = 0; i < enemyCount; i++) {
             let randomX = Math.random();
             if (!randomX)
                 randomX = 2;
 
-            ghostArray.push(new Ghost(sceneWidth * randomX, 0, ghostSpeedLevel));
+            ghostArray.push(new Ghost(sceneWidth * randomX, 0, enemySpeedLevel));
         }
         return ghostArray;
     }
+
+    generateEnemies(enemyCount, enemySpeedLevel, sceneWidth) {
+        var enemies = [];
+        for (var i = 0; i < enemyCount; i++) {
+            let randomX = Math.random();
+            if (!randomX)
+                randomX = 2;
+
+            enemies.push(new Enemy(sceneWidth * randomX, 0, enemySpeedLevel));
+        }
+        return enemies;
+    }
 }
 
-var tankGame = new TankGame(10, 1);
+var tankGame = new TankGame(1, 1);
 
 tankGame.start();
 
 document.getElementById('startNewGame')
     .addEventListener('click', function (event) {
-        tankGame.ghostCount = getIntValueFromInput('ghostCount', 10);
-        tankGame.ghostSpeedLevel = getIntValueFromInput('ghostSpeedLevel', 1);
+        tankGame.enemyCount = getIntValueFromInput('enemyCount', 1);
+        tankGame.enemySpeedLevel = getIntValueFromInput('enemySpeedLevel', 1);
         tankGame.restart();
         window.focus();
 

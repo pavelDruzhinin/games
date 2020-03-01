@@ -82,10 +82,15 @@ class ClashPhysicEvent extends BasePhysicEvent {
                 fromPositionX - fromHeight <= toHeight + toPositionX && fromPositionX + fromHeight >= toPositionX - toHeight) {
                 this._isCancelled = true;
                 scene.removeDrawObject(this.fromObject);
-                scene.removeDrawObject(toObject);
-                this.toObjects.remove(toObject);
+                if (toObject.hasOwnProperty("_damage") && !toObject._damage.isLastDamage(this.fromObject.damage)) {
+                    toObject._damage.remove(this.fromObject.damage);
+                } else {
+                    scene.removeDrawObject(toObject);
+                    this.toObjects.remove(toObject);
+                }
+
                 if (this.animation) {
-                    this.animation.setPosition(fromPositionX, fromPositionY);
+                    this.animation.setPosition(fromPositionX, toPositionY + toHeight);
                     scene.addAnimation(this.animation);
                 }
                 scene.removeEvent(this);
@@ -126,6 +131,22 @@ class BaseDrawObject {
 
     toString() {
         return "DrawObject";
+    }
+}
+
+class BaseDrawObjectPart {
+    setPosition(parentPositionX, parentPositionY) {
+        this.positionX = parentPositionX;
+        this.positionY = parentPositionY;
+    }
+
+    draw(ctx, devicePixelRatio, positionX, positionY) {
+        this.setPosition(positionX, positionY);
+        this._drawPart(ctx, devicePixelRatio);
+    }
+
+    _drawPart(ctx, devicePixelRatio) {
+
     }
 }
 
@@ -261,7 +282,6 @@ class Game {
 
     registerKeyBoardEvents(keyboardEvents) {
         document.addEventListener('keydown', function (event) {
-            console.log(event);
             if (!keyboardEvents.hasOwnProperty(event.code))
                 return;
 
