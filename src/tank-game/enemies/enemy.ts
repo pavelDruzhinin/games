@@ -73,7 +73,7 @@ class EnemyGun extends BaseDrawObjectPart {
     private _imageGun: GameImage;
     public width: number;
     public height: number;
-    public _pistols: EnemyGunPistol[];
+    private _pistols: EnemyGunPistol[];
 
     constructor() {
         super();
