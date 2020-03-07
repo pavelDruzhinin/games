@@ -2,6 +2,7 @@ import { Tank } from "./tank/tank";
 import { TankAmunnition } from "./tank/ammunition";
 import { BaseDrawObject, MathLib, Colors, Game, ClashPhysicEvent, StrikingDistancePhysicEvent } from "./game-framework";
 import { Enemy } from "./enemies/enemy";
+import NakamaClient from "./realtime-server/client";
 
 export class RechargeTankTower {
     startRifflePosition: number;
@@ -204,8 +205,6 @@ document.getElementById('startNewGame')
             (<HTMLElement>document.activeElement).blur();
         }
     });
-
-
 
 function getIntValueFromInput(inputId: any, defaultValue: any) {
     var value = (<HTMLInputElement>document.getElementById(inputId)).value;

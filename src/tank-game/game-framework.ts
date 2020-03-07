@@ -1,13 +1,5 @@
-// Array.prototype.remove = function (obj) {
-//     var index = this.indexOf(obj);
-
-//     if (index == -1)
-//         return index;
-
-//     this.splice(index, 1);
-//     return index;
-// }
 import { List } from "../common/list";
+import GameEnvironment from "./game-framework.env";
 
 export class MathLib {
     static getRandomInt(max: number) {

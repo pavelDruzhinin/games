@@ -1,12 +1,15 @@
 {
     "compilerOptions": {
-        "module": "system",
+        // "module": "system",
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "outFile": "../../built/local/tsc.js",
-        "sourceMap": true,
-        "target": "es6"
+        "moduleResolution": "node",
+        // "outFile": "game.js",
+        "target": "es6",
+        "build": true,
+        "inlineSourceMap": true,
+        "inlineSources": true
     },
     "include": [
         "src/**/*"

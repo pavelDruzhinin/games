@@ -1,4 +1,6 @@
-/// <reference path="..\\..\\..\\node_modules\\@heroiclabs\\nakama-js\\dist\\client.d.ts" />
+/// <reference path="../../../node_modules/@heroiclabs/nakama-js/dist/index.d.ts" />
+// <script src="path/to/nakama-js.umd.js"></script>
+import { Client } from "@heroiclabs/nakama-js";
 
 class NakamaClient {
     private _client: any;
@@ -7,9 +9,11 @@ class NakamaClient {
     }
 
     connect() {
-        const client = new nakamajs.Client("defaultkey", "95.216.171.225", 7350);
-        client.ssl = true;
+        const client = new Client("defaultkey", "95.216.171.225", '7350');
+        client.useSSL = true;
 
         return client;
     }
-} 
+}
+
+export default NakamaClient;
