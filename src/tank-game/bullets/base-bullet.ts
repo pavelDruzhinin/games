@@ -1,12 +1,10 @@
 import { BaseDrawObject } from "../game-framework";
 
-export class BaseBullet extends BaseDrawObject {
+export abstract class BaseBullet extends BaseDrawObject {
     protected _radius: number;
     private _speed: number;
-    constructor(public positionX: any, public positionY: any, radius: any, speed: any) {
+    constructor(public positionX: number, public positionY: number, radius: number, speed: number) {
         super();
-        this.positionX = positionX;
-        this.positionY = positionY;
 
         this._radius = radius;
         this._speed = speed;
@@ -15,16 +13,14 @@ export class BaseBullet extends BaseDrawObject {
     get width() { return this._radius * 2; }
     get height() { return this._radius * 2; }
 
-    draw(ctx: any, deviceRatio: any) {
+    draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         this._drawBullet(ctx, deviceRatio);
         this.move(deviceRatio);
     }
 
-    _drawBullet(ctx: any, deviceRatio: any) {
+    abstract _drawBullet(ctx: CanvasRenderingContext2D, deviceRatio: number): void;
 
-    }
-
-    move(deviceRatio: any) {
+    move(deviceRatio: number) {
         this.positionY -= this._speed * deviceRatio;
     }
 }

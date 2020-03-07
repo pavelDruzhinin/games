@@ -4,13 +4,15 @@ import { RechargeTankTower } from "../game";
 import { Bullet } from "../bullets/bullet";
 
 export class DoubleBarreledTankTower extends TankTower {
-    _towerImage: any;
-    _towerRiffleImage: any;
-    _recharge: any;
     rifle1Position: number;
     rifle2Position: number;
-    _correctPositionY: number;
     deviceRatio: number;
+
+    private _towerImage: GameImage;
+    private _towerRiffleImage: GameImage;
+    private _recharge: RechargeTankTower;
+    private _correctPositionY: number;
+
     constructor(positionX: number, positionY: number) {
         super(positionX, positionY);
 
@@ -24,7 +26,7 @@ export class DoubleBarreledTankTower extends TankTower {
         this._correctPositionY = -28;
     }
 
-    draw(ctx: any, deviceRatio: number) {
+    draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         this._recharge.process();
         this.deviceRatio = deviceRatio;
 
@@ -33,7 +35,7 @@ export class DoubleBarreledTankTower extends TankTower {
         this._drawTower(ctx, deviceRatio);
     }
 
-    _drawTower(ctx: any, deviceRatio: number) {
+    _drawTower(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.drawImage(this._towerImage,
             this.positionX - 14 * deviceRatio,
             this.positionY - 15 * deviceRatio,
@@ -41,7 +43,7 @@ export class DoubleBarreledTankTower extends TankTower {
             30 * deviceRatio);
     }
 
-    _drawRifle(ctx: any, x: number, deviceRatio: number) {
+    _drawRifle(ctx: CanvasRenderingContext2D, x: number, deviceRatio: number) {
         ctx.drawImage(this._towerRiffleImage,
             this.positionX - x * deviceRatio,
             this.positionY + this._recharge.startRifflePosition + this._correctPositionY * deviceRatio,

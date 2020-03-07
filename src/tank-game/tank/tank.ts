@@ -3,11 +3,12 @@ import { DoubleBarreledTankTower } from "./double-barreled-tank-tower"
 import { SimpleTankTower } from "./simple-tank-tower"
 import { SimpleTankBumber } from "./simple-tank-bumper";
 import { TankAmunnition } from "./ammunition";
+import { TankTower } from "./tank-tower";
 
 export class Damage extends BaseDrawObject {
     health: number;
-    positionX: any;
-    positionY: any;
+    positionX: number;
+    positionY: number;
 
     constructor(positionX: number, positionY: number) {
         super();
@@ -26,28 +27,41 @@ export class Damage extends BaseDrawObject {
         this.positionY = positionY;
     }
 
-    remove(damage: any) {
+    remove(damage: number) {
         this.health -= damage;
     }
 
-    isLastDamage(damage: any) {
+    isLastDamage(damage: number) {
         return this.health - damage < 0;
     }
 }
 
-export class Tank extends BaseDrawObject {
-    _currentDirection = 'up';
-    _bumberHeight = 40;
-    _bumberWidth = 30;
-    _ammunition = new TankAmunnition();
+export interface IDamagable {
+    damage: Damage;
+}
+
+export enum TankDirections {
+    Up,
+    Down,
+    Right,
+    Left
+}
+
+export class Tank extends BaseDrawObject implements IDamagable {
     positionX: number;
     positionY: number;
     speed: number;
-    _bumber: SimpleTankBumber;
-    _towers: any[];
-    tower: any;
-    _damage: Damage;
+    tower: TankTower;
+    damage: Damage;
     deviceRatio: number;
+    ammunition = new TankAmunnition();
+
+    private _currentDirection: TankDirections = TankDirections.Up;
+    private _bumberHeight = 40;
+    private _bumberWidth = 30;
+
+    private _bumber: SimpleTankBumber;
+    private _towers: TankTower[];
 
     constructor(startPositionX: number, startPositionY: number, speed: number) {
         super();
@@ -55,6 +69,7 @@ export class Tank extends BaseDrawObject {
         this.positionX = startPositionX;
         this.positionY = startPositionY;
         this.speed = speed;
+
         this._bumber = new SimpleTankBumber(startPositionX, startPositionY);
         this._towers = [
             new SimpleTankTower(startPositionX, startPositionY),
@@ -62,11 +77,11 @@ export class Tank extends BaseDrawObject {
         ];
         this.tower = this._towers[0];
 
-        this._damage = new Damage(startPositionX - 50, startPositionY + 60);
+        this.damage = new Damage(startPositionX - 50, startPositionY + 60);
     }
 
-    addAmunnition(ammunition: any) {
-        this._ammunition.add(ammunition);
+    addAmunnition(ammunition: TankAmunnition) {
+        this.ammunition.add(ammunition);
     }
 
     changeTower() {
@@ -76,30 +91,30 @@ export class Tank extends BaseDrawObject {
         this.tower = tankTower;
     }
 
-    move(direction: any) {
+    move(direction: TankDirections) {
         if (this._currentDirection != direction) {
             this._turn(direction);
             return;
         }
 
         switch (direction) {
-            case 'up':
+            case TankDirections.Up:
                 this.positionY -= this.speed * this.deviceRatio;
                 break;
-            case 'right':
+            case TankDirections.Down:
+                this.positionY += this.speed * this.deviceRatio;
+                break;
+            case TankDirections.Right:
                 this.positionX += this.speed * this.deviceRatio;
                 break;
-            case 'left':
+            case TankDirections.Left:
                 this.positionX -= this.speed * this.deviceRatio;
-                break;
-            case 'down':
-                this.positionY += this.speed * this.deviceRatio;
                 break;
         }
     }
 
-    _turn(direction: any) {
-        var directions = ['up', 'right', 'down', 'left'];
+    _turn(direction: TankDirections) {
+        var directions = [TankDirections.Up, TankDirections.Right, TankDirections.Down, TankDirections.Left];
 
         var currentDirectionIndex = directions.indexOf(this._currentDirection);
 
@@ -132,7 +147,7 @@ export class Tank extends BaseDrawObject {
         // console.log('next', this._currentDirection);
     }
 
-    getCurrentDirectionScope(directions: string[], currentIndex: number) {
+    getCurrentDirectionScope(directions: TankDirections[], currentIndex: number) {
         var scope = [directions[currentIndex]];
         var nextIndex = currentIndex + 1;
         var prevIndex = currentIndex - 1;
@@ -152,17 +167,17 @@ export class Tank extends BaseDrawObject {
     }
 
     fire() {
-        return this.tower.fire(this._ammunition);
+        return this.tower.fire(this.ammunition);
     }
 
-    public draw(ctx: any, deviceRatio: number): void {
+    draw(ctx: CanvasRenderingContext2D, deviceRatio: number): void {
         this.deviceRatio = deviceRatio;
         this._bumber.setPosition(this.positionX, this.positionY);
         this._bumber.draw(ctx, deviceRatio);
         this.tower.setPosition(this.positionX, this.positionY);
         this.tower.draw(ctx, deviceRatio);
-        this._damage.setPosition(this.positionX - 50, this.positionY + 60);
-        this._damage.draw(ctx, deviceRatio);
+        this.damage.setPosition(this.positionX - 50, this.positionY + 60);
+        this.damage.draw(ctx, deviceRatio);
     }
 }
 

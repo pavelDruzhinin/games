@@ -232,6 +232,14 @@ exports.default = GameEnvironment;
 },{}],"src/tank-game/game-framework.ts":[function(require,module,exports) {
 "use strict";
 
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
 function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
 
 function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
@@ -240,17 +248,9 @@ function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _co
 
 function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -333,35 +333,14 @@ Colors.blue = "#3366ff";
 Colors.red = "#ff1a1a";
 Colors.violet = '#6666ff';
 
-var BasePhysicEvent = /*#__PURE__*/function () {
-  function BasePhysicEvent() {
-    _classCallCheck(this, BasePhysicEvent);
-  }
-
-  _createClass(BasePhysicEvent, [{
-    key: "fire",
-    value: function fire(scene) {}
-  }]);
-
-  return BasePhysicEvent;
-}();
-
-exports.BasePhysicEvent = BasePhysicEvent;
-
-var ClashPhysicEvent = /*#__PURE__*/function (_BasePhysicEvent) {
-  _inherits(ClashPhysicEvent, _BasePhysicEvent);
-
+var ClashPhysicEvent = /*#__PURE__*/function () {
   function ClashPhysicEvent(fromObject, toObjects, animation) {
-    var _this;
-
     _classCallCheck(this, ClashPhysicEvent);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(ClashPhysicEvent).call(this));
-    _this._isCancelled = false;
-    _this.fromObject = fromObject;
-    _this.toObjects = toObjects;
-    _this.animation = animation;
-    return _this;
+    this._isCancelled = false;
+    this.fromObject = fromObject;
+    this.toObjects = toObjects;
+    this.animation = animation;
   }
 
   _createClass(ClashPhysicEvent, [{
@@ -390,9 +369,10 @@ var ClashPhysicEvent = /*#__PURE__*/function (_BasePhysicEvent) {
           if (fromWidth + fromPositionY >= toPositionY - toWidth && fromPositionY - fromWidth <= toPositionY + toWidth && fromPositionX - fromHeight <= toHeight + toPositionX && fromPositionX + fromHeight >= toPositionX - toHeight) {
             this._isCancelled = true;
             scene.removeDrawObject(this.fromObject);
+            var damageObject = toObject;
 
-            if (toObject.hasOwnProperty("_damage") && !toObject._damage.isLastDamage(this.fromObject.damage)) {
-              toObject._damage.remove(this.fromObject.damage);
+            if (damageObject && !damageObject.damage.isLastDamage(this.fromObject.damage)) {
+              damageObject.damage.remove(this.fromObject.damage);
             } else {
               scene.removeDrawObject(toObject);
               this.toObjects.remove(toObject);
@@ -425,24 +405,18 @@ var ClashPhysicEvent = /*#__PURE__*/function (_BasePhysicEvent) {
   }]);
 
   return ClashPhysicEvent;
-}(BasePhysicEvent);
+}();
 
 exports.ClashPhysicEvent = ClashPhysicEvent;
 
-var StrikingDistancePhysicEvent = /*#__PURE__*/function (_BasePhysicEvent2) {
-  _inherits(StrikingDistancePhysicEvent, _BasePhysicEvent2);
-
+var StrikingDistancePhysicEvent = /*#__PURE__*/function () {
   function StrikingDistancePhysicEvent(object, startPositionY, strikingDistance, animation) {
-    var _this2;
-
     _classCallCheck(this, StrikingDistancePhysicEvent);
 
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(StrikingDistancePhysicEvent).call(this));
-    _this2._isCancelled = false;
-    _this2._object = object;
-    _this2._strikingPosition = startPositionY - strikingDistance;
-    _this2._animation = animation;
-    return _this2;
+    this._isCancelled = false;
+    this._object = object;
+    this._strikingPosition = startPositionY - strikingDistance;
+    this._animation = animation;
   }
 
   _createClass(StrikingDistancePhysicEvent, [{
@@ -464,7 +438,7 @@ var StrikingDistancePhysicEvent = /*#__PURE__*/function (_BasePhysicEvent2) {
   }]);
 
   return StrikingDistancePhysicEvent;
-}(BasePhysicEvent);
+}();
 
 exports.StrikingDistancePhysicEvent = StrikingDistancePhysicEvent;
 
@@ -474,9 +448,6 @@ var BaseDrawObject = /*#__PURE__*/function () {
   }
 
   _createClass(BaseDrawObject, [{
-    key: "draw",
-    value: function draw(ctx, deviceRatio) {}
-  }, {
     key: "toString",
     value: function toString() {
       return "DrawObject";
@@ -506,9 +477,6 @@ var BaseDrawObjectPart = /*#__PURE__*/function () {
 
       this._drawPart(ctx, devicePixelRatio);
     }
-  }, {
-    key: "_drawPart",
-    value: function _drawPart(ctx, devicePixelRatio) {}
   }]);
 
   return BaseDrawObjectPart;
@@ -531,9 +499,6 @@ var BaseAnimation = /*#__PURE__*/function () {
 
       this._draw(ctx, scene.devicePixelRatio);
     }
-  }, {
-    key: "_draw",
-    value: function _draw(ctx, devicePixelRatio) {}
   }, {
     key: "setPosition",
     value: function setPosition(positionX, positionY) {
@@ -806,13 +771,13 @@ var GameImage = /*#__PURE__*/function (_Image) {
   _inherits(GameImage, _Image);
 
   function GameImage(path) {
-    var _this3;
+    var _this;
 
     _classCallCheck(this, GameImage);
 
-    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(GameImage).call(this));
-    _this3.src = GameContext.getFullPath(path);
-    return _this3;
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(GameImage).call(this));
+    _this.src = GameContext.getFullPath(path);
+    return _this;
   }
 
   return GameImage;
@@ -840,12 +805,6 @@ var TankTower = /*#__PURE__*/function () {
   }
 
   _createClass(TankTower, [{
-    key: "draw",
-    value: function draw(ctx, deviceRatio) {}
-  }, {
-    key: "fire",
-    value: function fire(ammunition) {}
-  }, {
     key: "setPosition",
     value: function setPosition(positionX, positionY) {
       this.positionX = positionX;
@@ -895,8 +854,6 @@ var BaseBullet = /*#__PURE__*/function (_game_framework_1$Bas) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(BaseBullet).call(this));
     _this.positionX = positionX;
     _this.positionY = positionY;
-    _this.positionX = positionX;
-    _this.positionY = positionY;
     _this._radius = radius;
     _this._speed = speed;
     return _this;
@@ -909,9 +866,6 @@ var BaseBullet = /*#__PURE__*/function (_game_framework_1$Bas) {
 
       this.move(deviceRatio);
     }
-  }, {
-    key: "_drawBullet",
-    value: function _drawBullet(ctx, deviceRatio) {}
   }, {
     key: "move",
     value: function move(deviceRatio) {
@@ -1303,9 +1257,6 @@ var BaseTankBumber = /*#__PURE__*/function () {
       this.positionY = positionY;
     }
   }, {
-    key: "draw",
-    value: function draw(ctx, deviceRatio) {}
-  }, {
     key: "turn",
     value: function turn(isLeft) {
       var angle = isLeft ? -90 : 90;
@@ -1406,8 +1357,8 @@ var TankAmunnition = /*#__PURE__*/function () {
 
     this._ammunitions = new Map();
     this._observables = [];
-    this.bullets = false;
-    this.shrapnels = false;
+    this.bullets = 0;
+    this.shrapnels = 0;
   }
 
   _createClass(TankAmunnition, [{
@@ -1428,9 +1379,7 @@ var TankAmunnition = /*#__PURE__*/function () {
             continue;
           }
 
-          var addShells = parseInt(addShell[1]);
-
-          this._ammunitions.set(addShell[0], shells + addShells);
+          this._ammunitions.set(addShell[0], shells + addShell[1]);
         }
       } catch (err) {
         _didIteratorError = true;
@@ -1452,13 +1401,13 @@ var TankAmunnition = /*#__PURE__*/function () {
     value: function _give(key) {
       var shells = this._ammunitions.get(key);
 
-      if (!shells) return false;
+      if (!shells) return 0;
       shells--;
       this.fireChangeEvent(key, shells);
 
       this._ammunitions.set(key, shells);
 
-      return true;
+      return shells;
     }
   }, {
     key: "onchange",
@@ -1475,7 +1424,7 @@ var TankAmunnition = /*#__PURE__*/function () {
       try {
         for (var _iterator2 = this._observables[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
           var observable = _step2.value;
-          if (typeof observable == 'function') observable(key, value);
+          observable(key, value);
         }
       } catch (err) {
         _didIteratorError2 = true;
@@ -1491,6 +1440,11 @@ var TankAmunnition = /*#__PURE__*/function () {
           }
         }
       }
+    }
+  }, {
+    key: "ammunitions",
+    get: function get() {
+      return this._ammunitions;
     }
   }, {
     key: "bullets",
@@ -1594,6 +1548,14 @@ var Damage = /*#__PURE__*/function (_game_framework_1$Bas) {
 }(game_framework_1.BaseDrawObject);
 
 exports.Damage = Damage;
+var TankDirections;
+
+(function (TankDirections) {
+  TankDirections[TankDirections["Up"] = 0] = "Up";
+  TankDirections[TankDirections["Down"] = 1] = "Down";
+  TankDirections[TankDirections["Right"] = 2] = "Right";
+  TankDirections[TankDirections["Left"] = 3] = "Left";
+})(TankDirections = exports.TankDirections || (exports.TankDirections = {}));
 
 var Tank = /*#__PURE__*/function (_game_framework_1$Bas2) {
   _inherits(Tank, _game_framework_1$Bas2);
@@ -1604,24 +1566,24 @@ var Tank = /*#__PURE__*/function (_game_framework_1$Bas2) {
     _classCallCheck(this, Tank);
 
     _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Tank).call(this));
-    _this2._currentDirection = 'up';
+    _this2.ammunition = new ammunition_1.TankAmunnition();
+    _this2._currentDirection = TankDirections.Up;
     _this2._bumberHeight = 40;
     _this2._bumberWidth = 30;
-    _this2._ammunition = new ammunition_1.TankAmunnition();
     _this2.positionX = startPositionX;
     _this2.positionY = startPositionY;
     _this2.speed = speed;
     _this2._bumber = new simple_tank_bumper_1.SimpleTankBumber(startPositionX, startPositionY);
     _this2._towers = [new simple_tank_tower_1.SimpleTankTower(startPositionX, startPositionY), new double_barreled_tank_tower_1.DoubleBarreledTankTower(startPositionX, startPositionY)];
     _this2.tower = _this2._towers[0];
-    _this2._damage = new Damage(startPositionX - 50, startPositionY + 60);
+    _this2.damage = new Damage(startPositionX - 50, startPositionY + 60);
     return _this2;
   }
 
   _createClass(Tank, [{
     key: "addAmunnition",
     value: function addAmunnition(ammunition) {
-      this._ammunition.add(ammunition);
+      this.ammunition.add(ammunition);
     }
   }, {
     key: "changeTower",
@@ -1645,27 +1607,27 @@ var Tank = /*#__PURE__*/function (_game_framework_1$Bas2) {
       }
 
       switch (direction) {
-        case 'up':
+        case TankDirections.Up:
           this.positionY -= this.speed * this.deviceRatio;
           break;
 
-        case 'right':
+        case TankDirections.Down:
+          this.positionY += this.speed * this.deviceRatio;
+          break;
+
+        case TankDirections.Right:
           this.positionX += this.speed * this.deviceRatio;
           break;
 
-        case 'left':
+        case TankDirections.Left:
           this.positionX -= this.speed * this.deviceRatio;
-          break;
-
-        case 'down':
-          this.positionY += this.speed * this.deviceRatio;
           break;
       }
     }
   }, {
     key: "_turn",
     value: function _turn(direction) {
-      var directions = ['up', 'right', 'down', 'left'];
+      var directions = [TankDirections.Up, TankDirections.Right, TankDirections.Down, TankDirections.Left];
       var currentDirectionIndex = directions.indexOf(this._currentDirection);
       var currentDirectionScope = this.getCurrentDirectionScope(directions, currentDirectionIndex);
       console.log(currentDirectionScope);
@@ -1713,7 +1675,7 @@ var Tank = /*#__PURE__*/function (_game_framework_1$Bas2) {
   }, {
     key: "fire",
     value: function fire() {
-      return this.tower.fire(this._ammunition);
+      return this.tower.fire(this.ammunition);
     }
   }, {
     key: "draw",
@@ -1726,10 +1688,8 @@ var Tank = /*#__PURE__*/function (_game_framework_1$Bas2) {
 
       this.tower.setPosition(this.positionX, this.positionY);
       this.tower.draw(ctx, deviceRatio);
-
-      this._damage.setPosition(this.positionX - 50, this.positionY + 60);
-
-      this._damage.draw(ctx, deviceRatio);
+      this.damage.setPosition(this.positionX - 50, this.positionY + 60);
+      this.damage.draw(ctx, deviceRatio);
     }
   }]);
 
@@ -1783,7 +1743,7 @@ var Enemy = /*#__PURE__*/function (_game_framework_1$Bas) {
     _this._head = new EnemyHead();
     _this._gun1 = new EnemyGun();
     _this._gun2 = new EnemyGun();
-    _this._damage = new tank_1.Damage(startPositionX, startPositionY - 20);
+    _this.damage = new tank_1.Damage(startPositionX, startPositionY - 20);
     _this.width = 30;
     _this.height = 60;
     return _this;
@@ -1798,10 +1758,8 @@ var Enemy = /*#__PURE__*/function (_game_framework_1$Bas) {
 
       this._gun2.draw(ctx, deviceRatio, this.positionX + 50 * deviceRatio, this.positionY + 30 * deviceRatio);
 
-      this._damage.setPosition(this.positionX, this.positionY - 20);
-
-      this._damage.draw(ctx, deviceRatio);
-
+      this.damage.setPosition(this.positionX, this.positionY - 20);
+      this.damage.draw(ctx, deviceRatio);
       this.move(deviceRatio);
     }
   }, {
@@ -1855,9 +1813,9 @@ var EnemyGun = /*#__PURE__*/function (_game_framework_1$Bas3) {
     _classCallCheck(this, EnemyGun);
 
     _this3 = _possibleConstructorReturn(this, _getPrototypeOf(EnemyGun).call(this));
-    _this3._imageGun = new game_framework_1.GameImage("/assets/img/enemy gun.png");
     _this3.width = 12;
     _this3.height = 12;
+    _this3._imageGun = new game_framework_1.GameImage("/assets/img/enemy gun.png");
     _this3._pistols = [new EnemyGunPistol(), new EnemyGunPistol(), new EnemyGunPistol(), new EnemyGunPistol()];
     return _this3;
   }
@@ -6767,12 +6725,14 @@ var enemy_1 = require("./enemies/enemy");
 
 var client_1 = __importDefault(require("./realtime-server/client"));
 
+var list_1 = require("../common/list");
+
 var RechargeTankTower = /*#__PURE__*/function () {
   function RechargeTankTower(endRifflePosition, step) {
     _classCallCheck(this, RechargeTankTower);
 
-    this.startRifflePosition = 0;
     this.endRifflePosition = endRifflePosition;
+    this.startRifflePosition = 0;
     this._step = step;
   }
 
@@ -6865,7 +6825,7 @@ var TankPanelAmmunition = /*#__PURE__*/function () {
       var _iteratorError = undefined;
 
       try {
-        for (var _iterator = ammunition._ammunitions[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (var _iterator = ammunition.ammunitions[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var shells = _step.value;
           var section = this.drawPanelSection(shells[0], shells[1]);
           sections.push(section);
@@ -6890,7 +6850,7 @@ var TankPanelAmmunition = /*#__PURE__*/function () {
   }, {
     key: "change",
     value: function change(key, value) {
-      document.getElementById(key).innerText = value;
+      document.getElementById(key).innerText = value.toString();
     }
   }, {
     key: "drawPanelSection",
@@ -6920,20 +6880,20 @@ var TankGame = /*#__PURE__*/function () {
       startTankAmmunition.bullets = 20;
       startTankAmmunition.shrapnels = 30;
       tank.addAmunnition(startTankAmmunition);
-      this.tankPanelAmmunition = new TankPanelAmmunition(tank._ammunition);
+      this.tankPanelAmmunition = new TankPanelAmmunition(tank.ammunition);
       var enemies = this.generateEnemies(this.enemyCount, this.enemySpeedLevel, game.scene.width);
       var keyboardsEvents = {
         'ArrowUp': function ArrowUp() {
-          return tank.move('up');
+          return tank.move(tank_1.TankDirections.Up);
         },
         'ArrowDown': function ArrowDown() {
-          return tank.move('down');
+          return tank.move(tank_1.TankDirections.Down);
         },
         'ArrowRight': function ArrowRight() {
-          return tank.move('right');
+          return tank.move(tank_1.TankDirections.Right);
         },
         'ArrowLeft': function ArrowLeft() {
-          return tank.move('left');
+          return tank.move(tank_1.TankDirections.Left);
         },
         'Space': function Space() {
           return tankFire();
@@ -6957,12 +6917,13 @@ var TankGame = /*#__PURE__*/function () {
           for (var _iterator2 = bullets[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
             var bullet = _step2.value;
             game.scene.addDrawObject(bullet);
-            var animation = typeof bullet.createStrikeAnimation == 'function' ? bullet.createStrikeAnimation() : null;
+            var shrapnel = bullet;
+            var animation = typeof shrapnel.createStrikeAnimation == 'function' ? shrapnel.createStrikeAnimation() : null;
             var event = new game_framework_1.ClashPhysicEvent(bullet, enemies, animation);
             game.scene.addPhysicEvent(event);
 
-            if (bullet.strikingDistance && animation) {
-              var _event = new game_framework_1.StrikingDistancePhysicEvent(bullet, bullet.positionY, bullet.strikingDistance, animation);
+            if (shrapnel.strikingDistance && animation) {
+              var _event = new game_framework_1.StrikingDistancePhysicEvent(bullet, bullet.positionY, shrapnel.strikingDistance, animation);
 
               game.scene.addPhysicEvent(_event);
             }
@@ -7007,7 +6968,7 @@ var TankGame = /*#__PURE__*/function () {
   }, {
     key: "generateEnemies",
     value: function generateEnemies(enemyCount, enemySpeedLevel, sceneWidth) {
-      var enemies = [];
+      var enemies = new list_1.List();
 
       for (var i = 0; i < enemyCount; i++) {
         var randomX = Math.random();
@@ -7050,7 +7011,7 @@ function getIntValueFromInput(inputId, defaultValue) {
   var intValue = parseInt(value);
   return isNaN(intValue) ? defaultValue : intValue;
 }
-},{"./tank/tank":"src/tank-game/tank/tank.ts","./tank/ammunition":"src/tank-game/tank/ammunition.ts","./game-framework":"src/tank-game/game-framework.ts","./enemies/enemy":"src/tank-game/enemies/enemy.ts","./realtime-server/client":"src/tank-game/realtime-server/client.ts"}],"node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./tank/tank":"src/tank-game/tank/tank.ts","./tank/ammunition":"src/tank-game/tank/ammunition.ts","./game-framework":"src/tank-game/game-framework.ts","./enemies/enemy":"src/tank-game/enemies/enemy.ts","./realtime-server/client":"src/tank-game/realtime-server/client.ts","../common/list":"src/common/list.ts"}],"node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;

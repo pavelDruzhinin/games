@@ -2,13 +2,14 @@ import { BaseBullet } from "./base-bullet";
 import { Colors } from "../game-framework";
 
 export class Bullet extends BaseBullet {
-    public damage: number;
-    constructor(startPositionX: any, startPositionY: any) {
+    damage: number;
+
+    constructor(startPositionX: number, startPositionY: number) {
         super(startPositionX, startPositionY, 3, 20);
         this.damage = 10;
     }
 
-    _drawBullet(ctx: any, deviceRatio: any) {
+    _drawBullet(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.fillStyle = Colors.red;
 
         ctx.beginPath();

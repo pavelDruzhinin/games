@@ -1,5 +1,7 @@
 import { List } from "../common/list";
 import GameEnvironment from "./game-framework.env";
+import { BaseBullet } from './bullets/base-bullet';
+import { IDamagable } from "./tank/tank";
 
 export class MathLib {
     static getRandomInt(max: number) {
@@ -42,24 +44,24 @@ export class Colors {
     }
 }
 
-export class BasePhysicEvent {
-    fire(scene: any) { }
+export interface BasePhysicEvent {
+    fire(scene: Scene): void;
 }
 
-export class ClashPhysicEvent extends BasePhysicEvent {
-    private _isCancelled = false;
+export class ClashPhysicEvent implements BasePhysicEvent {
     fromObject: any;
-    toObjects: any;
-    animation: any;
+    toObjects: List<any>;
+    animation: BaseAnimation;
 
-    constructor(fromObject: any, toObjects: any, animation: any) {
-        super();
+    private _isCancelled = false;
+
+    constructor(fromObject: any, toObjects: List<any>, animation: BaseAnimation) {
         this.fromObject = fromObject;
         this.toObjects = toObjects;
         this.animation = animation;
     }
 
-    public fire(scene: any): void {
+    public fire(scene: Scene): void {
         if (this._isCancelled) {
             return;
         }
@@ -79,8 +81,11 @@ export class ClashPhysicEvent extends BasePhysicEvent {
                 fromPositionX - fromHeight <= toHeight + toPositionX && fromPositionX + fromHeight >= toPositionX - toHeight) {
                 this._isCancelled = true;
                 scene.removeDrawObject(this.fromObject);
-                if (toObject.hasOwnProperty("_damage") && !toObject._damage.isLastDamage(this.fromObject.damage)) {
-                    toObject._damage.remove(this.fromObject.damage);
+
+                const damageObject: IDamagable = <IDamagable>toObject;
+
+                if (damageObject && !damageObject.damage.isLastDamage(this.fromObject.damage)) {
+                    damageObject.damage.remove(this.fromObject.damage);
                 } else {
                     scene.removeDrawObject(toObject);
                     this.toObjects.remove(toObject);
@@ -90,6 +95,7 @@ export class ClashPhysicEvent extends BasePhysicEvent {
                     this.animation.setPosition(fromPositionX, toPositionY + toHeight);
                     scene.addAnimation(this.animation);
                 }
+
                 scene.removeEvent(this);
                 break;
             }
@@ -97,21 +103,19 @@ export class ClashPhysicEvent extends BasePhysicEvent {
     }
 }
 
-export class StrikingDistancePhysicEvent extends BasePhysicEvent {
+export class StrikingDistancePhysicEvent implements BasePhysicEvent {
     private _isCancelled = false;
-    private _object: any;
+    private _object: BaseBullet;
     private _strikingPosition: number;
     private _animation: BaseAnimation;
 
-    constructor(object: any, startPositionY: number, strikingDistance: number, animation: BaseAnimation) {
-        super();
-
+    constructor(object: BaseBullet, startPositionY: number, strikingDistance: number, animation: BaseAnimation) {
         this._object = object;
         this._strikingPosition = startPositionY - strikingDistance;
         this._animation = animation;
     }
 
-    fire(scene: any) {
+    fire(scene: Scene) {
         if (this._isCancelled)
             return;
 
@@ -127,15 +131,15 @@ export class StrikingDistancePhysicEvent extends BasePhysicEvent {
     }
 }
 
-export class BaseDrawObject {
-    draw(ctx: any, deviceRatio: any) { }
+export abstract class BaseDrawObject {
+    abstract draw(ctx: CanvasRenderingContext2D, deviceRatio: number): void;
 
     toString() {
         return "DrawObject";
     }
 }
 
-export class BaseDrawObjectPart {
+export abstract class BaseDrawObjectPart {
     positionX: number;
     positionY: number;
     setPosition(parentPositionX: number, parentPositionY: number) {
@@ -143,26 +147,22 @@ export class BaseDrawObjectPart {
         this.positionY = parentPositionY;
     }
 
-    draw(ctx: any, devicePixelRatio: number, positionX: number, positionY: number) {
+    draw(ctx: CanvasRenderingContext2D, devicePixelRatio: number, positionX: number, positionY: number) {
         this.setPosition(positionX, positionY);
         this._drawPart(ctx, devicePixelRatio);
     }
 
-    _drawPart(ctx: any, devicePixelRatio: number) {
-
-    }
+    abstract _drawPart(ctx: CanvasRenderingContext2D, devicePixelRatio: number): void;
 }
 
 
-export class BaseAnimation {
+export abstract class BaseAnimation {
     positionX: number;
     positionY: number;
-    constructor() {
-    }
 
-    get isDestroy(): boolean { return false; }
+    get isDestroy() { return false; }
 
-    animate(ctx: any, scene: any) {
+    animate(ctx: CanvasRenderingContext2D, scene: Scene) {
         if (this.isDestroy) {
             this.destroy(scene);
             return;
@@ -171,31 +171,31 @@ export class BaseAnimation {
         this._draw(ctx, scene.devicePixelRatio);
     }
 
-    _draw(ctx: any, devicePixelRatio: any) { }
+    abstract _draw(ctx: CanvasRenderingContext2D, devicePixelRatio: number): void;
 
     setPosition(positionX: number, positionY: number) {
         this.positionX = positionX;
         this.positionY = positionY;
     }
 
-    destroy(scene: any) {
+    destroy(scene: Scene) {
         scene.removeAnimation(this);
     }
 }
 
-
 export class Scene {
-    _drawObjects: List<BaseDrawObject> = new List<BaseDrawObject>();
-    _events: List<BasePhysicEvent> = new List<BasePhysicEvent>();
-    _animations: List<BaseAnimation> = new List<BaseAnimation>();
-    _ctx: any;
     width: number;
     height: number;
+
+    private _drawObjects: List<BaseDrawObject> = new List<BaseDrawObject>();
+    private _events: List<BasePhysicEvent> = new List<BasePhysicEvent>();
+    private _animations: List<BaseAnimation> = new List<BaseAnimation>();
+    private _ctx: CanvasRenderingContext2D;
 
     constructor(canvasId: string, width: number, height: number) {
 
         let scene: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById(canvasId);
-        height -= 20;
+        height -= 20; // <-- magic constant
 
         scene.height = height * this.devicePixelRatio;
         scene.width = width * this.devicePixelRatio;
@@ -237,11 +237,11 @@ export class Scene {
         this._drawObjects.remove(drawObject);
     }
 
-    addPhysicEvent(event: any) {
+    addPhysicEvent(event: BasePhysicEvent) {
         this._events.push(event);
     }
 
-    removeEvent(event: any) {
+    removeEvent(event: BasePhysicEvent) {
         this._events.remove(event);
     }
 
@@ -281,7 +281,7 @@ export class Scene {
 }
 
 export class Game {
-    public scene: Scene;
+    scene: Scene;
     private _interval: number;
 
     constructor(canvasId: string, width: number, height: number) {

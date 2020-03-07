@@ -1,10 +1,11 @@
 import { MathLib } from "../game-framework";
 
-export class BaseTankBumber {
+export abstract class BaseTankBumber {
     positionY: number;
     positionX: number;
-    _bumberWidth: number;
-    _bumberHeight: number;
+    protected _bumberWidth: number;
+    protected _bumberHeight: number;
+
     constructor(positionX: any, positionY: any) {
         this.setPosition(positionX, positionY);
     }
@@ -14,7 +15,7 @@ export class BaseTankBumber {
         this.positionY = positionY;
     }
 
-    draw(ctx: any, deviceRatio: number) { }
+    abstract draw(ctx: any, deviceRatio: number): void;
 
     turn(isLeft: boolean) {
         var angle = isLeft ? -90 : 90;

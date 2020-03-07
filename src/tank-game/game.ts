@@ -1,17 +1,16 @@
-import { Tank } from "./tank/tank";
+import { Tank, TankDirections } from "./tank/tank";
 import { TankAmunnition } from "./tank/ammunition";
 import { BaseDrawObject, MathLib, Colors, Game, ClashPhysicEvent, StrikingDistancePhysicEvent } from "./game-framework";
 import { Enemy } from "./enemies/enemy";
 import NakamaClient from "./realtime-server/client";
+import { Shrapnel } from "./bullets/shrapnel";
+import { List } from "../common/list";
 
 export class RechargeTankTower {
-    startRifflePosition: number;
-    endRifflePosition: any;
-    _step: any;
+    startRifflePosition = 0;
+    private _step: any;
 
-    constructor(endRifflePosition: any, step: any) {
-        this.startRifflePosition = 0;
-        this.endRifflePosition = endRifflePosition;
+    constructor(public endRifflePosition: number, step: number) {
         this._step = step;
     }
 
@@ -29,13 +28,13 @@ export class RechargeTankTower {
 }
 
 class Ghost extends BaseDrawObject {
-    public positionX: number;
-    public positionY: number;
+    positionX: number;
+    positionY: number;
     private _radius: number;
     private _ghostColor: string;
-    private _speedLevel: any;
+    private _speedLevel: number;
 
-    constructor(startPositionX: number, startPositionY: number, speedLevel: any) {
+    constructor(startPositionX: number, startPositionY: number, speedLevel: number) {
         super();
 
         this.positionX = startPositionX;
@@ -50,7 +49,7 @@ class Ghost extends BaseDrawObject {
     get height() { return this._radius * 2; }
     get width() { return this._radius * 2; }
 
-    draw(ctx: any, deviceRatio: any) {
+    draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.fillStyle = this._ghostColor;
         ctx.beginPath();
         ctx.arc(this.positionX, this.positionY, this._radius * deviceRatio, 0, 2 * Math.PI);
@@ -61,24 +60,24 @@ class Ghost extends BaseDrawObject {
         this.move(deviceRatio);
     }
 
-    move(deviceRatio: any) {
+    move(deviceRatio: number) {
         //this.positionX -= MathLib.getRandomInt(2);
         this.positionY += MathLib.getRandomInt(2) * this._speedLevel * deviceRatio;
     }
 }
 
 class TankPanelAmmunition {
-    private _panel: any;
-    constructor(ammunition: any) {
+    private _panel: Element;
+    constructor(ammunition: TankAmunnition) {
         this._panel = document.getElementsByClassName('tank-ammunition-panel-inner')[0];
         this.init(ammunition);
 
         ammunition.onchange(this.change);
     }
 
-    init(ammunition: any) {
+    init(ammunition: TankAmunnition) {
         var sections = [];
-        for (var shells of ammunition._ammunitions) {
+        for (var shells of ammunition.ammunitions) {
             var section = this.drawPanelSection(shells[0], shells[1]);
             sections.push(section);
         }
@@ -86,11 +85,11 @@ class TankPanelAmmunition {
         this._panel.innerHTML = sections.join('');
     }
 
-    change(key: any, value: any) {
-        document.getElementById(key).innerText = value;
+    change(key: string, value: number) {
+        document.getElementById(key).innerText = value.toString();
     }
 
-    drawPanelSection(key: any, value: any) {
+    drawPanelSection(key: string, value: number) {
         return '<div class="form-group">' +
             `<label>${key}</label>` +
             `<span id="${key}">${value}</span>` +
@@ -99,13 +98,9 @@ class TankPanelAmmunition {
 }
 
 class TankGame {
-    public enemyCount: any;
-    public enemySpeedLevel: any;
     tankPanelAmmunition: TankPanelAmmunition;
     game: Game;
-    constructor(enemyCount: any, enemySpeedLevel: any) {
-        this.enemyCount = enemyCount;
-        this.enemySpeedLevel = enemySpeedLevel;
+    constructor(public enemyCount: number, public enemySpeedLevel: number) {
     }
 
     get sceneWidth() { return 800; }
@@ -122,16 +117,16 @@ class TankGame {
 
         tank.addAmunnition(startTankAmmunition);
 
-        this.tankPanelAmmunition = new TankPanelAmmunition(tank._ammunition);
+        this.tankPanelAmmunition = new TankPanelAmmunition(tank.ammunition);
 
         // var ghosts = this.generateGhosts(this._enemyCount, this._enemySpeedLevel, game.scene.width);
-        var enemies = this.generateEnemies(this.enemyCount, this.enemySpeedLevel, game.scene.width);
+        const enemies = this.generateEnemies(this.enemyCount, this.enemySpeedLevel, game.scene.width);
 
-        var keyboardsEvents = {
-            'ArrowUp': () => tank.move('up'),
-            'ArrowDown': () => tank.move('down'),
-            'ArrowRight': () => tank.move('right'),
-            'ArrowLeft': () => tank.move('left'),
+        const keyboardsEvents = {
+            'ArrowUp': () => tank.move(TankDirections.Up),
+            'ArrowDown': () => tank.move(TankDirections.Down),
+            'ArrowRight': () => tank.move(TankDirections.Right),
+            'ArrowLeft': () => tank.move(TankDirections.Left),
             'Space': () => tankFire(),
             'KeyC': () => tank.changeTower()
         };
@@ -145,12 +140,15 @@ class TankGame {
             var bullets = tank.fire();
             for (var bullet of bullets) {
                 game.scene.addDrawObject(bullet);
-                var animation = typeof bullet.createStrikeAnimation == 'function' ? bullet.createStrikeAnimation() : null;
+
+                const shrapnel: Shrapnel = <Shrapnel>bullet;
+                const animation = typeof shrapnel.createStrikeAnimation == 'function' ? shrapnel.createStrikeAnimation() : null;
+
                 let event = new ClashPhysicEvent(bullet, enemies, animation);
                 game.scene.addPhysicEvent(event);
 
-                if (bullet.strikingDistance && animation) {
-                    let event = new StrikingDistancePhysicEvent(bullet, bullet.positionY, bullet.strikingDistance, animation);
+                if (shrapnel.strikingDistance && animation) {
+                    let event = new StrikingDistancePhysicEvent(bullet, bullet.positionY, shrapnel.strikingDistance, animation);
                     game.scene.addPhysicEvent(event);
                 }
             }
@@ -164,9 +162,9 @@ class TankGame {
         this.start();
     }
 
-    generateGhosts(enemyCount: any, enemySpeedLevel: any, sceneWidth: any) {
-        var ghostArray = [];
-        for (var i = 0; i < enemyCount; i++) {
+    generateGhosts(enemyCount: number, enemySpeedLevel: number, sceneWidth: number) {
+        let ghostArray = [];
+        for (let i = 0; i < enemyCount; i++) {
             let randomX = Math.random();
             if (!randomX)
                 randomX = 2;
@@ -176,9 +174,9 @@ class TankGame {
         return ghostArray;
     }
 
-    generateEnemies(enemyCount: any, enemySpeedLevel: any, sceneWidth: any) {
-        var enemies = [];
-        for (var i = 0; i < enemyCount; i++) {
+    generateEnemies(enemyCount: number, enemySpeedLevel: number, sceneWidth: number): List<any> {
+        let enemies = new List<any>();
+        for (let i = 0; i < enemyCount; i++) {
             let randomX = Math.random();
             if (!randomX)
                 randomX = 2;
@@ -206,7 +204,7 @@ document.getElementById('startNewGame')
         }
     });
 
-function getIntValueFromInput(inputId: any, defaultValue: any) {
+function getIntValueFromInput(inputId: string, defaultValue: number) {
     var value = (<HTMLInputElement>document.getElementById(inputId)).value;
     var intValue = parseInt(value);
     return isNaN(intValue) ? defaultValue : intValue;

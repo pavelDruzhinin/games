@@ -2,12 +2,10 @@ import { MathLib, GameImage } from "../game-framework";
 import { BaseTankBumber } from "./base-tank-bumper";
 
 export class SimpleTankBumber extends BaseTankBumber {
-    _bumberHeight = 55;
-    _bumberWidth = 40;
-    _angle = 0;
-    _image: any;
-    positionX: number;
-    positionY: number;
+    protected _bumberHeight = 55;
+    protected _bumberWidth = 40;
+    private _angle = 0;
+    private _image: GameImage;
 
     constructor(positionX: number, positionY: number) {
         super(positionX, positionY);
@@ -15,11 +13,11 @@ export class SimpleTankBumber extends BaseTankBumber {
         this._image = new GameImage("/assets/img/tank bumper.png");
     }
 
-    draw(ctx: any, deviceRatio: number) {
+    draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY); // sets scale and origin
         ctx.rotate(MathLib.getAngleRadians(this._angle));
-        var bumperWidth = this._bumberWidth * deviceRatio;
-        var bumperHeight = this._bumberHeight * deviceRatio;
+        const bumperWidth = this._bumberWidth * deviceRatio;
+        const bumperHeight = this._bumberHeight * deviceRatio;
 
         ctx.drawImage(this._image, -bumperWidth / 2,
             -bumperHeight / 2,
@@ -30,7 +28,7 @@ export class SimpleTankBumber extends BaseTankBumber {
     }
 
     turn(isLeft: boolean = false) {
-        var angle = isLeft ? -90 : 90;
+        const angle = isLeft ? -90 : 90;
 
         this._angle += angle;
     }

@@ -1,16 +1,19 @@
-export class TankTower {
-    positionX: any;
-    positionY: any;
+import { TankAmunnition } from "./ammunition";
+import { BaseBullet } from "../bullets/base-bullet";
 
-    constructor(positionX: any, positionY: any) {
+export abstract class TankTower {
+    positionX: number;
+    positionY: number;
+
+    constructor(positionX: number, positionY: number) {
         this.setPosition(positionX, positionY);
     }
 
-    draw(ctx: any, deviceRatio: number) { }
+    abstract draw(ctx: CanvasRenderingContext2D, deviceRatio: number): void;
 
-    fire(ammunition: any) { }
+    abstract fire(ammunition: TankAmunnition): BaseBullet[];
 
-    setPosition(positionX: any, positionY: any) {
+    setPosition(positionX: number, positionY: number) {
         this.positionX = positionX;
         this.positionY = positionY;
     }

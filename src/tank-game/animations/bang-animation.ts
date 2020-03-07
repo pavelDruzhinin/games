@@ -15,7 +15,7 @@ export class BangAnimation extends BaseAnimation {
 
     get isDestroy() { return this._increaseCoef >= this._increaseCoefEnd; }
 
-    _draw(ctx: any, deviceRatio: any) {
+    _draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         if (this.isDestroy)
             return;
 
