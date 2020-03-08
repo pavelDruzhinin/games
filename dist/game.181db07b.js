@@ -3767,7 +3767,7 @@ var NakamaClient = /*#__PURE__*/function () {
       var payload = {
         userId: userId
       };
-      http_1.default.get('/api/check').then(function (response) {
+      http_1.default.post('/api/users', payload).then(function (response) {
         console.info("Successfully authenticated:", response);
       });
     }

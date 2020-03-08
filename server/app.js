@@ -1,6 +1,7 @@
 const express = require('express'),
     app = express(),
-    cors = require('cors');
+    cors = require('cors'),
+    bodyParser = require('body-parser');
 
 var corsOptions = {
     origin: 'http://localhost:1234',
@@ -8,6 +9,8 @@ var corsOptions = {
 }
 
 app.use(cors(corsOptions));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 const nakamajs = require('./nakama-js.cjs');
 
@@ -40,6 +43,12 @@ app.get('/api/check', (req, res) => {
 
 app.post('/api/users', (req, res) => {
     console.log(req.url, req.body);
+
+    nakamaClient.createUser(req.body).then((session) => {
+        res.send(session);
+    }).catch(error => {
+        res.sendStatus(500);
+    });
 });
 
 const port = 3000;
