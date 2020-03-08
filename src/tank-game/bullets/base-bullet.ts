@@ -1,6 +1,7 @@
 import { BaseDrawObject } from "../game-framework";
 
 export abstract class BaseBullet extends BaseDrawObject {
+    abstract damage: number;
     protected _radius: number;
     private _speed: number;
     constructor(public positionX: number, public positionY: number, radius: number, speed: number) {
@@ -18,7 +19,7 @@ export abstract class BaseBullet extends BaseDrawObject {
         this.move(deviceRatio);
     }
 
-    abstract _drawBullet(ctx: CanvasRenderingContext2D, deviceRatio: number): void;
+    protected abstract _drawBullet(ctx: CanvasRenderingContext2D, deviceRatio: number): void;
 
     move(deviceRatio: number) {
         this.positionY -= this._speed * deviceRatio;

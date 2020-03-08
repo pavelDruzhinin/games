@@ -64,7 +64,7 @@ class EnemyHead extends BaseDrawObjectPart {
         this.height = 75;
     }
 
-    _drawPart(ctx: CanvasRenderingContext2D, deviceRatio: number) {
+    protected _drawPart(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.drawImage(this._imageHead,
             this.positionX,
             this.positionY,
@@ -95,7 +95,7 @@ class EnemyGun extends BaseDrawObjectPart {
         ];
     }
 
-    _drawPart(ctx: CanvasRenderingContext2D, deviceRatio: number) {
+    protected _drawPart(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.drawImage(this._imageGun, this.positionX, this.positionY, this.width * deviceRatio, this.height * deviceRatio);
         for (var i = 0; i < this._pistols.length; i++) {
             this._pistols[i].draw(ctx, deviceRatio, this.positionX + this._pistols[i].width * deviceRatio * i, this.positionY + 10 * deviceRatio);

@@ -16,7 +16,7 @@ export class Damage extends BaseDrawObject {
         this.setPosition(positionX, positionY);
     }
 
-    draw(ctx: any, deviceRatio: any): void {
+    draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.rect(this.positionX, this.positionY, this.health, 10);
         ctx.fillStyle = Colors.green;
         ctx.fillRect(this.positionX, this.positionY, this.health, 10);

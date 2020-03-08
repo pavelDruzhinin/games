@@ -9,7 +9,7 @@ export class Bullet extends BaseBullet {
         this.damage = 10;
     }
 
-    _drawBullet(ctx: CanvasRenderingContext2D, deviceRatio: number) {
+    protected _drawBullet(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.fillStyle = Colors.red;
 
         ctx.beginPath();

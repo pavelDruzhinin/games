@@ -13,9 +13,6 @@ export class MathLib {
     }
 
     static getTurnPoint(x: number, y: number, angle: number) {
-        if (typeof angle == 'string')
-            angle = parseInt(angle);
-
         if (isNaN(angle))
             return null;
 
@@ -49,19 +46,19 @@ export interface BasePhysicEvent {
 }
 
 export class ClashPhysicEvent implements BasePhysicEvent {
-    fromObject: any;
+    fromObject: BaseBullet;
     toObjects: List<any>;
     animation: BaseAnimation;
 
     private _isCancelled = false;
 
-    constructor(fromObject: any, toObjects: List<any>, animation: BaseAnimation) {
+    constructor(fromObject: BaseBullet, toObjects: List<any>, animation: BaseAnimation) {
         this.fromObject = fromObject;
         this.toObjects = toObjects;
         this.animation = animation;
     }
 
-    public fire(scene: Scene): void {
+    fire(scene: Scene) {
         if (this._isCancelled) {
             return;
         }
@@ -152,7 +149,7 @@ export abstract class BaseDrawObjectPart {
         this._drawPart(ctx, devicePixelRatio);
     }
 
-    abstract _drawPart(ctx: CanvasRenderingContext2D, devicePixelRatio: number): void;
+    protected abstract _drawPart(ctx: CanvasRenderingContext2D, devicePixelRatio: number): void;
 }
 
 
@@ -171,7 +168,7 @@ export abstract class BaseAnimation {
         this._draw(ctx, scene.devicePixelRatio);
     }
 
-    abstract _draw(ctx: CanvasRenderingContext2D, devicePixelRatio: number): void;
+    protected abstract _draw(ctx: CanvasRenderingContext2D, devicePixelRatio: number): void;
 
     setPosition(positionX: number, positionY: number) {
         this.positionX = positionX;

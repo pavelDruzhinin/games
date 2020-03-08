@@ -35,7 +35,7 @@ export class DoubleBarreledTankTower extends TankTower {
         this._drawTower(ctx, deviceRatio);
     }
 
-    _drawTower(ctx: CanvasRenderingContext2D, deviceRatio: number) {
+    private _drawTower(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.drawImage(this._towerImage,
             this.positionX - 14 * deviceRatio,
             this.positionY - 15 * deviceRatio,
@@ -43,7 +43,7 @@ export class DoubleBarreledTankTower extends TankTower {
             30 * deviceRatio);
     }
 
-    _drawRifle(ctx: CanvasRenderingContext2D, x: number, deviceRatio: number) {
+    private _drawRifle(ctx: CanvasRenderingContext2D, x: number, deviceRatio: number) {
         ctx.drawImage(this._towerRiffleImage,
             this.positionX - x * deviceRatio,
             this.positionY + this._recharge.startRifflePosition + this._correctPositionY * deviceRatio,

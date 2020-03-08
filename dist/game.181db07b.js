@@ -168,31 +168,27 @@ var List = /*#__PURE__*/function (_Array) {
   }, {
     key: "firstIndex",
     value: function firstIndex(func) {
-      var index = -1;
-
       for (var i = 0; i < this.length; i++) {
         var bool = func(this[i]);
 
         if (bool) {
-          index = i;
-          break;
+          return i;
         }
       }
 
-      return index;
+      return -1;
     }
   }, {
     key: "remove",
     value: function remove(obj) {
-      var index = typeof obj == "function" ? this.firstIndex(obj) : this.indexOf(obj);
+      var index = obj == "function" ? this.firstIndex(obj) : this.indexOf(obj);
       if (index == -1) return;
       this.splice(index, 1);
     }
   }, {
     key: "last",
     value: function last() {
-      if (!this.length) return null;
-      return this[this.length - 1];
+      return !this.length ? null : this[this.length - 1];
     }
   }]);
 
@@ -290,7 +286,6 @@ var MathLib = /*#__PURE__*/function () {
   }, {
     key: "getTurnPoint",
     value: function getTurnPoint(x, y, angle) {
-      if (typeof angle == 'string') angle = parseInt(angle);
       if (isNaN(angle)) return null;
       var angleRadians = this.getAngleRadians(angle);
       var x1 = x * Math.cos(angleRadians) + y * Math.sin(angleRadians);
@@ -7039,7 +7034,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56185" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63682" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

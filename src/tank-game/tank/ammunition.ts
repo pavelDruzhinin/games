@@ -1,5 +1,5 @@
 export class TankAmunnition {
-    private _ammunitions = new Map<string, number>();
+    private readonly _ammunitions = new Map<string, number>();
     private _observables: ((key: string, value: number) => void)[] = [];
 
     get ammunitions(): Map<string, number> {

@@ -6,7 +6,7 @@ export abstract class BaseTankBumber {
     protected _bumberWidth: number;
     protected _bumberHeight: number;
 
-    constructor(positionX: any, positionY: any) {
+    constructor(positionX: number, positionY: number) {
         this.setPosition(positionX, positionY);
     }
 
@@ -15,12 +15,12 @@ export abstract class BaseTankBumber {
         this.positionY = positionY;
     }
 
-    abstract draw(ctx: any, deviceRatio: number): void;
+    abstract draw(ctx: CanvasRenderingContext2D, deviceRatio: number): void;
 
     turn(isLeft: boolean) {
-        var angle = isLeft ? -90 : 90;
+        const angle = isLeft ? -90 : 90;
 
-        var newPoint = MathLib.getTurnPoint(this._bumberWidth, this._bumberHeight, angle);
+        const newPoint = MathLib.getTurnPoint(this._bumberWidth, this._bumberHeight, angle);
 
         this._bumberWidth = newPoint.x;
         this._bumberHeight = newPoint.y;

@@ -8,7 +8,7 @@ import { List } from "../common/list";
 
 export class RechargeTankTower {
     startRifflePosition = 0;
-    private _step: any;
+    private _step: number;
 
     constructor(public endRifflePosition: number, step: number) {
         this._step = step;
