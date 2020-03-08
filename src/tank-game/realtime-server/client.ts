@@ -1,18 +1,30 @@
-/// <reference path="../../../node_modules/@heroiclabs/nakama-js/dist/index.d.ts" />
-// <script src="path/to/nakama-js.umd.js"></script>
-import { Client } from "@heroiclabs/nakama-js";
+import http from "./http";
+import { MathLib, GameStorage } from "../game-framework";
 
 class NakamaClient {
-    private _client: any;
+    gameStorage: GameStorage;
+
     constructor() {
-        this._client = this.connect();
+        this.gameStorage = new GameStorage();
+        this.connect();
     }
 
     connect() {
-        const client = new Client("defaultkey", "95.216.171.225", '7350');
-        client.useSSL = true;
+        if (this.gameStorage.session) {
+            return;
+        }
 
-        return client;
+        let userId = this.gameStorage.userId;
+        if (!userId)
+            userId = MathLib.getRandomInt(8).toString();
+
+        const payload = { userId: userId };
+
+        http.get('/api/check').then((response: any) => {
+            console.info(`Successfully authenticated:`, response);
+            // this.gameStorage.userId = userId;
+            // this.gameStorage.session = session;
+        });
     }
 }
 

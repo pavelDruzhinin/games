@@ -5,7 +5,8 @@
   "main": "game-framework.env.js",
   "scripts": {
     "build": "parcel build index.html",
-    "dev": "parcel index.html"
+    "dev": "parcel index.html",
+    "proxy": "node server/app.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,14 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@heroiclabs/nakama-js": "^2.0.1"
+    "@heroiclabs/nakama-js": "^2.0.1",
+    "axios": "^0.19.2",
+    "cors": "^2.8.5",
+    "es6-promise": "^4.2.8",
+    "express": "^4.17.1",
+    "http": "0.0.0",
+    "isomorphic-fetch": "^2.2.1",
+    "url-search-params": "^1.1.0",
+    "ws": "^7.2.2"
   }
 }

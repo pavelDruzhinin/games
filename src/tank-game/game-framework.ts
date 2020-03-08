@@ -3,6 +3,29 @@ import GameEnvironment from "./game-framework.env";
 import { BaseBullet } from './bullets/base-bullet';
 import { IDamagable } from "./tank/tank";
 
+export class GameStorage {
+    private _ls: Storage;
+
+    constructor() {
+        this._ls = localStorage;
+    }
+
+    get userId() {
+        return this._ls.getItem('userId');
+    }
+    set userId(value: string) {
+        this._ls.setItem('userId', value);
+    }
+
+    get session() {
+        return JSON.parse(this._ls.getItem('session'));
+    }
+
+    set session(value: object) {
+        this._ls.setItem('session', JSON.stringify(value));
+    }
+}
+
 export class MathLib {
     static getRandomInt(max: number) {
         return Math.floor(Math.random() * Math.floor(max));
