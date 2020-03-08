@@ -57,8 +57,6 @@ export class Tank extends BaseDrawObject implements IDamagable {
     ammunition = new TankAmunnition();
 
     private _currentDirection: TankDirections = TankDirections.Up;
-    private _bumberHeight = 40;
-    private _bumberWidth = 30;
 
     private _bumber: SimpleTankBumber;
     private _towers: TankTower[];
@@ -133,7 +131,8 @@ export class Tank extends BaseDrawObject implements IDamagable {
             if (currentDirectionIndex > directions.length - 1)
                 currentDirectionIndex = 0;
 
-            this._bumber.turn();
+            this._bumber.turn(false);
+            this.tower.turn(false);
 
         } else {
             currentDirectionIndex--;
@@ -141,10 +140,9 @@ export class Tank extends BaseDrawObject implements IDamagable {
                 currentDirectionIndex = directions.length - 1;
 
             this._bumber.turn(true);
+            this.tower.turn(true);
         }
-        // console.log('previous current direction', this._currentDirection);
         this._currentDirection = directions[currentDirectionIndex];
-        // console.log('next', this._currentDirection);
     }
 
     getCurrentDirectionScope(directions: TankDirections[], currentIndex: number) {
@@ -167,7 +165,7 @@ export class Tank extends BaseDrawObject implements IDamagable {
     }
 
     fire() {
-        return this.tower.fire(this.ammunition);
+        return this.tower.fire(this.ammunition, this._currentDirection);
     }
 
     draw(ctx: CanvasRenderingContext2D, deviceRatio: number): void {
