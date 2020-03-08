@@ -27,11 +27,17 @@ class NakamaClient {
 
     createUser(userId) {
         const payload = { id: userId, create: true, username: `user_${userId}` };
+        console.log(payload);
         return this._client.authenticateCustom(payload).then((session) => {
             console.info(`Successfully authenticated:`, session);
-            this.gameStorage.userId = userId;
-            this.gameStorage.session = session;
+            return session;
         });
+    }
+
+    listMatches(session) {
+        return this._client
+            .listMatches(session)
+            .then((response) => response);
     }
 }
 
@@ -44,11 +50,22 @@ app.get('/api/check', (req, res) => {
 app.post('/api/users', (req, res) => {
     console.log(req.url, req.body);
 
-    nakamaClient.createUser(req.body).then((session) => {
+    nakamaClient.createUser(req.body.userId).then((session) => {
         res.send(session);
     }).catch(error => {
-        res.sendStatus(500);
+        res.send(error);
     });
+});
+
+app.post('/api/matches', (req, res) => {
+    console.log(req.url, req.body);
+
+    nakamaClient.listMatches(req.body)
+        .then((response) => {
+            res.send(response);
+        }).catch(error => {
+            res.status(error.status).send(error);
+        });
 });
 
 const port = 3000;

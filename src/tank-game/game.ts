@@ -100,7 +100,10 @@ class TankPanelAmmunition {
 class TankGame {
     tankPanelAmmunition: TankPanelAmmunition;
     game: Game;
+    matchId: string;
+    private _client: NakamaClient;
     constructor(public enemyCount: number, public enemySpeedLevel: number) {
+        this._client = new NakamaClient();
     }
 
     get sceneWidth() { return 800; }
@@ -109,7 +112,6 @@ class TankGame {
     start() {
         var game = new Game("scene", this.sceneWidth, this.sceneHeight);
         var tank = new Tank(game.scene.width / 2, game.scene.height - 50 * game.scene.devicePixelRatio, 10);
-        var client = new NakamaClient();
 
         var startTankAmmunition = new TankAmunnition();
         startTankAmmunition.bullets = 20;
@@ -130,6 +132,11 @@ class TankGame {
             'Space': () => tankFire(),
             'KeyC': () => tank.changeTower()
         };
+
+
+        if (this.matchId) {
+            this._client.addOpponentToMatch(this.matchId);
+        }
 
         game.scene.addDrawObjects(enemies);
         game.scene.addDrawObject(tank);
@@ -195,6 +202,7 @@ document.getElementById('startNewGame')
     .addEventListener('click', function (event) {
         tankGame.enemyCount = getIntValueFromInput('enemyCount', 1);
         tankGame.enemySpeedLevel = getIntValueFromInput('enemySpeedLevel', 1);
+        tankGame.matchId = getValueFromInput('matchId', '');
         tankGame.restart();
         window.focus();
 
@@ -203,6 +211,10 @@ document.getElementById('startNewGame')
             (<HTMLElement>document.activeElement).blur();
         }
     });
+
+function getValueFromInput(inputId: string, defaultValue: string) {
+    return (<HTMLInputElement>document.getElementById(inputId)).value;
+}
 
 function getIntValueFromInput(inputId: string, defaultValue: number) {
     var value = (<HTMLInputElement>document.getElementById(inputId)).value;

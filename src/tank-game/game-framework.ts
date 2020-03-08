@@ -2,12 +2,14 @@ import { List } from "../common/list";
 import GameEnvironment from "./game-framework.env";
 import { BaseBullet } from './bullets/base-bullet';
 import { IDamagable } from "./tank/tank";
+import { Session } from "@heroiclabs/nakama-js";
 
 export class GameStorage {
     private _ls: Storage;
 
     constructor() {
         this._ls = localStorage;
+        this._ls.clear();
     }
 
     get userId() {
@@ -17,12 +19,20 @@ export class GameStorage {
         this._ls.setItem('userId', value);
     }
 
-    get session() {
+    get session(): Session {
         return JSON.parse(this._ls.getItem('session'));
     }
 
-    set session(value: object) {
+    set session(value: Session) {
         this._ls.setItem('session', JSON.stringify(value));
+    }
+
+    get matchId(): string {
+        return this._ls.getItem('matchId');
+    }
+
+    set matchId(value: string) {
+        this._ls.setItem('matchId', value);
     }
 }
 
