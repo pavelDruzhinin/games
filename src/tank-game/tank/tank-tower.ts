@@ -1,5 +1,6 @@
 import { TankAmunnition } from "./ammunition";
 import { BaseBullet } from "../bullets/base-bullet";
+import { TankDirections } from "./tank";
 
 export abstract class TankTower {
     positionX: number;
@@ -11,7 +12,9 @@ export abstract class TankTower {
 
     abstract draw(ctx: CanvasRenderingContext2D, deviceRatio: number): void;
 
-    abstract fire(ammunition: TankAmunnition): BaseBullet[];
+    abstract fire(ammunition: TankAmunnition, direction: TankDirections): BaseBullet[];
+
+    abstract turn(isLeft: boolean): void;
 
     setPosition(positionX: number, positionY: number) {
         this.positionX = positionX;

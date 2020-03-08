@@ -1,7 +1,7 @@
 import { List } from "../common/list";
 import GameEnvironment from "./game-framework.env";
 import { BaseBullet } from './bullets/base-bullet';
-import { IDamagable } from "./tank/tank";
+import { IDamagable, TankDirections } from "./tank/tank";
 import { Session } from "@heroiclabs/nakama-js";
 
 export class GameStorage {
@@ -107,8 +107,11 @@ export class ClashPhysicEvent implements BasePhysicEvent {
             var toPositionX = toObject.positionX;
             var toPositionY = toObject.positionY;
 
-            if (fromWidth + fromPositionY >= toPositionY - toWidth && fromPositionY - fromWidth <= toPositionY + toWidth &&
-                fromPositionX - fromHeight <= toHeight + toPositionX && fromPositionX + fromHeight >= toPositionX - toHeight) {
+            if ((fromWidth + fromPositionY >= toPositionY - toWidth || fromHeight + fromPositionY >= toPositionY - toHeight)
+                && (fromPositionY - fromWidth <= toPositionY + toWidth || fromPositionY - fromHeight <= toPositionY + toHeight)
+                && (fromPositionX - fromHeight <= toHeight + toPositionX || fromPositionX - fromWidth <= toWidth + toPositionX)
+                && (fromPositionX + fromHeight >= toPositionX - toHeight || fromPositionX + fromWidth >= toPositionX - toWidth)
+            ) {
                 this._isCancelled = true;
                 scene.removeDrawObject(this.fromObject);
 
