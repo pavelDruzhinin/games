@@ -166,10 +166,6 @@ export class StrikingDistancePhysicEvent implements BasePhysicEvent {
 
 export abstract class BaseDrawObject {
     abstract draw(ctx: CanvasRenderingContext2D, deviceRatio: number): void;
-
-    toString() {
-        return "DrawObject";
-    }
 }
 
 export abstract class BaseDrawObjectPart {
@@ -329,17 +325,12 @@ export class Game {
         clearInterval(this._interval);
     }
 
-    registerKeyBoardEvents(keyboardEvents: any) {
+    registerKeyBoardEvents(keyboardEvents: Map<string, Function>) {
         document.addEventListener('keydown', function (event) {
-            if (!keyboardEvents.hasOwnProperty(event.code))
+            if (!keyboardEvents.has(event.code))
                 return;
 
-            var keyboardEvent = keyboardEvents[event.code];
-            if (typeof keyboardEvent != 'function') {
-                console.warn(`Event for key ${event.code} is not a function`);
-                return;
-            }
-
+            const keyboardEvent = keyboardEvents.get(event.code);
             keyboardEvent();
         });
     }

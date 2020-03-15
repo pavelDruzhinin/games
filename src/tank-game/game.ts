@@ -124,14 +124,14 @@ class TankGame {
         // var ghosts = this.generateGhosts(this._enemyCount, this._enemySpeedLevel, game.scene.width);
         const enemies = this.generateEnemies(this.enemyCount, this.enemySpeedLevel, game.scene.width);
 
-        const keyboardsEvents = {
-            'ArrowUp': () => tank.move(TankDirections.Up),
-            'ArrowDown': () => tank.move(TankDirections.Down),
-            'ArrowRight': () => tank.move(TankDirections.Right),
-            'ArrowLeft': () => tank.move(TankDirections.Left),
-            'Space': () => tankFire(),
-            'KeyC': () => tank.changeTower()
-        };
+        const keyboardsEvents = new Map<string, Function>([
+            ['ArrowUp', () => tank.move(TankDirections.Up)],
+            ['ArrowDown', () => tank.move(TankDirections.Down)],
+            ['ArrowRight', () => tank.move(TankDirections.Right)],
+            ['ArrowLeft', () => tank.move(TankDirections.Left)],
+            ['Space', () => tankFire()],
+            ['KeyC', () => tank.changeTower()]
+        ]);
 
 
         if (this.matchId) {
