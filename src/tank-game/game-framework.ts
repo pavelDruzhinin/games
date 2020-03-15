@@ -96,20 +96,20 @@ export class ClashPhysicEvent implements BasePhysicEvent {
             return;
         }
 
-        var fromWidth = this.fromObject.width / 2 * scene.devicePixelRatio;
-        var fromHeight = this.fromObject.height / 2 * scene.devicePixelRatio;
-        var fromPositionX = this.fromObject.positionX;
-        var fromPositionY = this.fromObject.positionY;
+        let fromWidth = this.fromObject.width * scene.devicePixelRatio;
+        let fromHeight = this.fromObject.height * scene.devicePixelRatio;
+        let fromPositionX = this.fromObject.positionX;
+        let fromPositionY = this.fromObject.positionY;
 
-        for (var toObject of this.toObjects) {
-            var toWidth = toObject.width / 2 * scene.devicePixelRatio;
-            var toHeight = toObject.height / 2 * scene.devicePixelRatio;
-            var toPositionX = toObject.positionX;
-            var toPositionY = toObject.positionY;
+        for (let toObject of this.toObjects) {
+            let toWidth = toObject.width * scene.devicePixelRatio;
+            let toHeight = toObject.height * scene.devicePixelRatio;
+            let toPositionX = toObject.positionX;
+            let toPositionY = toObject.positionY;
 
-            if ((fromWidth + fromPositionY >= toPositionY - toWidth || fromHeight + fromPositionY >= toPositionY - toHeight)
-                && (fromPositionY - fromWidth <= toPositionY + toWidth || fromPositionY - fromHeight <= toPositionY + toHeight)
-                && (fromPositionX - fromHeight <= toHeight + toPositionX || fromPositionX - fromWidth <= toWidth + toPositionX)
+            if (   (fromPositionY + fromHeight >= toPositionY - toHeight || fromPositionY + fromWidth >= toPositionY - toWidth)
+                && (fromPositionY - fromHeight <= toPositionY + toHeight || fromPositionY - fromWidth <= toPositionY + toWidth)
+                && (fromPositionX - fromHeight <= toPositionX + toHeight || fromPositionX - fromWidth <= toPositionX + toWidth)
                 && (fromPositionX + fromHeight >= toPositionX - toHeight || fromPositionX + fromWidth >= toPositionX - toWidth)
             ) {
                 this._isCancelled = true;

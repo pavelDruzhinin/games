@@ -55,7 +55,34 @@ export class SimpleTankTower extends TankTower {
 
         this._recharge.start(this.deviceRatio);
 
-        return [new Shrapnel((this.positionX), (this.positionY), direction)];
+        const xOffset = this.getBulletXPositionOffset(direction);
+        const yOffset = this.getBulletYPositionOffset(direction);
+
+        return [new Shrapnel((this.positionX + xOffset), (this.positionY + yOffset), direction)];
+    }
+
+    private getBulletXPositionOffset(direction: TankDirections) : number
+    {
+        switch (direction) {
+            case TankDirections.Left:
+                return -50;
+            case TankDirections.Right:
+                return 50;
+            default:
+                return 0;
+        }
+    }
+
+    private getBulletYPositionOffset(direction: TankDirections) : number
+    {
+        switch (direction) {
+            case TankDirections.Up:
+                return -50;
+            case TankDirections.Down:
+                return 50;
+            default:
+                return 0;
+        }
     }
 
     turn(isLeft: boolean = false): void {

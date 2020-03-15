@@ -61,7 +61,6 @@ class Ghost extends BaseDrawObject {
     }
 
     move(deviceRatio: number) {
-        //this.positionX -= MathLib.getRandomInt(2);
         this.positionY += MathLib.getRandomInt(2) * this._speedLevel * deviceRatio;
     }
 }
@@ -221,45 +220,3 @@ function getIntValueFromInput(inputId: string, defaultValue: number) {
     var intValue = parseInt(value);
     return isNaN(intValue) ? defaultValue : intValue;
 }
-
-//old
-// class Wall extends BaseDrawObject {
-
-//     constructor(positionX: any, positionY: any, side: any) {
-//         super();
-
-//         this.positionX = positionX;
-//         this.positionY = positionY;
-//         this._side = side;
-//     }
-
-//     draw(ctx) {
-//         switch (this._side) {
-//             case 'right':
-//                 ctx.fillRect(this.positionX, this.positionY, 1, 20);
-//                 break;
-//             case 'left':
-//                 ctx.fillRect(this.positionX, this.positionY, 20, 1);
-//                 break;
-//             default:
-//                 break;
-//         }
-//     }
-// }
-
-// function generateWalls() {
-//     var wallSize = 40;
-//     var wallsCount = sceneWidth / wallSize;
-//     var wallsArray = [];
-//     for (var i = 0; i < wallsCount; i++) {
-//         for (var j = 0; j < wallsCount; j++) {
-//             var rightWall = new Wall(wallSize * i, wallSize * j, 'right');
-//             var leftWall = new Wall(wallSize * i, wallSize * j, 'left');
-
-//             wallsArray.push(rightWall);
-//             wallsArray.push(leftWall);
-//         }
-//     }
-
-//     return wallsArray;
-// }
