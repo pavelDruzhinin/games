@@ -2,9 +2,11 @@ import { Tank, TankDirections } from "./tank/tank";
 import { TankAmunnition } from "./tank/ammunition";
 import { BaseDrawObject, MathLib, Colors, Game, ClashPhysicEvent, StrikingDistancePhysicEvent } from "./game-framework";
 import { Enemy } from "./enemies/enemy";
-import NakamaClient from "./realtime-server/client";
+// import NakamaClient from "./realtime-server/nakamaClient";
 import { Shrapnel } from "./bullets/shrapnel";
 import { List } from "../common/list";
+import Client from "./realtime-server/client";
+import MatchesComponent from "./components/MatchesComponent";
 
 export class RechargeTankTower {
     startRifflePosition = 0;
@@ -100,9 +102,7 @@ class TankGame {
     tankPanelAmmunition: TankPanelAmmunition;
     game: Game;
     matchId: string;
-    private _client: NakamaClient;
     constructor(public enemyCount: number, public enemySpeedLevel: number) {
-        this._client = new NakamaClient();
     }
 
     get sceneWidth() { return 800; }
@@ -131,11 +131,6 @@ class TankGame {
             ['Space', () => tankFire()],
             ['KeyC', () => tank.changeTower()]
         ]);
-
-
-        if (this.matchId) {
-            this._client.addOpponentToMatch(this.matchId);
-        }
 
         game.scene.addDrawObjects(enemies);
         game.scene.addDrawObject(tank);
@@ -194,6 +189,12 @@ class TankGame {
 }
 
 var tankGame = new TankGame(1, 1);
+var matches = new MatchesComponent('matches', []);
+var client = new Client();
+
+client.getMatches().then((response: any) => {
+    matches.update(response.data);
+});
 
 tankGame.start();
 
@@ -201,7 +202,11 @@ document.getElementById('startNewGame')
     .addEventListener('click', function (event) {
         tankGame.enemyCount = getIntValueFromInput('enemyCount', 1);
         tankGame.enemySpeedLevel = getIntValueFromInput('enemySpeedLevel', 1);
-        tankGame.matchId = getValueFromInput('matchId', '');
+
+        client.getMatches().then((response: any) => {
+            matches.update(response.data);
+        });
+
         tankGame.restart();
         window.focus();
 
@@ -211,7 +216,16 @@ document.getElementById('startNewGame')
         }
     });
 
-function getValueFromInput(inputId: string, defaultValue: string) {
+document.getElementById('add-match')
+    .addEventListener('click', (event) => {
+        const matchName = getValueFromInput('match-name');
+
+        client.addMatch(matchName).then((response: any) => {
+            matches.add(response.data);
+        });
+    });
+
+function getValueFromInput(inputId: string) {
     return (<HTMLInputElement>document.getElementById(inputId)).value;
 }
 

@@ -13,6 +13,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const nakamajs = require('./nakama-js.cjs');
+const repositories = require('./repository');
 
 class NakamaClient {
     constructor() {
@@ -43,6 +44,10 @@ class NakamaClient {
 
 const nakamaClient = new NakamaClient();
 
+const usersRepository = new repositories.UsersRepository();
+const matchesRepository = new repositories.MatchesRepository();
+const matchUsersRepository = new repositories.MatchUsersRepository();
+
 app.get('/api/check', (req, res) => {
     res.sendStatus(201);
 });
@@ -50,22 +55,37 @@ app.get('/api/check', (req, res) => {
 app.post('/api/users', (req, res) => {
     console.log(req.url, req.body);
 
-    nakamaClient.createUser(req.body.userId).then((session) => {
-        res.send(session);
-    }).catch(error => {
-        res.send(error);
-    });
+    const user = { connectId: req.body.connectId };
+
+    usersRepository.add(user);
+    res.send(user);
+});
+
+app.get('/api/matches', (req, res) => {
+    console.log(req.url, req.body);
+
+    const data = matchesRepository.get();
+    res.send(data);
+});
+
+app.get('/api/matches/:id', (req, res) => {
+    const match = matchesRepository.getById(req.params.id);
+
+    res.send(match);
+});
+
+app.post('/api/matches/:matchId/users/:userId', (req, res) => {
+    const matchUser = matchUsersRepository.connect(req.params.matchId, req.params.userId);
+
+    res.send(matchUser);
 });
 
 app.post('/api/matches', (req, res) => {
-    console.log(req.url, req.body);
+    console.log(req.body);
+    const match = { name: req.body.matchName };
 
-    nakamaClient.listMatches(req.body)
-        .then((response) => {
-            res.send(response);
-        }).catch(error => {
-            res.status(error.status).send(error);
-        });
+    matchesRepository.add(match);
+    res.send(match);
 });
 
 const port = 3000;
