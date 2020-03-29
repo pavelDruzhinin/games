@@ -7,7 +7,7 @@ export class Bullet extends BaseBullet {
 
     constructor(startPositionX: number, startPositionY: number, direction: TankDirections) {
         super(startPositionX, startPositionY, 3, 20, direction);
-        this.damage = -10;
+        this.damage = 10;
     }
 
     protected _drawBullet(ctx: CanvasRenderingContext2D, deviceRatio: number) {
