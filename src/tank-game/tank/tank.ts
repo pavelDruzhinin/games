@@ -4,6 +4,7 @@ import { SimpleTankTower } from "./simple-tank-tower"
 import { SimpleTankBumber } from "./simple-tank-bumper";
 import { TankAmunnition } from "./ammunition";
 import { TankTower } from "./tank-tower";
+import { TankDirections } from "./tank-directions";
 
 export class Damage extends BaseDrawObject {
     health: number;
@@ -38,13 +39,6 @@ export class Damage extends BaseDrawObject {
 
 export interface IDamagable {
     damage: Damage;
-}
-
-export enum TankDirections {
-    Up,
-    Down,
-    Right,
-    Left
 }
 
 export class Tank extends BaseDrawObject implements IDamagable {
@@ -85,7 +79,7 @@ export class Tank extends BaseDrawObject implements IDamagable {
     changeTower() {
         var tankTower = this._towers.filter((el) => el != this.tower)[0];
         tankTower.setPosition(this.positionX, this.positionY);
-
+        tankTower.turn(this._currentDirection);
         this.tower = tankTower;
     }
 
@@ -132,7 +126,7 @@ export class Tank extends BaseDrawObject implements IDamagable {
                 currentDirectionIndex = 0;
 
             this._bumber.turn(false);
-            this.tower.turn(false);
+            this.tower.turn(direction);
 
         } else {
             currentDirectionIndex--;
@@ -140,7 +134,7 @@ export class Tank extends BaseDrawObject implements IDamagable {
                 currentDirectionIndex = directions.length - 1;
 
             this._bumber.turn(true);
-            this.tower.turn(true);
+            this.tower.turn(direction);
         }
         this._currentDirection = directions[currentDirectionIndex];
     }

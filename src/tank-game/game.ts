@@ -1,4 +1,5 @@
-import { Tank, TankDirections } from "./tank/tank";
+import { Tank } from "./tank/tank";
+import { TankDirections } from "./tank/tank-directions";
 import { TankAmunnition } from "./tank/ammunition";
 import { BaseDrawObject, MathLib, Colors, Game, ClashPhysicEvent, StrikingDistancePhysicEvent } from "./game-framework";
 import { Enemy } from "./enemies/enemy";
