@@ -1,5 +1,5 @@
 import { BaseDrawObject } from "../game-framework";
-import { TankDirections } from "../tank/tank";
+import { TankDirections } from "../tank/tank-directions";
 
 export abstract class BaseBullet extends BaseDrawObject {
     abstract damage: number;

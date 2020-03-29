@@ -4,7 +4,7 @@ import { RechargeTankTower } from "../game";
 import { Bullet } from "../bullets/bullet";
 import { BaseBullet } from "../bullets/base-bullet";
 import { TankAmunnition } from "./ammunition";
-import { TankDirections } from "./tank";
+import { TankDirections } from "./tank-directions";
 
 export class DoubleBarreledTankTower extends TankTower {
 
@@ -43,11 +43,6 @@ export class DoubleBarreledTankTower extends TankTower {
         this._drawTower(ctx, deviceRatio);
 
         ctx.resetTransform();
-    }
-
-    public turn(isLeft: boolean): void {
-        const angle = isLeft ? -90 : 90;
-        this._angle += angle;
     }
 
     public fire(ammunition: TankAmunnition, direction: TankDirections): BaseBullet[] {

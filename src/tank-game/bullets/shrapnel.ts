@@ -1,7 +1,7 @@
 import { BaseBullet } from "./base-bullet";
 import { BangAnimation } from "../animations/bang-animation";
 import { GameImage, MathLib } from "../game-framework";
-import { TankDirections } from "../tank/tank";
+import { TankDirections } from "../tank/tank-directions";
 
 export class Shrapnel extends BaseBullet {
     strikingDistance: number;

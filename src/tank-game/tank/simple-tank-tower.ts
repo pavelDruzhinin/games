@@ -3,7 +3,7 @@ import { Shrapnel } from "../bullets/shrapnel";
 import { GameImage, MathLib } from "../game-framework";
 import { RechargeTankTower } from "../game";
 import { TankAmunnition } from "./ammunition";
-import { TankDirections } from "./tank";
+import { TankDirections } from "./tank-directions";
 
 export class SimpleTankTower extends TankTower {
     deviceRatio: number;
@@ -58,11 +58,6 @@ export class SimpleTankTower extends TankTower {
         const yOffset = this.getBulletYPositionOffset(direction);
 
         return [new Shrapnel((this.positionX + xOffset), (this.positionY + yOffset), direction)];
-    }
-
-    public turn(isLeft: boolean = false): void {
-        const angle = isLeft ? -90 : 90;
-        this._angle += angle;
     }
 
     private getBulletXPositionOffset(direction: TankDirections): number {

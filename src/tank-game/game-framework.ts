@@ -1,7 +1,8 @@
 import { List } from "../common/list";
 import GameEnvironment from "./game-framework.env";
 import { BaseBullet } from './bullets/base-bullet';
-import { IDamagable, TankDirections } from "./tank/tank";
+import { IDamagable } from "./tank/tank";
+import { TankDirections } from "./tank/tank-directions";
 import Session from "./realtime-server/session";
 // import { Session } from "@heroiclabs/nakama-js";
 

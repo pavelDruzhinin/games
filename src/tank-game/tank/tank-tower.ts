@@ -1,6 +1,6 @@
 import { TankAmunnition } from "./ammunition";
 import { BaseBullet } from "../bullets/base-bullet";
-import { TankDirections } from "./tank";
+import { TankDirections } from "./tank-directions";
 
 export abstract class TankTower {
     positionX: number;
@@ -15,9 +15,26 @@ export abstract class TankTower {
 
     abstract fire(ammunition: TankAmunnition, direction: TankDirections): BaseBullet[];
 
-    abstract turn(isLeft: boolean): void;
-
-    protected setPosition(positionX: number, positionY: number) {
+    public turn(direction: TankDirections): void {
+        switch (direction) {
+            case TankDirections.Up:
+                this._angle = 0;
+                break;
+            case TankDirections.Right:
+                this._angle = 90;
+                break;
+            case TankDirections.Down:
+                this._angle = 180;
+                break;
+            case TankDirections.Left:
+                this._angle = -90;
+                break;
+            default:
+                break;
+        }
+    }
+    
+    public setPosition(positionX: number, positionY: number) {
         this.positionX = positionX;
         this.positionY = positionY;
     }
