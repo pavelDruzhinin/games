@@ -1,10 +1,12 @@
-import { BaseDrawObject, Colors } from "../game-framework";
+import { BaseDrawObject, Colors, GameStorage, Game } from "../game-framework";
 import { DoubleBarreledTankTower } from "./double-barreled-tank-tower"
 import { SimpleTankTower } from "./simple-tank-tower"
 import { SimpleTankBumber } from "./simple-tank-bumper";
 import { TankAmunnition } from "./ammunition";
 import { TankTower } from "./tank-tower";
 import { TankDirections } from "./tank-directions";
+import { GameData, GameEventType } from "../realtime-server/GameData";
+import Client from "../realtime-server/client";
 
 export class Damage extends BaseDrawObject {
     health: number;
@@ -49,9 +51,10 @@ export class Tank extends BaseDrawObject implements IDamagable {
     damage: Damage;
     deviceRatio: number;
     ammunition = new TankAmunnition();
+    userId: number;
 
     private _currentDirection: TankDirections = TankDirections.Up;
-
+    private _storage: GameStorage;
     private _bumber: SimpleTankBumber;
     private _towers: TankTower[];
 
@@ -68,7 +71,7 @@ export class Tank extends BaseDrawObject implements IDamagable {
             new DoubleBarreledTankTower(startPositionX, startPositionY)
         ];
         this.tower = this._towers[0];
-
+        this._storage = new GameStorage();
         this.damage = new Damage(startPositionX - 50, startPositionY + 60);
     }
 
@@ -89,20 +92,29 @@ export class Tank extends BaseDrawObject implements IDamagable {
             return;
         }
 
+        let data = {};
+
         switch (direction) {
             case TankDirections.Up:
                 this.positionY -= this.speed * this.deviceRatio;
+                data = { up: this.speed * this.deviceRatio };
                 break;
             case TankDirections.Down:
                 this.positionY += this.speed * this.deviceRatio;
+                data = { down: this.speed * this.deviceRatio };
                 break;
             case TankDirections.Right:
                 this.positionX += this.speed * this.deviceRatio;
+                data = { right: this.speed * this.deviceRatio };
                 break;
             case TankDirections.Left:
                 this.positionX -= this.speed * this.deviceRatio;
+                data = { left: this.speed * this.deviceRatio };
                 break;
         }
+
+        const client = Client.instance;
+        client.sendGameData(new GameData(this._storage.userId, GameEventType.ChangePosition, data));
     }
 
     _turn(direction: TankDirections) {

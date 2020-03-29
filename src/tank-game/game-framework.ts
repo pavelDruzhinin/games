@@ -13,6 +13,14 @@ export class GameStorage {
         this._ls = localStorage;
     }
 
+    private static _instance: GameStorage;
+    static get instance(): GameStorage {
+        if (this._instance == null)
+            this._instance = new GameStorage();
+
+        return this._instance;
+    }
+
     get userId() {
         return parseInt(this._ls.getItem('userId'));
     }
@@ -312,7 +320,7 @@ export class Scene {
 
 export class Game {
     scene: Scene;
-    private _interval: number;
+    private _interval: NodeJS.Timeout;
 
     constructor(canvasId: string, width: number, height: number) {
         this.scene = new Scene(canvasId, width, height);
@@ -333,6 +341,8 @@ export class Game {
 
             const keyboardEvent = keyboardEvents.get(event.code);
             keyboardEvent();
+            event.preventDefault();
+            event.stopPropagation();
         });
     }
 

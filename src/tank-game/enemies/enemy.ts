@@ -1,6 +1,7 @@
 import { BaseDrawObject, BaseDrawObjectPart, MathLib, GameImage } from "../game-framework";
 import { Bullet } from "../bullets/bullet";
 import { Damage, IDamagable } from "../tank/tank";
+import { TankDirections } from "../tank/tank-directions";
 
 export class Enemy extends BaseDrawObject implements IDamagable {
     positionX: number;
@@ -103,7 +104,7 @@ class EnemyGun extends BaseDrawObjectPart {
     }
 
     fire() {
-        return [new Bullet(this.positionX, this.positionY)];
+        return [new Bullet(this.positionX, this.positionY, TankDirections.Up)];
     }
 }
 

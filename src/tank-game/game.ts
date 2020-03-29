@@ -1,13 +1,14 @@
 import { Tank } from "./tank/tank";
 import { TankDirections } from "./tank/tank-directions";
 import { TankAmunnition } from "./tank/ammunition";
-import { BaseDrawObject, MathLib, Colors, Game, ClashPhysicEvent, StrikingDistancePhysicEvent } from "./game-framework";
+import { BaseDrawObject, MathLib, Colors, Game, ClashPhysicEvent, StrikingDistancePhysicEvent, GameStorage } from "./game-framework";
 import { Enemy } from "./enemies/enemy";
 // import NakamaClient from "./realtime-server/nakamaClient";
 import { Shrapnel } from "./bullets/shrapnel";
 import { List } from "../common/list";
 import Client from "./realtime-server/client";
 import MatchesComponent from "./components/MatchesComponent";
+import { GameEventType, GameData } from "./realtime-server/GameData";
 
 export class RechargeTankTower {
     startRifflePosition = 0;
@@ -103,6 +104,8 @@ class TankGame {
     tankPanelAmmunition: TankPanelAmmunition;
     game: Game;
     matchId: string;
+    private _enemies: List<Tank> = new List<Tank>();
+
     constructor(public enemyCount: number, public enemySpeedLevel: number) {
     }
 
@@ -113,7 +116,7 @@ class TankGame {
         var game = new Game("scene", this.sceneWidth, this.sceneHeight);
         var tank = new Tank(game.scene.width / 2, game.scene.height - 50 * game.scene.devicePixelRatio, 10);
 
-        var startTankAmmunition = new TankAmunnition();
+        let startTankAmmunition = new TankAmunnition();
         startTankAmmunition.bullets = 20;
         startTankAmmunition.shrapnels = 30;
 
@@ -122,7 +125,7 @@ class TankGame {
         this.tankPanelAmmunition = new TankPanelAmmunition(tank.ammunition);
 
         // var ghosts = this.generateGhosts(this._enemyCount, this._enemySpeedLevel, game.scene.width);
-        const enemies = this.generateEnemies(this.enemyCount, this.enemySpeedLevel, game.scene.width);
+        //const enemies = this.generateEnemies(this.enemyCount, this.enemySpeedLevel, game.scene.width);
 
         const keyboardsEvents = new Map<string, Function>([
             ['ArrowUp', () => tank.move(TankDirections.Up)],
@@ -133,10 +136,12 @@ class TankGame {
             ['KeyC', () => tank.changeTower()]
         ]);
 
-        game.scene.addDrawObjects(enemies);
+        game.scene.addDrawObjects(this._enemies);
         game.scene.addDrawObject(tank);
         game.registerKeyBoardEvents(keyboardsEvents);
         game.run();
+
+        let selfEnemies = this._enemies;
 
         function tankFire() {
             var bullets = tank.fire();
@@ -146,7 +151,7 @@ class TankGame {
                 const shrapnel: Shrapnel = <Shrapnel>bullet;
                 const animation = typeof shrapnel.createStrikeAnimation == 'function' ? shrapnel.createStrikeAnimation() : null;
 
-                let event = new ClashPhysicEvent(bullet, enemies, animation);
+                let event = new ClashPhysicEvent(bullet, selfEnemies, animation);
                 game.scene.addPhysicEvent(event);
 
                 if (shrapnel.strikingDistance && animation) {
@@ -187,12 +192,39 @@ class TankGame {
         }
         return enemies;
     }
+
+    addEnemy(enemyId: number) {
+        let enemyTank = new Tank(this.game.scene.width / 2, 50 * this.game.scene.devicePixelRatio, 10);
+        enemyTank.userId = enemyId;
+        this._enemies.push(enemyTank);
+
+        this.game.scene.addDrawObject(enemyTank);
+    }
 }
 
 var tankGame = new TankGame(1, 1);
-var matches = new MatchesComponent('matches', []);
-var client = new Client();
+function joinMatch() {
+    tankGame.restart();
+    window.focus();
+
+    // Remove focus from any focused element
+    if (document.activeElement) {
+        (<HTMLElement>document.activeElement).blur();
+    }
+};
+
+var matches = new MatchesComponent('matches', [], joinMatch);
+const client = Client.instance;
+
 client.addUser();
+
+client.addSocketListener(GameEventType.JoinPlayer, (gameData: GameData) => {
+    if (gameData.userId == GameStorage.instance.userId)
+        return;
+
+    tankGame.addEnemy(gameData.userId);
+    console.log('addEnemy');
+});
 
 client.getMatches().then((response: any) => {
     matches.update(response.data);

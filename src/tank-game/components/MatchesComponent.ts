@@ -3,12 +3,12 @@ import { MatchComponent, Match } from "./MatchComponent";
 
 class MatchesComponent extends BaseComponent {
     _components: MatchComponent[];
-    constructor(private _elementId: string, private _matches: Match[]) {
+    constructor(private _elementId: string, private _matches: Match[], private _joinMatch: () => void) {
         super();
     }
 
     render() {
-        this._components = this._matches.map(x => new MatchComponent(x));
+        this._components = this._matches.map(x => new MatchComponent(x, this._joinMatch));
 
         document.getElementById(this._elementId).innerHTML = this._components.map(x => x.render()).join('');
         this._components.forEach(x => x.registerEvents());

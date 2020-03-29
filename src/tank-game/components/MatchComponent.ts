@@ -1,6 +1,7 @@
 import { BaseComponent } from "./BaseComponent";
 import { GameStorage } from "../game-framework";
 import Client from "../realtime-server/client";
+import { GameData, GameEventType } from "../realtime-server/GameData";
 
 class Match {
     id: number
@@ -12,11 +13,11 @@ class MatchComponent extends BaseComponent {
     _storage: GameStorage;
     _client: Client;
 
-    constructor(match: Match) {
+    constructor(match: Match, private _joinMatch: () => void) {
         super();
         this._match = match;
         this._storage = new GameStorage();
-        this._client = new Client();
+        this._client = Client.instance;
     }
 
     render() {
@@ -41,6 +42,8 @@ class MatchComponent extends BaseComponent {
                             const previousButtonId = `join_to_match_${matchId}`;
                             console.log(previousButtonId);
                             document.getElementById(previousButtonId).innerText = 'Join';
+                            this._client.sendGameData(new GameData(this._storage.userId, GameEventType.UnJoinPlayer));
+                            this._joinMatch();
                         });
                 }
 
@@ -49,15 +52,15 @@ class MatchComponent extends BaseComponent {
                     return;
                 }
 
-                this._client.connect(this._match.id, this._storage.userId)
-                    .then((response: any) => {
-                        console.log(response);
+                this._client.connect(this._match.id, this._storage.userId, () => {
+                    this._client.sendGameData(new GameData(this._storage.userId, GameEventType.JoinPlayer, { position: 'start' }));
+                    this._joinMatch();
+                }).then((response: any) => {
+                    console.log(response);
 
-                        let buttonText = document.getElementById(buttonId).innerText;
-                        let isJoin = buttonText === 'Unjoin';
-                        document.getElementById(buttonId).innerText = !isJoin ? 'Unjoin' : 'Join';
-                        this._storage.matchId = this._match.id;
-                    });
+                    document.getElementById(buttonId).innerText = 'Unjoin';
+                    this._storage.matchId = this._match.id;
+                });
             });
     }
 }

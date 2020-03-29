@@ -3,6 +3,10 @@ const express = require('express'),
     cors = require('cors'),
     bodyParser = require('body-parser');
 
+const WebSocket = require('ws');
+
+
+
 var corsOptions = {
     origin: 'http://localhost:1234',
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -96,6 +100,18 @@ app.post('/api/matches', async (req, res) => {
 const port = 3000;
 
 const server = require('http').createServer(app);
+
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', function connection(ws) {
+    ws.on('message', function incoming(data) {
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(data);
+            }
+        });
+    });
+});
 
 console.log(`proxy server run on http://localhost:${port}`);
 server.listen(port);
