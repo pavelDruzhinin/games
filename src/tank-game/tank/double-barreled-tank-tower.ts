@@ -1,11 +1,15 @@
 import { TankTower } from "./tank-tower";
-import { GameImage } from "../game-framework";
+import { GameImage, MathLib } from "../game-framework";
 import { RechargeTankTower } from "../game";
 import { Bullet } from "../bullets/bullet";
+import { BaseBullet } from "../bullets/base-bullet";
+import { TankAmunnition } from "./ammunition";
+import { TankDirections } from "./tank";
 
 export class DoubleBarreledTankTower extends TankTower {
-    rifle1Position: number;
-    rifle2Position: number;
+
+    readonly rifle1Position: number;
+    readonly rifle2Position: number;
     deviceRatio: number;
 
     private _towerImage: GameImage;
@@ -26,42 +30,98 @@ export class DoubleBarreledTankTower extends TankTower {
         this._correctPositionY = -28;
     }
 
-    draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
+    public draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         this._recharge.process();
         this.deviceRatio = deviceRatio;
+
+        ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY);
+
+        ctx.rotate(MathLib.getAngleRadians(this._angle));
 
         this._drawRifle(ctx, this.rifle1Position, deviceRatio);
         this._drawRifle(ctx, this.rifle2Position, deviceRatio);
         this._drawTower(ctx, deviceRatio);
+
+        ctx.resetTransform();
+    }
+
+    public turn(isLeft: boolean): void {
+        const angle = isLeft ? -90 : 90;
+        this._angle += angle;
+    }
+
+    public fire(ammunition: TankAmunnition, direction: TankDirections): BaseBullet[] {
+        if (this._recharge.inProccess)
+            return [];
+
+        if (!ammunition.bullets)
+            return;
+
+        this._recharge.start(this.deviceRatio);
+
+        const xOffset = this.getBulletXPositionOffset(direction);
+        const yOffset = this.getBulletYPositionOffset(direction);
+
+        let x1 = this.positionX + xOffset;
+        let x2 = this.positionX + xOffset;
+        let y1 = this.positionY + yOffset;
+        let y2 = this.positionY + yOffset;
+
+        switch (direction) {
+            case TankDirections.Down:
+            case TankDirections.Up:
+                x1 -= this.rifle1Position;
+                x2 -= this.rifle2Position;
+                break;
+
+            case TankDirections.Right:
+            case TankDirections.Left:
+                y1 -= this.rifle1Position;
+                y2 -= this.rifle2Position;
+                break;
+        }
+
+        return [
+            new Bullet(x1, y1, direction),
+            new Bullet(x2, y2, direction)
+        ];
     }
 
     private _drawTower(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         ctx.drawImage(this._towerImage,
-            this.positionX - 14 * deviceRatio,
-            this.positionY - 15 * deviceRatio,
+            (-14 * deviceRatio),
+            (-15 * deviceRatio),
             30 * deviceRatio,
             30 * deviceRatio);
     }
 
     private _drawRifle(ctx: CanvasRenderingContext2D, x: number, deviceRatio: number) {
         ctx.drawImage(this._towerRiffleImage,
-            this.positionX - x * deviceRatio,
-            this.positionY + this._recharge.startRifflePosition + this._correctPositionY * deviceRatio,
+            x * deviceRatio,
+            this._recharge.startRifflePosition + this._correctPositionY * deviceRatio,
             3 * deviceRatio,
             15 * deviceRatio);
     }
 
-    fire() {
-        if (this._recharge.inProccess)
-            return [];
+    private getBulletXPositionOffset(direction: TankDirections): number {
+        switch (direction) {
+            case TankDirections.Left:
+                return -50;
+            case TankDirections.Right:
+                return 50;
+            default:
+                return 0;
+        }
+    }
 
-        this._recharge.start(this.deviceRatio);
-
-        return [
-            new Bullet(this.positionX - this.rifle1Position * this.deviceRatio + 1 * this.deviceRatio,
-                this.positionY + this._correctPositionY * this.deviceRatio),
-            new Bullet(this.positionX - this.rifle2Position * this.deviceRatio + 1 * this.deviceRatio,
-                this.positionY + this._correctPositionY * this.deviceRatio)
-        ];
+    private getBulletYPositionOffset(direction: TankDirections): number {
+        switch (direction) {
+            case TankDirections.Up:
+                return -50;
+            case TankDirections.Down:
+                return 50;
+            default:
+                return 0;
+        }
     }
 }

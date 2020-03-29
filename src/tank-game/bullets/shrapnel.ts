@@ -17,7 +17,7 @@ export class Shrapnel extends BaseBullet {
         this.damage = 30;
     }
 
-    protected _drawBullet(ctx: CanvasRenderingContext2D, devicePixelRatio: number) {
+    protected _drawBullet(ctx: CanvasRenderingContext2D, devicePixelRatio: number): void {
         ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY);
         ctx.rotate(this.getAngel());
         ctx.drawImage(this._shrapnelImage, 0, 0, 3 * devicePixelRatio, 7 * devicePixelRatio);

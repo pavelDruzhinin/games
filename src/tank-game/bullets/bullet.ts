@@ -1,11 +1,12 @@
 import { BaseBullet } from "./base-bullet";
-import { Colors } from "../game-framework";
+import { Colors, MathLib } from "../game-framework";
+import { TankDirections } from "../tank/tank";
 
 export class Bullet extends BaseBullet {
     damage: number;
 
-    constructor(startPositionX: number, startPositionY: number) {
-        super(startPositionX, startPositionY, 3, 20);
+    constructor(startPositionX: number, startPositionY: number, direction: TankDirections) {
+        super(startPositionX, startPositionY, 3, 20, direction);
         this.damage = 10;
     }
 

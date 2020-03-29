@@ -5,6 +5,7 @@ import { TankDirections } from "./tank";
 export abstract class TankTower {
     positionX: number;
     positionY: number;
+    protected _angle: number = 0;
 
     constructor(positionX: number, positionY: number) {
         this.setPosition(positionX, positionY);
@@ -16,7 +17,7 @@ export abstract class TankTower {
 
     abstract turn(isLeft: boolean): void;
 
-    setPosition(positionX: number, positionY: number) {
+    protected setPosition(positionX: number, positionY: number) {
         this.positionX = positionX;
         this.positionY = positionY;
     }

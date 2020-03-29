@@ -11,7 +11,6 @@ export class SimpleTankTower extends TankTower {
     protected _towerImage: GameImage;
     protected _towerRiffleImage: GameImage;
     private _recharge: RechargeTankTower;
-    private _angle = 0;
 
     constructor(positionX: number, positionY: number) {
         super(positionX, positionY);
@@ -22,7 +21,7 @@ export class SimpleTankTower extends TankTower {
         this._recharge = new RechargeTankTower(6, 1);
     }
 
-    draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
+    public draw(ctx: CanvasRenderingContext2D, deviceRatio: number) {
         this._recharge.process();
 
         ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY);
@@ -33,20 +32,20 @@ export class SimpleTankTower extends TankTower {
 
         ctx.drawImage(this._towerRiffleImage,
             0,
-            (- 45 * deviceRatio + this._recharge.startRifflePosition),
+            (-45 * deviceRatio + this._recharge.startRifflePosition),
             3 * deviceRatio,
             30 * deviceRatio);
 
         ctx.drawImage(this._towerImage,
-            (- 14 * deviceRatio),
-            (- 15 * deviceRatio),
+            (-14 * deviceRatio),
+            (-15 * deviceRatio),
             30 * deviceRatio,
             30 * deviceRatio);
 
         ctx.resetTransform();
     }
 
-    fire(ammunition: TankAmunnition, direction: TankDirections) {
+    public fire(ammunition: TankAmunnition, direction: TankDirections) {
         if (this._recharge.inProccess)
             return [];
 
@@ -61,8 +60,12 @@ export class SimpleTankTower extends TankTower {
         return [new Shrapnel((this.positionX + xOffset), (this.positionY + yOffset), direction)];
     }
 
-    private getBulletXPositionOffset(direction: TankDirections) : number
-    {
+    public turn(isLeft: boolean = false): void {
+        const angle = isLeft ? -90 : 90;
+        this._angle += angle;
+    }
+
+    private getBulletXPositionOffset(direction: TankDirections): number {
         switch (direction) {
             case TankDirections.Left:
                 return -50;
@@ -73,8 +76,7 @@ export class SimpleTankTower extends TankTower {
         }
     }
 
-    private getBulletYPositionOffset(direction: TankDirections) : number
-    {
+    private getBulletYPositionOffset(direction: TankDirections): number {
         switch (direction) {
             case TankDirections.Up:
                 return -50;
@@ -83,10 +85,5 @@ export class SimpleTankTower extends TankTower {
             default:
                 return 0;
         }
-    }
-
-    turn(isLeft: boolean = false): void {
-        const angle = isLeft ? -90 : 90;
-        this._angle += angle;
     }
 }
