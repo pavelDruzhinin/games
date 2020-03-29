@@ -19,7 +19,7 @@ export default class Client {
     }
 
     addUser() {
-        if (this.gameStorage.session) {
+        if (!isNaN(this.gameStorage.userId)) {
             return;
         }
 
@@ -31,6 +31,7 @@ export default class Client {
 
         http.post('/api/users', payload).then((response: any) => {
             this.gameStorage.session = new Session(userId);
+            this.gameStorage.userId = userId;
         });
     }
 
@@ -40,5 +41,9 @@ export default class Client {
 
     connect(matchId: number, userId: number) {
         return http.post(`/api/matches/${matchId}/users/${userId}`, null);
+    }
+
+    disconnect(matchId: number, userId: number) {
+        return http.delete(`/api/matches/${matchId}/users/${userId}`, null);
     }
 }

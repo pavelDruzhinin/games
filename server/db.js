@@ -1,16 +1,17 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
 class JsonDbProvider {
-    getData(tableName) {
+    async getData(tableName) {
         const filePath = this._getFileName(tableName);
-        var data = fs.readFileSync(filePath, { encoding: 'utf-8' });
+        var data = await fs.readFile(filePath, { encoding: 'utf-8' });
+        console.log('json getData:', data);
         return JSON.parse(data);
     }
 
-    writeData(tableName, data) {
+    async writeData(tableName, data) {
         const filePath = this._getFileName(tableName);
-        fs.writeFile(filePath, JSON.stringify(data), (err) => { console.log(err); });
+        await fs.writeFile(filePath, JSON.stringify(data), (err) => { console.log(err); });
     }
 
     _getFileName(tableName) {
@@ -18,6 +19,31 @@ class JsonDbProvider {
     }
 }
 
+class MemoryDbProvider {
+    constructor() {
+        this._storage = {};
+    }
+
+    async getData(tableName) {
+        return new Promise((resolve, reject) => {
+            var data = this._storage[tableName];
+
+            if (!data)
+                resolve([]);
+
+            resolve(data);
+        });
+    }
+
+    async writeData(tableName, data) {
+        return new Promise((resolve, reject) => {
+            this._storage[tableName] = data;
+            resolve();
+        });
+    }
+}
+
 module.exports = {
-    JsonDbProvider
+    JsonDbProvider,
+    MemoryDbProvider
 }

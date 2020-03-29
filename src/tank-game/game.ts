@@ -191,6 +191,7 @@ class TankGame {
 var tankGame = new TankGame(1, 1);
 var matches = new MatchesComponent('matches', []);
 var client = new Client();
+client.addUser();
 
 client.getMatches().then((response: any) => {
     matches.update(response.data);

@@ -3,31 +3,32 @@ const db = require('./db');
 class BaseRepository {
     constructor(tableName) {
         this._tableName = tableName;
-        this._dbProvider = new db.JsonDbProvider();
+        this._dbProvider = new db.MemoryDbProvider();
     }
 
-    get() {
+    async get() {
         try {
-            const data = this._dbProvider.getData(this._tableName);
+            const data = await this._dbProvider.getData(this._tableName);
             return !data ? [] : data;
-        } catch {
+        } catch (error) {
+            console.log('data get error:', error);
             return [];
         }
     }
 
-    getById(id) {
-        return this.get().find(x => x.id == id);
+    async getById(id) {
+        return await this.get().find(x => x.id == id);
     }
 
-    getBy(predicate) {
+    async getBy(predicate) {
         if (typeof predicate != 'function')
             throw new Error(`Error: ${predicate} is not function`);
 
-        return this.get().filter(predicate);
+        return await this.get().filter(predicate);
     }
 
-    add(row) {
-        let data = this.get();
+    async add(row) {
+        let data = await this.get();
 
         if (data.some(x => x.id == row.id))
             throw new Exception(`BaseRepository: record with ${row.id} is exist`);
@@ -38,7 +39,7 @@ class BaseRepository {
 
         data.push(row);
 
-        this._dbProvider.writeData(this._tableName, data);
+        await this._dbProvider.writeData(this._tableName, data);
 
         return lastId;
     }
@@ -47,15 +48,15 @@ class BaseRepository {
         throw new Exception('NotImplemented');
     }
 
-    delete(row) {
-        let data = this.get();
+    async delete(row) {
+        let data = await this.get();
         const index = data.indexOf(row);
         if (index == -1)
             throw new Exception(`BaseRepository: record with ${row.id} is not exist`);
 
         data.splice(index, 1);
 
-        this._dbProvider.writeData(this._tableName, data);
+        await this._dbProvider.writeData(this._tableName, data);
     }
 }
 
@@ -76,18 +77,33 @@ class MatchUsersRepository extends BaseRepository {
         super('MatchUsers');
     }
 
-    connect(matchId, userId) {
-        const connectUser = { matchId: matchId, userId: userId };
-
-        let data = this.get();
+    async connect(matchId, userId) {
+        let data = await this.get();
         if (data.some(x => x.matchId == matchId && x.userId == userId))
             throw new Exception(`MatchUsersRepository: connect with matchId ${matchId} and userId ${userId} is exist`);
 
+        const connectUser = { matchId: matchId, userId: userId };
         data.push(connectUser);
 
-        this._dbProvider.writeData(this._tableName, data);
+        await this._dbProvider.writeData(this._tableName, data);
 
         return connectUser;
+    }
+
+    async disconnect(matchId, userId) {
+        let data = await this.get();
+        console.log('disconnect data:', data);
+        const rows = data.filter(x => x.matchId == matchId && x.userId == userId);
+        console.log('disconnect rows:', rows);
+        console.log('disconnect match:', matchId, userId);
+
+        if (!rows.length)
+            throw new Exception(`MatchUsersRepository: connect with matchId ${matchId} and userId ${userId} is not exist`);
+
+        const index = data.indexOf(rows[0]);
+        data.splice(index, 1);
+
+        await this._dbProvider.writeData(this._tableName, data);
     }
 }
 

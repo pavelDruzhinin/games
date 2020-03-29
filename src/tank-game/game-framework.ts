@@ -10,7 +10,6 @@ export class GameStorage {
 
     constructor() {
         this._ls = localStorage;
-        this._ls.clear();
     }
 
     get userId() {
@@ -28,12 +27,12 @@ export class GameStorage {
         this._ls.setItem('session', JSON.stringify(value));
     }
 
-    get matchId(): string {
-        return this._ls.getItem('matchId');
+    get matchId(): number {
+        return parseInt(this._ls.getItem('matchId'));
     }
 
-    set matchId(value: string) {
-        this._ls.setItem('matchId', value);
+    set matchId(value: number) {
+        this._ls.setItem('matchId', value.toString());
     }
 }
 
