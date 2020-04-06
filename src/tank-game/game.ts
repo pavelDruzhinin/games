@@ -100,6 +100,10 @@ class TankPanelAmmunition {
     }
 }
 
+class MatchState {
+    players: any;
+}
+
 class TankGame {
     tankPanelAmmunition: TankPanelAmmunition;
     game: Game;
@@ -112,9 +116,14 @@ class TankGame {
     get sceneWidth() { return 800; }
     get sceneHeight() { return window.innerHeight; }
 
-    start() {
-        var game = new Game("scene", this.sceneWidth, this.sceneHeight);
-        var tank = new Tank(game.scene.width / 2, game.scene.height - 50 * game.scene.devicePixelRatio, 10);
+    start(state?: MatchState) {
+        let game = new Game("scene", this.sceneWidth, this.sceneHeight);
+        let position = state == null ? { positionX: game.scene.width / 2, positionY: game.scene.height - 50 * game.scene.devicePixelRatio } : state.players[GameStorage.instance.userId].position;
+
+        let tank = new Tank(position.positionX, position.positionY, 10);
+
+        if (state != null)
+            tank._currentDirection = position.direction;
 
         let startTankAmmunition = new TankAmunnition();
         startTankAmmunition.bullets = 20;
@@ -135,6 +144,15 @@ class TankGame {
             ['Space', () => tankFire()],
             ['KeyC', () => tank.changeTower()]
         ]);
+
+        if (state !== null) {
+            Object.keys(state.players).forEach((key) => {
+                if (key != GameStorage.instance.userId.toString()) {
+                    const position = state.players[key].position;
+                    this._addEnemyWithoutDraw(parseInt(key), position.positionX, position.positionY, position.direction);
+                }
+            });
+        }
 
         game.scene.addDrawObjects(this._enemies);
         game.scene.addDrawObject(tank);
@@ -164,9 +182,9 @@ class TankGame {
         this.game = game;
     }
 
-    restart() {
+    restart(state?: MatchState) {
         this.game.destroy();
-        this.start();
+        this.start(state);
     }
 
     generateGhosts(enemyCount: number, enemySpeedLevel: number, sceneWidth: number) {
@@ -193,27 +211,36 @@ class TankGame {
         return enemies;
     }
 
-    addEnemy(enemyId: number) {
-        let enemyTank = new Tank(this.game.scene.width / 2, 50 * this.game.scene.devicePixelRatio, 10);
+    _addEnemyWithoutDraw(enemyId: number, startPositionX: number, startPositionY: number, direction: TankDirections) {
+        let enemyTank = new Tank(startPositionX, startPositionY, 10);
+
+        enemyTank._currentDirection = direction;
         enemyTank.userId = enemyId;
+
         this._enemies.push(enemyTank);
+        return enemyTank;
+    }
+
+    addEnemy(enemyId: number, startPositionX: number, startPositionY: number, direction: TankDirections) {
+        const enemyTank = this._addEnemyWithoutDraw(enemyId, startPositionX, startPositionY, direction);
 
         this.game.scene.addDrawObject(enemyTank);
+    }
+
+    changePositionEnemy(enemyId: number, positionX: number, positionY: number, direction: TankDirections) {
+        const enemyTanks = this._enemies.filter(x => x.userId == enemyId);
+        if (!enemyTanks || enemyTanks.length == 0)
+            return;
+
+        const enemyTank = enemyTanks[0];
+        enemyTank.positionX = positionX;
+        enemyTank.positionY = positionY;
+        enemyTank._turn(direction);
     }
 }
 
 var tankGame = new TankGame(1, 1);
-function joinMatch() {
-    tankGame.restart();
-    window.focus();
 
-    // Remove focus from any focused element
-    if (document.activeElement) {
-        (<HTMLElement>document.activeElement).blur();
-    }
-};
-
-var matches = new MatchesComponent('matches', [], joinMatch);
 const client = Client.instance;
 
 client.addUser();
@@ -222,15 +249,53 @@ client.addSocketListener(GameEventType.JoinPlayer, (gameData: GameData) => {
     if (gameData.userId == GameStorage.instance.userId)
         return;
 
-    tankGame.addEnemy(gameData.userId);
+    tankGame.addEnemy(gameData.userId, gameData.data.positionX, gameData.data.positionY, gameData.data.direction);
     console.log('addEnemy');
 });
+
+client.addSocketListener(GameEventType.ChangePosition, (gameData: GameData) => {
+    if (gameData.userId == GameStorage.instance.userId)
+        return;
+
+    tankGame.changePositionEnemy(gameData.userId, gameData.data.positionX, gameData.data.positionY, gameData.data.direction);
+    console.log('changePositionEnemy');
+});
+
+function joinMatch(matchId: number) {
+    client.getMatchState(matchId).then((response: any) => {
+        console.log('match state', matchId, response.data);
+        if (tankGame.game == null) {
+            tankGame.start(response.data);
+            client.connectToWebSocket();
+        } else {
+            tankGame.restart(response.data);
+        }
+
+        window.focus();
+
+        // Remove focus from any focused element
+        if (document.activeElement) {
+            (<HTMLElement>document.activeElement).blur();
+        }
+    });
+
+    if (tankGame.game == null)
+        return null;
+
+    return { direction: TankDirections.Down, positionX: tankGame.game.scene.width / 2, positionY: 50 * tankGame.game.scene.devicePixelRatio };
+};
+
+var matches = new MatchesComponent('matches', [], joinMatch);
 
 client.getMatches().then((response: any) => {
     matches.update(response.data);
 });
 
-tankGame.start();
+if (GameStorage.instance.matchId > 0) {
+    joinMatch(GameStorage.instance.matchId);
+} else {
+    tankGame.start();
+}
 
 document.getElementById('startNewGame')
     .addEventListener('click', function (event) {

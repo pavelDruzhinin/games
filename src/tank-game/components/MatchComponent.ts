@@ -13,7 +13,7 @@ class MatchComponent extends BaseComponent {
     _storage: GameStorage;
     _client: Client;
 
-    constructor(match: Match, private _joinMatch: () => void) {
+    constructor(match: Match, private _joinMatch: (matchId: number) => void) {
         super();
         this._match = match;
         this._storage = new GameStorage();
@@ -43,7 +43,7 @@ class MatchComponent extends BaseComponent {
                             console.log(previousButtonId);
                             document.getElementById(previousButtonId).innerText = 'Join';
                             this._client.sendGameData(new GameData(this._storage.userId, GameEventType.UnJoinPlayer));
-                            this._joinMatch();
+                            this._joinMatch(matchId);
                         });
                 }
 
@@ -53,8 +53,9 @@ class MatchComponent extends BaseComponent {
                 }
 
                 this._client.connect(this._match.id, this._storage.userId, () => {
-                    this._client.sendGameData(new GameData(this._storage.userId, GameEventType.JoinPlayer, { position: 'start' }));
-                    this._joinMatch();
+                    const position = this._joinMatch(this._match.id);
+                    this._client.sendGameData(new GameData(this._storage.userId, GameEventType.JoinPlayer, position));
+
                 }).then((response: any) => {
                     console.log(response);
 

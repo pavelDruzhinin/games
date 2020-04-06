@@ -3,7 +3,7 @@ import { MatchComponent, Match } from "./MatchComponent";
 
 class MatchesComponent extends BaseComponent {
     _components: MatchComponent[];
-    constructor(private _elementId: string, private _matches: Match[], private _joinMatch: () => void) {
+    constructor(private _elementId: string, private _matches: Match[], private _joinMatch: (matchId: number) => void) {
         super();
     }
 

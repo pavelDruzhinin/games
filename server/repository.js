@@ -24,7 +24,9 @@ class BaseRepository {
         if (typeof predicate != 'function')
             throw new Error(`Error: ${predicate} is not function`);
 
-        return await this.get().filter(predicate);
+        const data = await this.get();
+
+        return data.filter(predicate);
     }
 
     async add(row) {
@@ -44,8 +46,15 @@ class BaseRepository {
         return lastId;
     }
 
-    update(row) {
-        throw new Exception('NotImplemented');
+    async update(row) {
+        let data = await this.get();
+        const index = data.indexOf(row);
+        if (index == -1)
+            throw new Exception(`BaseRepository: record with ${row.id} is not exist`);
+
+        data[index] = row;
+
+        await this._dbProvider.writeData(this._tableName, data);
     }
 
     async delete(row) {
@@ -107,9 +116,20 @@ class MatchUsersRepository extends BaseRepository {
     }
 }
 
+class MatchStatesRepository extends BaseRepository {
+    constructor() {
+        super('MatchStates');
+    }
+
+    async getByMatchId(matchId) {
+        return this.getBy(x => x.matchId == matchId);
+    }
+}
+
 module.exports = {
     BaseRepository,
     UsersRepository,
     MatchesRepository,
-    MatchUsersRepository
+    MatchUsersRepository,
+    MatchStatesRepository
 }

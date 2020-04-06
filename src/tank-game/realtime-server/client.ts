@@ -52,36 +52,45 @@ export default class Client {
         return http.get(`/api/matches/${matchId}`);
     }
 
-    connect(matchId: number, userId: number, afterJoinMatch: () => void) {
+    getMatchState(matchId: number) {
+        return http.get(`/api/matches/${matchId}/states`);
+    }
+
+    connect(matchId: number, userId: number, afterJoinMatch?: () => void) {
         return http.post(`/api/matches/${matchId}/users/${userId}`, null).then((response: any) => {
-            this._webSocket = new WebSocket("ws://localhost:3000");
-            console.log('connect');
-            this._webSocket.onopen = (ev: Event) => {
-                console.log('connected');
-                afterJoinMatch();
-            };
-
-            this._webSocket.onclose = (ev: Event) => {
-                console.log('disconnected');
-            };
-
-            this._webSocket.onmessage = (messageEvent) => {
-                console.log(messageEvent);
-                const gameData = JSON.parse(messageEvent.data) as GameData;
-                const listeners = this._socketListeners.get(gameData.type);
-                console.log(listeners);
-                if (!listeners)
-                    return;
-
-                for (const listener of listeners) {
-                    listener(gameData);
-                }
-            };
-
-            this._webSocket.onerror = (error) => {
-                console.log(error);
-            }
+            this.connectToWebSocket(afterJoinMatch);
         });
+    }
+
+    connectToWebSocket(afterJoinMatch?: () => void) {
+        this._webSocket = new WebSocket("ws://localhost:3000");
+        console.log('connect');
+        this._webSocket.onopen = (ev: Event) => {
+            console.log('connected');
+            if (afterJoinMatch != null)
+                afterJoinMatch();
+        };
+
+        this._webSocket.onclose = (ev: Event) => {
+            console.log('disconnected');
+        };
+
+        this._webSocket.onmessage = (messageEvent) => {
+            console.log(messageEvent);
+            const gameData = JSON.parse(messageEvent.data) as GameData;
+            const listeners = this._socketListeners.get(gameData.type);
+            console.log(listeners);
+            if (!listeners)
+                return;
+
+            for (const listener of listeners) {
+                listener(gameData);
+            }
+        };
+
+        this._webSocket.onerror = (error) => {
+            console.log(error);
+        }
     }
 
     addSocketListener(eventType: GameEventType, listener: SocketListener) {
