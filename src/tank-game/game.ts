@@ -145,7 +145,7 @@ class TankGame {
             ['KeyC', () => tank.changeTower()]
         ]);
 
-        if (state !== null) {
+        if (!!state && !!state.players) {
             Object.keys(state.players).forEach((key) => {
                 if (key != GameStorage.instance.userId.toString()) {
                     const position = state.players[key].position;
