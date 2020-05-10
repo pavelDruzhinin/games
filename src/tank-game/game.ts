@@ -319,6 +319,9 @@ document.getElementById('add-match')
     .addEventListener('click', (event) => {
         const matchName = getValueFromInput('match-name');
 
+        if(matchName === null || matchName.match(/^ *$/) !== null)
+            return;
+
         client.addMatch(matchName).then((response: any) => {
             matches.add(response.data);
         });
