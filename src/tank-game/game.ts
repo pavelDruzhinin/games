@@ -227,6 +227,12 @@ class TankGame {
         this.game.scene.addDrawObject(enemyTank);
     }
 
+    dropEnemy(enemyId: number) {
+        let tank = this._enemies.find(x => x.userId == enemyId);
+        this._enemies.remove(tank);
+        this.game.scene.removeDrawObject(tank);
+    }
+
     changePositionEnemy(enemyId: number, positionX: number, positionY: number, direction: TankDirections) {
         const enemyTanks = this._enemies.filter(x => x.userId == enemyId);
         if (!enemyTanks || enemyTanks.length == 0)
@@ -251,6 +257,14 @@ client.addSocketListener(GameEventType.JoinPlayer, (gameData: GameData) => {
 
     tankGame.addEnemy(gameData.userId, gameData.data.positionX, gameData.data.positionY, gameData.data.direction);
     console.log('addEnemy');
+});
+
+client.addSocketListener(GameEventType.UnJoinPlayer, (gameData: GameData) => {
+    if (gameData.userId == GameStorage.instance.userId)
+        return;
+        
+    tankGame.dropEnemy(gameData.userId);
+    console.log('dropEnemy');
 });
 
 client.addSocketListener(GameEventType.ChangePosition, (gameData: GameData) => {
