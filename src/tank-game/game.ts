@@ -282,7 +282,14 @@ function joinMatch(matchId: number) {
     if (tankGame.game == null)
         return null;
 
-    return { direction: TankDirections.Down, positionX: tankGame.game.scene.width / 2, positionY: 50 * tankGame.game.scene.devicePixelRatio };
+    const randomPositionX = Math.random() * (tankGame.game.scene.width - 50) * tankGame.game.scene.devicePixelRatio; 
+    const randomPositionY = Math.random() * (tankGame.game.scene.height - 50) * tankGame.game.scene.devicePixelRatio;
+
+    return { 
+        direction: TankDirections.Down, 
+        positionX: randomPositionX, 
+        positionY: randomPositionY 
+    };
 };
 
 var matches = new MatchesComponent('matches', [], joinMatch);
