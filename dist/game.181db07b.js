@@ -273,33 +273,37 @@ var GameStorage = /*#__PURE__*/function () {
     _classCallCheck(this, GameStorage);
 
     this._ls = localStorage;
-
-    this._ls.clear();
   }
 
   _createClass(GameStorage, [{
     key: "userId",
     get: function get() {
-      return this._ls.getItem('userId');
+      return parseInt(this._ls.getItem("userId"));
     },
     set: function set(value) {
-      this._ls.setItem('userId', value);
+      this._ls.setItem("userId", value.toString());
     }
   }, {
     key: "session",
     get: function get() {
-      return JSON.parse(this._ls.getItem('session'));
+      return JSON.parse(this._ls.getItem("session"));
     },
     set: function set(value) {
-      this._ls.setItem('session', JSON.stringify(value));
+      this._ls.setItem("session", JSON.stringify(value));
     }
   }, {
     key: "matchId",
     get: function get() {
-      return this._ls.getItem('matchId');
+      return parseInt(this._ls.getItem("matchId"));
     },
     set: function set(value) {
-      this._ls.setItem('matchId', value);
+      this._ls.setItem("matchId", value.toString());
+    }
+  }], [{
+    key: "instance",
+    get: function get() {
+      if (this._instance == null) this._instance = new GameStorage();
+      return this._instance;
     }
   }]);
 
@@ -361,12 +365,12 @@ var Colors = /*#__PURE__*/function () {
 
 exports.Colors = Colors;
 Colors.black = "#000000";
-Colors.green = '#66ff66';
-Colors.orange = '#ff6600';
-Colors.purple = '#ff0066';
+Colors.green = "#66ff66";
+Colors.orange = "#ff6600";
+Colors.purple = "#ff0066";
 Colors.blue = "#3366ff";
 Colors.red = "#ff1a1a";
-Colors.violet = '#6666ff';
+Colors.violet = "#6666ff";
 
 var ClashPhysicEvent = /*#__PURE__*/function () {
   function ClashPhysicEvent(fromObject, toObjects, animation) {
@@ -385,8 +389,8 @@ var ClashPhysicEvent = /*#__PURE__*/function () {
         return;
       }
 
-      var fromWidth = this.fromObject.width / 2 * scene.devicePixelRatio;
-      var fromHeight = this.fromObject.height / 2 * scene.devicePixelRatio;
+      var fromWidth = this.fromObject.width * scene.devicePixelRatio;
+      var fromHeight = this.fromObject.height * scene.devicePixelRatio;
       var fromPositionX = this.fromObject.positionX;
       var fromPositionY = this.fromObject.positionY;
       var _iteratorNormalCompletion = true;
@@ -396,12 +400,12 @@ var ClashPhysicEvent = /*#__PURE__*/function () {
       try {
         for (var _iterator = this.toObjects[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var toObject = _step.value;
-          var toWidth = toObject.width / 2 * scene.devicePixelRatio;
-          var toHeight = toObject.height / 2 * scene.devicePixelRatio;
+          var toWidth = toObject.width * scene.devicePixelRatio;
+          var toHeight = toObject.height * scene.devicePixelRatio;
           var toPositionX = toObject.positionX;
           var toPositionY = toObject.positionY;
 
-          if (fromWidth + fromPositionY >= toPositionY - toWidth && fromPositionY - fromWidth <= toPositionY + toWidth && fromPositionX - fromHeight <= toHeight + toPositionX && fromPositionX + fromHeight >= toPositionX - toHeight) {
+          if ((fromPositionY + fromHeight >= toPositionY - toHeight || fromPositionY + fromWidth >= toPositionY - toWidth) && (fromPositionY - fromHeight <= toPositionY + toHeight || fromPositionY - fromWidth <= toPositionY + toWidth) && (fromPositionX - fromHeight <= toPositionX + toHeight || fromPositionX - fromWidth <= toPositionX + toWidth) && (fromPositionX + fromHeight >= toPositionX - toHeight || fromPositionX + fromWidth >= toPositionX - toWidth)) {
             this._isCancelled = true;
             scene.removeDrawObject(this.fromObject);
             var damageObject = toObject;
@@ -477,20 +481,9 @@ var StrikingDistancePhysicEvent = /*#__PURE__*/function () {
 
 exports.StrikingDistancePhysicEvent = StrikingDistancePhysicEvent;
 
-var BaseDrawObject = /*#__PURE__*/function () {
-  function BaseDrawObject() {
-    _classCallCheck(this, BaseDrawObject);
-  }
-
-  _createClass(BaseDrawObject, [{
-    key: "toString",
-    value: function toString() {
-      return "DrawObject";
-    }
-  }]);
-
-  return BaseDrawObject;
-}();
+var BaseDrawObject = function BaseDrawObject() {
+  _classCallCheck(this, BaseDrawObject);
+};
 
 exports.BaseDrawObject = BaseDrawObject;
 
@@ -561,6 +554,7 @@ var Scene = /*#__PURE__*/function () {
   function Scene(canvasId, width, height) {
     _classCallCheck(this, Scene);
 
+    this._randomDrawObjects = new list_1.List();
     this._drawObjects = new list_1.List();
     this._events = new list_1.List();
     this._animations = new list_1.List();
@@ -568,34 +562,25 @@ var Scene = /*#__PURE__*/function () {
     height -= 20;
     scene.height = height * this.devicePixelRatio;
     scene.width = width * this.devicePixelRatio;
-    scene.style.width = width + 'px';
-    scene.style.height = height + 'px';
-    this._ctx = scene.getContext('2d');
+    scene.style.width = width + "px";
+    scene.style.height = height + "px";
+    this._ctx = scene.getContext("2d");
     this.width = scene.width;
     this.height = scene.height;
   }
 
   _createClass(Scene, [{
-    key: "addDrawObject",
-    value: function addDrawObject(drawObject) {
-      if (!drawObject.draw) {
-        return;
-      }
-
-      this._drawObjects.push(drawObject);
-    }
-  }, {
-    key: "addDrawObjects",
-    value: function addDrawObjects(drawObjects) {
-      if (!drawObjects.push) return;
+    key: "addRandomDrawObjects",
+    value: function addRandomDrawObjects(randomDrawObjects) {
       var _iteratorNormalCompletion2 = true;
       var _didIteratorError2 = false;
       var _iteratorError2 = undefined;
 
       try {
-        for (var _iterator2 = drawObjects[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var drawObject = _step2.value;
-          this.addDrawObject(drawObject);
+        for (var _iterator2 = randomDrawObjects[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var randomDrawObject = _step2.value;
+
+          this._randomDrawObjects.push(randomDrawObject);
         }
       } catch (err) {
         _didIteratorError2 = true;
@@ -608,6 +593,43 @@ var Scene = /*#__PURE__*/function () {
         } finally {
           if (_didIteratorError2) {
             throw _iteratorError2;
+          }
+        }
+      }
+    }
+  }, {
+    key: "addDrawObject",
+    value: function addDrawObject(drawObject) {
+      if (!drawObject.draw) {
+        return;
+      }
+
+      this._drawObjects.push(drawObject);
+    }
+  }, {
+    key: "addDrawObjects",
+    value: function addDrawObjects(drawObjects) {
+      if (!drawObjects.push) return;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = drawObjects[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var drawObject = _step3.value;
+          this.addDrawObject(drawObject);
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3.return != null) {
+            _iterator3.return();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
           }
         }
       }
@@ -648,38 +670,14 @@ var Scene = /*#__PURE__*/function () {
     key: "update",
     value: function update() {
       this.clear();
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
-
-      try {
-        for (var _iterator3 = this._drawObjects[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var drawObject = _step3.value;
-          drawObject.draw(this._ctx, this.devicePixelRatio);
-        }
-      } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3.return != null) {
-            _iterator3.return();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
-      }
-
       var _iteratorNormalCompletion4 = true;
       var _didIteratorError4 = false;
       var _iteratorError4 = undefined;
 
       try {
-        for (var _iterator4 = this._events[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-          var event = _step4.value;
-          event.fire(this);
+        for (var _iterator4 = this._drawObjects[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var drawObject = _step4.value;
+          drawObject.draw(this._ctx, this.devicePixelRatio);
         }
       } catch (err) {
         _didIteratorError4 = true;
@@ -701,9 +699,9 @@ var Scene = /*#__PURE__*/function () {
       var _iteratorError5 = undefined;
 
       try {
-        for (var _iterator5 = this._animations[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-          var animation = _step5.value;
-          animation.animate(this._ctx, this);
+        for (var _iterator5 = this._events[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var event = _step5.value;
+          event.fire(this);
         }
       } catch (err) {
         _didIteratorError5 = true;
@@ -719,6 +717,30 @@ var Scene = /*#__PURE__*/function () {
           }
         }
       }
+
+      var _iteratorNormalCompletion6 = true;
+      var _didIteratorError6 = false;
+      var _iteratorError6 = undefined;
+
+      try {
+        for (var _iterator6 = this._animations[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+          var animation = _step6.value;
+          animation.animate(this._ctx, this);
+        }
+      } catch (err) {
+        _didIteratorError6 = true;
+        _iteratorError6 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion6 && _iterator6.return != null) {
+            _iterator6.return();
+          }
+        } finally {
+          if (_didIteratorError6) {
+            throw _iteratorError6;
+          }
+        }
+      }
     }
   }, {
     key: "destroy",
@@ -730,7 +752,7 @@ var Scene = /*#__PURE__*/function () {
   }, {
     key: "devicePixelRatio",
     get: function get() {
-      return 'devicePixelRatio' in window && window.devicePixelRatio > 1 ? window.devicePixelRatio : 1;
+      return "devicePixelRatio" in window && window.devicePixelRatio > 1 ? window.devicePixelRatio : 1;
     }
   }]);
 
@@ -759,16 +781,12 @@ var Game = /*#__PURE__*/function () {
   }, {
     key: "registerKeyBoardEvents",
     value: function registerKeyBoardEvents(keyboardEvents) {
-      document.addEventListener('keydown', function (event) {
-        if (!keyboardEvents.hasOwnProperty(event.code)) return;
-        var keyboardEvent = keyboardEvents[event.code];
-
-        if (typeof keyboardEvent != 'function') {
-          console.warn("Event for key ".concat(event.code, " is not a function"));
-          return;
-        }
-
+      document.addEventListener("keydown", function (event) {
+        if (!keyboardEvents.has(event.code)) return;
+        var keyboardEvent = keyboardEvents.get(event.code);
         keyboardEvent();
+        event.preventDefault();
+        event.stopPropagation();
       });
     }
   }, {
@@ -819,7 +837,21 @@ var GameImage = /*#__PURE__*/function (_Image) {
 }( /*#__PURE__*/_wrapNativeSuper(Image));
 
 exports.GameImage = GameImage;
-},{"../common/list":"src/common/list.ts","./game-framework.env":"src/tank-game/game-framework.env.ts"}],"src/tank-game/tank/tank-tower.ts":[function(require,module,exports) {
+},{"../common/list":"src/common/list.ts","./game-framework.env":"src/tank-game/game-framework.env.ts"}],"src/tank-game/tank/tank-directions.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var TankDirections;
+
+(function (TankDirections) {
+  TankDirections[TankDirections["Up"] = 0] = "Up";
+  TankDirections[TankDirections["Down"] = 1] = "Down";
+  TankDirections[TankDirections["Right"] = 2] = "Right";
+  TankDirections[TankDirections["Left"] = 3] = "Left";
+})(TankDirections = exports.TankDirections || (exports.TankDirections = {}));
+},{}],"src/tank-game/tank/tank-tower.ts":[function(require,module,exports) {
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -832,14 +864,41 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var tank_directions_1 = require("./tank-directions");
+
 var TankTower = /*#__PURE__*/function () {
   function TankTower(positionX, positionY) {
     _classCallCheck(this, TankTower);
 
+    this._angle = 0;
     this.setPosition(positionX, positionY);
   }
 
   _createClass(TankTower, [{
+    key: "turn",
+    value: function turn(direction) {
+      switch (direction) {
+        case tank_directions_1.TankDirections.Up:
+          this._angle = 0;
+          break;
+
+        case tank_directions_1.TankDirections.Right:
+          this._angle = 90;
+          break;
+
+        case tank_directions_1.TankDirections.Down:
+          this._angle = 180;
+          break;
+
+        case tank_directions_1.TankDirections.Left:
+          this._angle = -90;
+          break;
+
+        default:
+          break;
+      }
+    }
+  }, {
     key: "setPosition",
     value: function setPosition(positionX, positionY) {
       this.positionX = positionX;
@@ -851,7 +910,7 @@ var TankTower = /*#__PURE__*/function () {
 }();
 
 exports.TankTower = TankTower;
-},{}],"src/tank-game/bullets/base-bullet.ts":[function(require,module,exports) {
+},{"./tank-directions":"src/tank-game/tank/tank-directions.ts"}],"src/tank-game/bullets/base-bullet.ts":[function(require,module,exports) {
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -878,10 +937,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var game_framework_1 = require("../game-framework");
 
+var tank_directions_1 = require("../tank/tank-directions");
+
 var BaseBullet = /*#__PURE__*/function (_game_framework_1$Bas) {
   _inherits(BaseBullet, _game_framework_1$Bas);
 
-  function BaseBullet(positionX, positionY, radius, speed) {
+  function BaseBullet(positionX, positionY, radius, speed, direction) {
     var _this;
 
     _classCallCheck(this, BaseBullet);
@@ -891,6 +952,7 @@ var BaseBullet = /*#__PURE__*/function (_game_framework_1$Bas) {
     _this.positionY = positionY;
     _this._radius = radius;
     _this._speed = speed;
+    _this._direction = direction;
     return _this;
   }
 
@@ -904,7 +966,23 @@ var BaseBullet = /*#__PURE__*/function (_game_framework_1$Bas) {
   }, {
     key: "move",
     value: function move(deviceRatio) {
-      this.positionY -= this._speed * deviceRatio;
+      switch (this._direction) {
+        case tank_directions_1.TankDirections.Up:
+          this.positionY -= this._speed * deviceRatio;
+          break;
+
+        case tank_directions_1.TankDirections.Down:
+          this.positionY += this._speed * deviceRatio;
+          break;
+
+        case tank_directions_1.TankDirections.Right:
+          this.positionX += this._speed * deviceRatio;
+          break;
+
+        case tank_directions_1.TankDirections.Left:
+          this.positionX -= this._speed * deviceRatio;
+          break;
+      }
     }
   }, {
     key: "width",
@@ -922,7 +1000,7 @@ var BaseBullet = /*#__PURE__*/function (_game_framework_1$Bas) {
 }(game_framework_1.BaseDrawObject);
 
 exports.BaseBullet = BaseBullet;
-},{"../game-framework":"src/tank-game/game-framework.ts"}],"src/tank-game/bullets/bullet.ts":[function(require,module,exports) {
+},{"../game-framework":"src/tank-game/game-framework.ts","../tank/tank-directions":"src/tank-game/tank/tank-directions.ts"}],"src/tank-game/bullets/bullet.ts":[function(require,module,exports) {
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -954,12 +1032,12 @@ var game_framework_1 = require("../game-framework");
 var Bullet = /*#__PURE__*/function (_base_bullet_1$BaseBu) {
   _inherits(Bullet, _base_bullet_1$BaseBu);
 
-  function Bullet(startPositionX, startPositionY) {
+  function Bullet(startPositionX, startPositionY, direction) {
     var _this;
 
     _classCallCheck(this, Bullet);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Bullet).call(this, startPositionX, startPositionY, 3, 20));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Bullet).call(this, startPositionX, startPositionY, 3, 20, direction));
     _this.damage = 10;
     return _this;
   }
@@ -1011,6 +1089,8 @@ var game_1 = require("../game");
 
 var bullet_1 = require("../bullets/bullet");
 
+var tank_directions_1 = require("./tank-directions");
+
 var DoubleBarreledTankTower = /*#__PURE__*/function (_tank_tower_1$TankTow) {
   _inherits(DoubleBarreledTankTower, _tank_tower_1$TankTow);
 
@@ -1035,31 +1115,85 @@ var DoubleBarreledTankTower = /*#__PURE__*/function (_tank_tower_1$TankTow) {
       this._recharge.process();
 
       this.deviceRatio = deviceRatio;
+      ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY);
+      ctx.rotate(game_framework_1.MathLib.getAngleRadians(this._angle));
 
       this._drawRifle(ctx, this.rifle1Position, deviceRatio);
 
       this._drawRifle(ctx, this.rifle2Position, deviceRatio);
 
       this._drawTower(ctx, deviceRatio);
+
+      ctx.resetTransform();
+    }
+  }, {
+    key: "fire",
+    value: function fire(ammunition, direction) {
+      if (this._recharge.inProccess) return [];
+      if (!ammunition.bullets) return;
+
+      this._recharge.start(this.deviceRatio);
+
+      var xOffset = this.getBulletXPositionOffset(direction);
+      var yOffset = this.getBulletYPositionOffset(direction);
+      var x1 = this.positionX + xOffset;
+      var x2 = this.positionX + xOffset;
+      var y1 = this.positionY + yOffset;
+      var y2 = this.positionY + yOffset;
+
+      switch (direction) {
+        case tank_directions_1.TankDirections.Down:
+        case tank_directions_1.TankDirections.Up:
+          x1 -= this.rifle1Position;
+          x2 -= this.rifle2Position;
+          break;
+
+        case tank_directions_1.TankDirections.Right:
+        case tank_directions_1.TankDirections.Left:
+          y1 -= this.rifle1Position;
+          y2 -= this.rifle2Position;
+          break;
+      }
+
+      return [new bullet_1.Bullet(x1, y1, direction), new bullet_1.Bullet(x2, y2, direction)];
     }
   }, {
     key: "_drawTower",
     value: function _drawTower(ctx, deviceRatio) {
-      ctx.drawImage(this._towerImage, this.positionX - 14 * deviceRatio, this.positionY - 15 * deviceRatio, 30 * deviceRatio, 30 * deviceRatio);
+      ctx.drawImage(this._towerImage, -14 * deviceRatio, -15 * deviceRatio, 30 * deviceRatio, 30 * deviceRatio);
     }
   }, {
     key: "_drawRifle",
     value: function _drawRifle(ctx, x, deviceRatio) {
-      ctx.drawImage(this._towerRiffleImage, this.positionX - x * deviceRatio, this.positionY + this._recharge.startRifflePosition + this._correctPositionY * deviceRatio, 3 * deviceRatio, 15 * deviceRatio);
+      ctx.drawImage(this._towerRiffleImage, x * deviceRatio, this._recharge.startRifflePosition + this._correctPositionY * deviceRatio, 3 * deviceRatio, 15 * deviceRatio);
     }
   }, {
-    key: "fire",
-    value: function fire() {
-      if (this._recharge.inProccess) return [];
+    key: "getBulletXPositionOffset",
+    value: function getBulletXPositionOffset(direction) {
+      switch (direction) {
+        case tank_directions_1.TankDirections.Left:
+          return -50;
 
-      this._recharge.start(this.deviceRatio);
+        case tank_directions_1.TankDirections.Right:
+          return 50;
 
-      return [new bullet_1.Bullet(this.positionX - this.rifle1Position * this.deviceRatio + 1 * this.deviceRatio, this.positionY + this._correctPositionY * this.deviceRatio), new bullet_1.Bullet(this.positionX - this.rifle2Position * this.deviceRatio + 1 * this.deviceRatio, this.positionY + this._correctPositionY * this.deviceRatio)];
+        default:
+          return 0;
+      }
+    }
+  }, {
+    key: "getBulletYPositionOffset",
+    value: function getBulletYPositionOffset(direction) {
+      switch (direction) {
+        case tank_directions_1.TankDirections.Up:
+          return -50;
+
+        case tank_directions_1.TankDirections.Down:
+          return 50;
+
+        default:
+          return 0;
+      }
     }
   }]);
 
@@ -1067,7 +1201,7 @@ var DoubleBarreledTankTower = /*#__PURE__*/function (_tank_tower_1$TankTow) {
 }(tank_tower_1.TankTower);
 
 exports.DoubleBarreledTankTower = DoubleBarreledTankTower;
-},{"./tank-tower":"src/tank-game/tank/tank-tower.ts","../game-framework":"src/tank-game/game-framework.ts","../game":"src/tank-game/game.ts","../bullets/bullet":"src/tank-game/bullets/bullet.ts"}],"src/tank-game/animations/bang-animation.ts":[function(require,module,exports) {
+},{"./tank-tower":"src/tank-game/tank/tank-tower.ts","../game-framework":"src/tank-game/game-framework.ts","../game":"src/tank-game/game.ts","../bullets/bullet":"src/tank-game/bullets/bullet.ts","./tank-directions":"src/tank-game/tank/tank-directions.ts"}],"src/tank-game/animations/bang-animation.ts":[function(require,module,exports) {
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -1159,15 +1293,17 @@ var bang_animation_1 = require("../animations/bang-animation");
 
 var game_framework_1 = require("../game-framework");
 
+var tank_directions_1 = require("../tank/tank-directions");
+
 var Shrapnel = /*#__PURE__*/function (_base_bullet_1$BaseBu) {
   _inherits(Shrapnel, _base_bullet_1$BaseBu);
 
-  function Shrapnel(startPositionX, startPositionY) {
+  function Shrapnel(startPositionX, startPositionY, direction) {
     var _this;
 
     _classCallCheck(this, Shrapnel);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Shrapnel).call(this, startPositionX, startPositionY, 6, 40));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Shrapnel).call(this, startPositionX, startPositionY, 6, 40, direction));
     _this._shrapnelImage = new game_framework_1.GameImage("/assets/img/bullet.png");
     _this.strikingDistance = 500;
     _this.damage = 30;
@@ -1177,7 +1313,27 @@ var Shrapnel = /*#__PURE__*/function (_base_bullet_1$BaseBu) {
   _createClass(Shrapnel, [{
     key: "_drawBullet",
     value: function _drawBullet(ctx, devicePixelRatio) {
-      ctx.drawImage(this._shrapnelImage, this.positionX, this.positionY, 3 * devicePixelRatio, 7 * devicePixelRatio);
+      ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY);
+      ctx.rotate(this.getAngel());
+      ctx.drawImage(this._shrapnelImage, 0, 0, 3 * devicePixelRatio, 7 * devicePixelRatio);
+      ctx.resetTransform();
+    }
+  }, {
+    key: "getAngel",
+    value: function getAngel() {
+      switch (this._direction) {
+        case tank_directions_1.TankDirections.Up:
+          return game_framework_1.MathLib.getAngleRadians(0);
+
+        case tank_directions_1.TankDirections.Down:
+          return game_framework_1.MathLib.getAngleRadians(180);
+
+        case tank_directions_1.TankDirections.Left:
+          return game_framework_1.MathLib.getAngleRadians(-90);
+
+        case tank_directions_1.TankDirections.Right:
+          return game_framework_1.MathLib.getAngleRadians(90);
+      }
     }
   }, {
     key: "createStrikeAnimation",
@@ -1190,7 +1346,7 @@ var Shrapnel = /*#__PURE__*/function (_base_bullet_1$BaseBu) {
 }(base_bullet_1.BaseBullet);
 
 exports.Shrapnel = Shrapnel;
-},{"./base-bullet":"src/tank-game/bullets/base-bullet.ts","../animations/bang-animation":"src/tank-game/animations/bang-animation.ts","../game-framework":"src/tank-game/game-framework.ts"}],"src/tank-game/tank/simple-tank-tower.ts":[function(require,module,exports) {
+},{"./base-bullet":"src/tank-game/bullets/base-bullet.ts","../animations/bang-animation":"src/tank-game/animations/bang-animation.ts","../game-framework":"src/tank-game/game-framework.ts","../tank/tank-directions":"src/tank-game/tank/tank-directions.ts"}],"src/tank-game/tank/simple-tank-tower.ts":[function(require,module,exports) {
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -1223,6 +1379,8 @@ var game_framework_1 = require("../game-framework");
 
 var game_1 = require("../game");
 
+var tank_directions_1 = require("./tank-directions");
+
 var SimpleTankTower = /*#__PURE__*/function (_tank_tower_1$TankTow) {
   _inherits(SimpleTankTower, _tank_tower_1$TankTow);
 
@@ -1243,19 +1401,52 @@ var SimpleTankTower = /*#__PURE__*/function (_tank_tower_1$TankTow) {
     value: function draw(ctx, deviceRatio) {
       this._recharge.process();
 
+      ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY);
       this.deviceRatio = deviceRatio;
-      ctx.drawImage(this._towerRiffleImage, this.positionX, this.positionY - 45 * deviceRatio + this._recharge.startRifflePosition, 3 * deviceRatio, 30 * deviceRatio);
-      ctx.drawImage(this._towerImage, this.positionX - 14 * deviceRatio, this.positionY - 15 * deviceRatio, 30 * deviceRatio, 30 * deviceRatio);
+      ctx.rotate(game_framework_1.MathLib.getAngleRadians(this._angle));
+      ctx.drawImage(this._towerRiffleImage, 0, -45 * deviceRatio + this._recharge.startRifflePosition, 3 * deviceRatio, 30 * deviceRatio);
+      ctx.drawImage(this._towerImage, -14 * deviceRatio, -15 * deviceRatio, 30 * deviceRatio, 30 * deviceRatio);
+      ctx.resetTransform();
     }
   }, {
     key: "fire",
-    value: function fire(ammunition) {
+    value: function fire(ammunition, direction) {
       if (this._recharge.inProccess) return [];
       if (!ammunition.shrapnels) return;
 
       this._recharge.start(this.deviceRatio);
 
-      return [new shrapnel_1.Shrapnel(this.positionX, this.positionY - 50 * this.deviceRatio)];
+      var xOffset = this.getBulletXPositionOffset(direction);
+      var yOffset = this.getBulletYPositionOffset(direction);
+      return [new shrapnel_1.Shrapnel(this.positionX + xOffset, this.positionY + yOffset, direction)];
+    }
+  }, {
+    key: "getBulletXPositionOffset",
+    value: function getBulletXPositionOffset(direction) {
+      switch (direction) {
+        case tank_directions_1.TankDirections.Left:
+          return -50;
+
+        case tank_directions_1.TankDirections.Right:
+          return 50;
+
+        default:
+          return 0;
+      }
+    }
+  }, {
+    key: "getBulletYPositionOffset",
+    value: function getBulletYPositionOffset(direction) {
+      switch (direction) {
+        case tank_directions_1.TankDirections.Up:
+          return -50;
+
+        case tank_directions_1.TankDirections.Down:
+          return 50;
+
+        default:
+          return 0;
+      }
     }
   }]);
 
@@ -1263,7 +1454,7 @@ var SimpleTankTower = /*#__PURE__*/function (_tank_tower_1$TankTow) {
 }(tank_tower_1.TankTower);
 
 exports.SimpleTankTower = SimpleTankTower;
-},{"./tank-tower":"src/tank-game/tank/tank-tower.ts","../bullets/shrapnel":"src/tank-game/bullets/shrapnel.ts","../game-framework":"src/tank-game/game-framework.ts","../game":"src/tank-game/game.ts"}],"src/tank-game/tank/base-tank-bumper.ts":[function(require,module,exports) {
+},{"./tank-tower":"src/tank-game/tank/tank-tower.ts","../bullets/shrapnel":"src/tank-game/bullets/shrapnel.ts","../game-framework":"src/tank-game/game-framework.ts","../game":"src/tank-game/game.ts","./tank-directions":"src/tank-game/tank/tank-directions.ts"}],"src/tank-game/tank/base-tank-bumper.ts":[function(require,module,exports) {
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1276,12 +1467,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var game_framework_1 = require("../game-framework");
-
 var BaseTankBumber = /*#__PURE__*/function () {
   function BaseTankBumber(positionX, positionY) {
     _classCallCheck(this, BaseTankBumber);
 
+    this._angle = 0;
     this.setPosition(positionX, positionY);
   }
 
@@ -1295,9 +1485,7 @@ var BaseTankBumber = /*#__PURE__*/function () {
     key: "turn",
     value: function turn(isLeft) {
       var angle = isLeft ? -90 : 90;
-      var newPoint = game_framework_1.MathLib.getTurnPoint(this._bumberWidth, this._bumberHeight, angle);
-      this._bumberWidth = newPoint.x;
-      this._bumberHeight = newPoint.y;
+      this._angle += angle;
     }
   }]);
 
@@ -1305,7 +1493,7 @@ var BaseTankBumber = /*#__PURE__*/function () {
 }();
 
 exports.BaseTankBumber = BaseTankBumber;
-},{"../game-framework":"src/tank-game/game-framework.ts"}],"src/tank-game/tank/simple-tank-bumper.ts":[function(require,module,exports) {
+},{}],"src/tank-game/tank/simple-tank-bumper.ts":[function(require,module,exports) {
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -1345,7 +1533,6 @@ var SimpleTankBumber = /*#__PURE__*/function (_base_tank_bumper_1$B) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SimpleTankBumber).call(this, positionX, positionY));
     _this._bumberHeight = 55;
     _this._bumberWidth = 40;
-    _this._angle = 0;
     _this._image = new game_framework_1.GameImage("/assets/img/tank bumper.png");
     return _this;
   }
@@ -1353,19 +1540,12 @@ var SimpleTankBumber = /*#__PURE__*/function (_base_tank_bumper_1$B) {
   _createClass(SimpleTankBumber, [{
     key: "draw",
     value: function draw(ctx, deviceRatio) {
-      ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY);
-      ctx.rotate(game_framework_1.MathLib.getAngleRadians(this._angle));
       var bumperWidth = this._bumberWidth * deviceRatio;
       var bumperHeight = this._bumberHeight * deviceRatio;
+      ctx.setTransform(1, 0, 0, 1, this.positionX, this.positionY);
+      ctx.rotate(game_framework_1.MathLib.getAngleRadians(this._angle));
       ctx.drawImage(this._image, -bumperWidth / 2, -bumperHeight / 2, bumperWidth, bumperHeight);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
-  }, {
-    key: "turn",
-    value: function turn() {
-      var isLeft = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      var angle = isLeft ? -90 : 90;
-      this._angle += angle;
+      ctx.resetTransform();
     }
   }]);
 
@@ -1503,402 +1683,32 @@ var TankAmunnition = /*#__PURE__*/function () {
 }();
 
 exports.TankAmunnition = TankAmunnition;
-},{}],"src/tank-game/tank/tank.ts":[function(require,module,exports) {
+},{}],"src/tank-game/realtime-server/GameData.ts":[function(require,module,exports) {
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var game_framework_1 = require("../game-framework");
-
-var double_barreled_tank_tower_1 = require("./double-barreled-tank-tower");
-
-var simple_tank_tower_1 = require("./simple-tank-tower");
-
-var simple_tank_bumper_1 = require("./simple-tank-bumper");
-
-var ammunition_1 = require("./ammunition");
-
-var Damage = /*#__PURE__*/function (_game_framework_1$Bas) {
-  _inherits(Damage, _game_framework_1$Bas);
-
-  function Damage(positionX, positionY) {
-    var _this;
-
-    _classCallCheck(this, Damage);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Damage).call(this));
-    _this.health = 100;
-
-    _this.setPosition(positionX, positionY);
-
-    return _this;
-  }
-
-  _createClass(Damage, [{
-    key: "draw",
-    value: function draw(ctx, deviceRatio) {
-      ctx.rect(this.positionX, this.positionY, this.health, 10);
-      ctx.fillStyle = game_framework_1.Colors.green;
-      ctx.fillRect(this.positionX, this.positionY, this.health, 10);
-    }
-  }, {
-    key: "setPosition",
-    value: function setPosition(positionX, positionY) {
-      this.positionX = positionX;
-      this.positionY = positionY;
-    }
-  }, {
-    key: "remove",
-    value: function remove(damage) {
-      this.health -= damage;
-    }
-  }, {
-    key: "isLastDamage",
-    value: function isLastDamage(damage) {
-      return this.health - damage < 0;
-    }
-  }]);
-
-  return Damage;
-}(game_framework_1.BaseDrawObject);
-
-exports.Damage = Damage;
-var TankDirections;
-
-(function (TankDirections) {
-  TankDirections[TankDirections["Up"] = 0] = "Up";
-  TankDirections[TankDirections["Down"] = 1] = "Down";
-  TankDirections[TankDirections["Right"] = 2] = "Right";
-  TankDirections[TankDirections["Left"] = 3] = "Left";
-})(TankDirections = exports.TankDirections || (exports.TankDirections = {}));
-
-var Tank = /*#__PURE__*/function (_game_framework_1$Bas2) {
-  _inherits(Tank, _game_framework_1$Bas2);
-
-  function Tank(startPositionX, startPositionY, speed) {
-    var _this2;
-
-    _classCallCheck(this, Tank);
-
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Tank).call(this));
-    _this2.ammunition = new ammunition_1.TankAmunnition();
-    _this2._currentDirection = TankDirections.Up;
-    _this2._bumberHeight = 40;
-    _this2._bumberWidth = 30;
-    _this2.positionX = startPositionX;
-    _this2.positionY = startPositionY;
-    _this2.speed = speed;
-    _this2._bumber = new simple_tank_bumper_1.SimpleTankBumber(startPositionX, startPositionY);
-    _this2._towers = [new simple_tank_tower_1.SimpleTankTower(startPositionX, startPositionY), new double_barreled_tank_tower_1.DoubleBarreledTankTower(startPositionX, startPositionY)];
-    _this2.tower = _this2._towers[0];
-    _this2.damage = new Damage(startPositionX - 50, startPositionY + 60);
-    return _this2;
-  }
-
-  _createClass(Tank, [{
-    key: "addAmunnition",
-    value: function addAmunnition(ammunition) {
-      this.ammunition.add(ammunition);
-    }
-  }, {
-    key: "changeTower",
-    value: function changeTower() {
-      var _this3 = this;
-
-      var tankTower = this._towers.filter(function (el) {
-        return el != _this3.tower;
-      })[0];
-
-      tankTower.setPosition(this.positionX, this.positionY);
-      this.tower = tankTower;
-    }
-  }, {
-    key: "move",
-    value: function move(direction) {
-      if (this._currentDirection != direction) {
-        this._turn(direction);
-
-        return;
-      }
-
-      switch (direction) {
-        case TankDirections.Up:
-          this.positionY -= this.speed * this.deviceRatio;
-          break;
-
-        case TankDirections.Down:
-          this.positionY += this.speed * this.deviceRatio;
-          break;
-
-        case TankDirections.Right:
-          this.positionX += this.speed * this.deviceRatio;
-          break;
-
-        case TankDirections.Left:
-          this.positionX -= this.speed * this.deviceRatio;
-          break;
-      }
-    }
-  }, {
-    key: "_turn",
-    value: function _turn(direction) {
-      var directions = [TankDirections.Up, TankDirections.Right, TankDirections.Down, TankDirections.Left];
-      var currentDirectionIndex = directions.indexOf(this._currentDirection);
-      var currentDirectionScope = this.getCurrentDirectionScope(directions, currentDirectionIndex);
-      console.log(currentDirectionScope);
-      var currentDirectionScopeIndex = currentDirectionScope.indexOf(this._currentDirection);
-      var whereDirectionIndex = currentDirectionScope.indexOf(direction);
-
-      if (whereDirectionIndex == -1) {
-        whereDirectionIndex = 2;
-      }
-
-      if (whereDirectionIndex > currentDirectionScopeIndex) {
-        currentDirectionIndex++;
-        if (currentDirectionIndex > directions.length - 1) currentDirectionIndex = 0;
-
-        this._bumber.turn();
-      } else {
-        currentDirectionIndex--;
-        if (currentDirectionIndex < 0) currentDirectionIndex = directions.length - 1;
-
-        this._bumber.turn(true);
-      }
-
-      this._currentDirection = directions[currentDirectionIndex];
-    }
-  }, {
-    key: "getCurrentDirectionScope",
-    value: function getCurrentDirectionScope(directions, currentIndex) {
-      var scope = [directions[currentIndex]];
-      var nextIndex = currentIndex + 1;
-      var prevIndex = currentIndex - 1;
-
-      if (nextIndex > directions.length - 1) {
-        nextIndex = 0;
-      }
-
-      if (prevIndex < 0) {
-        prevIndex = directions.length - 1;
-      }
-
-      scope.unshift(directions[prevIndex]);
-      scope.push(directions[nextIndex]);
-      console.log('scope indexes', prevIndex, currentIndex, nextIndex);
-      return scope;
-    }
-  }, {
-    key: "fire",
-    value: function fire() {
-      return this.tower.fire(this.ammunition);
-    }
-  }, {
-    key: "draw",
-    value: function draw(ctx, deviceRatio) {
-      this.deviceRatio = deviceRatio;
-
-      this._bumber.setPosition(this.positionX, this.positionY);
-
-      this._bumber.draw(ctx, deviceRatio);
-
-      this.tower.setPosition(this.positionX, this.positionY);
-      this.tower.draw(ctx, deviceRatio);
-      this.damage.setPosition(this.positionX - 50, this.positionY + 60);
-      this.damage.draw(ctx, deviceRatio);
-    }
-  }]);
-
-  return Tank;
-}(game_framework_1.BaseDrawObject);
-
-exports.Tank = Tank;
-},{"../game-framework":"src/tank-game/game-framework.ts","./double-barreled-tank-tower":"src/tank-game/tank/double-barreled-tank-tower.ts","./simple-tank-tower":"src/tank-game/tank/simple-tank-tower.ts","./simple-tank-bumper":"src/tank-game/tank/simple-tank-bumper.ts","./ammunition":"src/tank-game/tank/ammunition.ts"}],"src/tank-game/enemies/enemy.ts":[function(require,module,exports) {
-"use strict";
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var game_framework_1 = require("../game-framework");
-
-var bullet_1 = require("../bullets/bullet");
-
-var tank_1 = require("../tank/tank");
-
-var Enemy = /*#__PURE__*/function (_game_framework_1$Bas) {
-  _inherits(Enemy, _game_framework_1$Bas);
-
-  function Enemy(startPositionX, startPositionY, speedLevel) {
-    var _this;
-
-    _classCallCheck(this, Enemy);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Enemy).call(this));
-    _this.positionX = startPositionX;
-    _this.positionY = startPositionY;
-    _this._speedLevel = speedLevel;
-    _this._head = new EnemyHead();
-    _this._gun1 = new EnemyGun();
-    _this._gun2 = new EnemyGun();
-    _this.damage = new tank_1.Damage(startPositionX, startPositionY - 20);
-    _this.width = 30;
-    _this.height = 60;
-    return _this;
-  }
-
-  _createClass(Enemy, [{
-    key: "draw",
-    value: function draw(ctx, deviceRatio) {
-      this._head.draw(ctx, deviceRatio, this.positionX, this.positionY);
-
-      this._gun1.draw(ctx, deviceRatio, this.positionX - 12 * deviceRatio, this.positionY + 30 * deviceRatio);
-
-      this._gun2.draw(ctx, deviceRatio, this.positionX + 50 * deviceRatio, this.positionY + 30 * deviceRatio);
-
-      this.damage.setPosition(this.positionX, this.positionY - 20);
-      this.damage.draw(ctx, deviceRatio);
-      this.move(deviceRatio);
-    }
-  }, {
-    key: "move",
-    value: function move(deviceRatio) {
-      this.positionY += game_framework_1.MathLib.getRandomInt(2) * this._speedLevel * deviceRatio;
-    }
-  }, {
-    key: "fire",
-    value: function fire() {
-      return this._gun1.fire();
-    }
-  }]);
-
-  return Enemy;
-}(game_framework_1.BaseDrawObject);
-
-exports.Enemy = Enemy;
-
-var EnemyHead = /*#__PURE__*/function (_game_framework_1$Bas2) {
-  _inherits(EnemyHead, _game_framework_1$Bas2);
-
-  function EnemyHead() {
-    var _this2;
-
-    _classCallCheck(this, EnemyHead);
-
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(EnemyHead).call(this));
-    _this2._imageHead = new game_framework_1.GameImage("/assets/img/enemy head.png");
-    _this2.width = 50;
-    _this2.height = 75;
-    return _this2;
-  }
-
-  _createClass(EnemyHead, [{
-    key: "_drawPart",
-    value: function _drawPart(ctx, deviceRatio) {
-      ctx.drawImage(this._imageHead, this.positionX, this.positionY, this.width * deviceRatio, this.height * deviceRatio);
-    }
-  }]);
-
-  return EnemyHead;
-}(game_framework_1.BaseDrawObjectPart);
-
-var EnemyGun = /*#__PURE__*/function (_game_framework_1$Bas3) {
-  _inherits(EnemyGun, _game_framework_1$Bas3);
-
-  function EnemyGun() {
-    var _this3;
-
-    _classCallCheck(this, EnemyGun);
-
-    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(EnemyGun).call(this));
-    _this3.width = 12;
-    _this3.height = 12;
-    _this3._imageGun = new game_framework_1.GameImage("/assets/img/enemy gun.png");
-    _this3._pistols = [new EnemyGunPistol(), new EnemyGunPistol(), new EnemyGunPistol(), new EnemyGunPistol()];
-    return _this3;
-  }
-
-  _createClass(EnemyGun, [{
-    key: "_drawPart",
-    value: function _drawPart(ctx, deviceRatio) {
-      ctx.drawImage(this._imageGun, this.positionX, this.positionY, this.width * deviceRatio, this.height * deviceRatio);
-
-      for (var i = 0; i < this._pistols.length; i++) {
-        this._pistols[i].draw(ctx, deviceRatio, this.positionX + this._pistols[i].width * deviceRatio * i, this.positionY + 10 * deviceRatio);
-      }
-    }
-  }, {
-    key: "fire",
-    value: function fire() {
-      return [new bullet_1.Bullet(this.positionX, this.positionY)];
-    }
-  }]);
-
-  return EnemyGun;
-}(game_framework_1.BaseDrawObjectPart);
-
-var EnemyGunPistol = /*#__PURE__*/function (_game_framework_1$Bas4) {
-  _inherits(EnemyGunPistol, _game_framework_1$Bas4);
-
-  function EnemyGunPistol() {
-    var _this4;
-
-    _classCallCheck(this, EnemyGunPistol);
-
-    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(EnemyGunPistol).call(this));
-    _this4._imageGunPistol = new game_framework_1.GameImage("/assets/img/enemy gun pistol.png");
-    _this4.width = 3;
-    _this4.height = 20;
-    return _this4;
-  }
-
-  _createClass(EnemyGunPistol, [{
-    key: "_drawPart",
-    value: function _drawPart(ctx, deviceRatio) {
-      ctx.drawImage(this._imageGunPistol, this.positionX, this.positionY, this.width * deviceRatio, this.height * deviceRatio);
-    }
-  }]);
-
-  return EnemyGunPistol;
-}(game_framework_1.BaseDrawObjectPart);
-},{"../game-framework":"src/tank-game/game-framework.ts","../bullets/bullet":"src/tank-game/bullets/bullet.ts","../tank/tank":"src/tank-game/tank/tank.ts"}],"node_modules/axios/lib/helpers/bind.js":[function(require,module,exports) {
+var GameData = function GameData(userId, type, data) {
+  _classCallCheck(this, GameData);
+
+  this.userId = userId;
+  this.type = type;
+  this.data = data;
+};
+
+exports.GameData = GameData;
+var GameEventType;
+
+(function (GameEventType) {
+  GameEventType[GameEventType["JoinPlayer"] = 0] = "JoinPlayer";
+  GameEventType[GameEventType["UnJoinPlayer"] = 1] = "UnJoinPlayer";
+  GameEventType[GameEventType["ChangePosition"] = 2] = "ChangePosition";
+})(GameEventType = exports.GameEventType || (exports.GameEventType = {}));
+},{}],"node_modules/axios/lib/helpers/bind.js":[function(require,module,exports) {
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -3734,4792 +3544,22 @@ exports.default = {
     return 'http://localhost:3000';
   }
 };
-},{"axios":"node_modules/axios/index.js"}],"node_modules/@heroiclabs/nakama-js/dist/nakama-js.umd.js":[function(require,module,exports) {
-var define;
-var global = arguments[3];
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.nakamajs = {})));
-}(this, (function (exports) { 'use strict';
+},{"axios":"node_modules/axios/index.js"}],"src/tank-game/realtime-server/session.ts":[function(require,module,exports) {
+"use strict";
 
-(function () {
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  var object =
-    typeof exports != 'undefined' ? exports :
-    typeof self != 'undefined' ? self : // #8: web workers
-    $.global; // #31: ExtendScript
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+var Session = function Session(userId) {
+  _classCallCheck(this, Session);
 
-  function InvalidCharacterError(message) {
-    this.message = message;
-  }
-  InvalidCharacterError.prototype = new Error;
-  InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-
-  // encoder
-  // [https://gist.github.com/999166] by [https://github.com/nignag]
-  object.btoa || (
-  object.btoa = function (input) {
-    var str = String(input);
-    for (
-      // initialize result and counter
-      var block, charCode, idx = 0, map = chars, output = '';
-      // if the next str index does not exist:
-      //   change the mapping table to "="
-      //   check if d has no fractional digits
-      str.charAt(idx | 0) || (map = '=', idx % 1);
-      // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-      output += map.charAt(63 & block >> 8 - idx % 1 * 8)
-    ) {
-      charCode = str.charCodeAt(idx += 3/4);
-      if (charCode > 0xFF) {
-        throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
-      }
-      block = block << 8 | charCode;
-    }
-    return output;
-  });
-
-  // decoder
-  // [https://gist.github.com/1020396] by [https://github.com/atk]
-  object.atob || (
-  object.atob = function (input) {
-    var str = String(input).replace(/[=]+$/, ''); // #31: ExtendScript bad parse of /=
-    if (str.length % 4 == 1) {
-      throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
-    }
-    for (
-      // initialize result and counters
-      var bc = 0, bs, buffer, idx = 0, output = '';
-      // get next character
-      buffer = str.charAt(idx++);
-      // character found in table? initialize bit storage and add its ascii value;
-      ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer, bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
-    ) {
-      // try to find character in table (0-63, not found => -1)
-      buffer = chars.indexOf(buffer);
-    }
-    return output;
-  });
-
-}());
-
-(function(self) {
-  if (self.fetch) {
-    return
-  }
-
-  var support = {
-    searchParams: 'URLSearchParams' in self,
-    iterable: 'Symbol' in self && 'iterator' in Symbol,
-    blob: 'FileReader' in self && 'Blob' in self && (function() {
-      try {
-        new Blob();
-        return true
-      } catch(e) {
-        return false
-      }
-    })(),
-    formData: 'FormData' in self,
-    arrayBuffer: 'ArrayBuffer' in self
-  };
-
-  if (support.arrayBuffer) {
-    var viewClasses = [
-      '[object Int8Array]',
-      '[object Uint8Array]',
-      '[object Uint8ClampedArray]',
-      '[object Int16Array]',
-      '[object Uint16Array]',
-      '[object Int32Array]',
-      '[object Uint32Array]',
-      '[object Float32Array]',
-      '[object Float64Array]'
-    ];
-
-    var isDataView = function(obj) {
-      return obj && DataView.prototype.isPrototypeOf(obj)
-    };
-
-    var isArrayBufferView = ArrayBuffer.isView || function(obj) {
-      return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1
-    };
-  }
-
-  function normalizeName(name) {
-    if (typeof name !== 'string') {
-      name = String(name);
-    }
-    if (/[^a-z0-9\-#$%&'*+.\^_`|~]/i.test(name)) {
-      throw new TypeError('Invalid character in header field name')
-    }
-    return name.toLowerCase()
-  }
-
-  function normalizeValue(value) {
-    if (typeof value !== 'string') {
-      value = String(value);
-    }
-    return value
-  }
-
-  // Build a destructive iterator for the value list
-  function iteratorFor(items) {
-    var iterator = {
-      next: function() {
-        var value = items.shift();
-        return {done: value === undefined, value: value}
-      }
-    };
-
-    if (support.iterable) {
-      iterator[Symbol.iterator] = function() {
-        return iterator
-      };
-    }
-
-    return iterator
-  }
-
-  function Headers(headers) {
-    this.map = {};
-
-    if (headers instanceof Headers) {
-      headers.forEach(function(value, name) {
-        this.append(name, value);
-      }, this);
-    } else if (Array.isArray(headers)) {
-      headers.forEach(function(header) {
-        this.append(header[0], header[1]);
-      }, this);
-    } else if (headers) {
-      Object.getOwnPropertyNames(headers).forEach(function(name) {
-        this.append(name, headers[name]);
-      }, this);
-    }
-  }
-
-  Headers.prototype.append = function(name, value) {
-    name = normalizeName(name);
-    value = normalizeValue(value);
-    var oldValue = this.map[name];
-    this.map[name] = oldValue ? oldValue+','+value : value;
-  };
-
-  Headers.prototype['delete'] = function(name) {
-    delete this.map[normalizeName(name)];
-  };
-
-  Headers.prototype.get = function(name) {
-    name = normalizeName(name);
-    return this.has(name) ? this.map[name] : null
-  };
-
-  Headers.prototype.has = function(name) {
-    return this.map.hasOwnProperty(normalizeName(name))
-  };
-
-  Headers.prototype.set = function(name, value) {
-    this.map[normalizeName(name)] = normalizeValue(value);
-  };
-
-  Headers.prototype.forEach = function(callback, thisArg) {
-    for (var name in this.map) {
-      if (this.map.hasOwnProperty(name)) {
-        callback.call(thisArg, this.map[name], name, this);
-      }
-    }
-  };
-
-  Headers.prototype.keys = function() {
-    var items = [];
-    this.forEach(function(value, name) { items.push(name); });
-    return iteratorFor(items)
-  };
-
-  Headers.prototype.values = function() {
-    var items = [];
-    this.forEach(function(value) { items.push(value); });
-    return iteratorFor(items)
-  };
-
-  Headers.prototype.entries = function() {
-    var items = [];
-    this.forEach(function(value, name) { items.push([name, value]); });
-    return iteratorFor(items)
-  };
-
-  if (support.iterable) {
-    Headers.prototype[Symbol.iterator] = Headers.prototype.entries;
-  }
-
-  function consumed(body) {
-    if (body.bodyUsed) {
-      return Promise.reject(new TypeError('Already read'))
-    }
-    body.bodyUsed = true;
-  }
-
-  function fileReaderReady(reader) {
-    return new Promise(function(resolve, reject) {
-      reader.onload = function() {
-        resolve(reader.result);
-      };
-      reader.onerror = function() {
-        reject(reader.error);
-      };
-    })
-  }
-
-  function readBlobAsArrayBuffer(blob) {
-    var reader = new FileReader();
-    var promise = fileReaderReady(reader);
-    reader.readAsArrayBuffer(blob);
-    return promise
-  }
-
-  function readBlobAsText(blob) {
-    var reader = new FileReader();
-    var promise = fileReaderReady(reader);
-    reader.readAsText(blob);
-    return promise
-  }
-
-  function readArrayBufferAsText(buf) {
-    var view = new Uint8Array(buf);
-    var chars = new Array(view.length);
-
-    for (var i = 0; i < view.length; i++) {
-      chars[i] = String.fromCharCode(view[i]);
-    }
-    return chars.join('')
-  }
-
-  function bufferClone(buf) {
-    if (buf.slice) {
-      return buf.slice(0)
-    } else {
-      var view = new Uint8Array(buf.byteLength);
-      view.set(new Uint8Array(buf));
-      return view.buffer
-    }
-  }
-
-  function Body() {
-    this.bodyUsed = false;
-
-    this._initBody = function(body) {
-      this._bodyInit = body;
-      if (!body) {
-        this._bodyText = '';
-      } else if (typeof body === 'string') {
-        this._bodyText = body;
-      } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
-        this._bodyBlob = body;
-      } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
-        this._bodyFormData = body;
-      } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
-        this._bodyText = body.toString();
-      } else if (support.arrayBuffer && support.blob && isDataView(body)) {
-        this._bodyArrayBuffer = bufferClone(body.buffer);
-        // IE 10-11 can't handle a DataView body.
-        this._bodyInit = new Blob([this._bodyArrayBuffer]);
-      } else if (support.arrayBuffer && (ArrayBuffer.prototype.isPrototypeOf(body) || isArrayBufferView(body))) {
-        this._bodyArrayBuffer = bufferClone(body);
-      } else {
-        throw new Error('unsupported BodyInit type')
-      }
-
-      if (!this.headers.get('content-type')) {
-        if (typeof body === 'string') {
-          this.headers.set('content-type', 'text/plain;charset=UTF-8');
-        } else if (this._bodyBlob && this._bodyBlob.type) {
-          this.headers.set('content-type', this._bodyBlob.type);
-        } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
-          this.headers.set('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-        }
-      }
-    };
-
-    if (support.blob) {
-      this.blob = function() {
-        var rejected = consumed(this);
-        if (rejected) {
-          return rejected
-        }
-
-        if (this._bodyBlob) {
-          return Promise.resolve(this._bodyBlob)
-        } else if (this._bodyArrayBuffer) {
-          return Promise.resolve(new Blob([this._bodyArrayBuffer]))
-        } else if (this._bodyFormData) {
-          throw new Error('could not read FormData body as blob')
-        } else {
-          return Promise.resolve(new Blob([this._bodyText]))
-        }
-      };
-
-      this.arrayBuffer = function() {
-        if (this._bodyArrayBuffer) {
-          return consumed(this) || Promise.resolve(this._bodyArrayBuffer)
-        } else {
-          return this.blob().then(readBlobAsArrayBuffer)
-        }
-      };
-    }
-
-    this.text = function() {
-      var rejected = consumed(this);
-      if (rejected) {
-        return rejected
-      }
-
-      if (this._bodyBlob) {
-        return readBlobAsText(this._bodyBlob)
-      } else if (this._bodyArrayBuffer) {
-        return Promise.resolve(readArrayBufferAsText(this._bodyArrayBuffer))
-      } else if (this._bodyFormData) {
-        throw new Error('could not read FormData body as text')
-      } else {
-        return Promise.resolve(this._bodyText)
-      }
-    };
-
-    if (support.formData) {
-      this.formData = function() {
-        return this.text().then(decode)
-      };
-    }
-
-    this.json = function() {
-      return this.text().then(JSON.parse)
-    };
-
-    return this
-  }
-
-  // HTTP methods whose capitalization should be normalized
-  var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT'];
-
-  function normalizeMethod(method) {
-    var upcased = method.toUpperCase();
-    return (methods.indexOf(upcased) > -1) ? upcased : method
-  }
-
-  function Request(input, options) {
-    options = options || {};
-    var body = options.body;
-
-    if (input instanceof Request) {
-      if (input.bodyUsed) {
-        throw new TypeError('Already read')
-      }
-      this.url = input.url;
-      this.credentials = input.credentials;
-      if (!options.headers) {
-        this.headers = new Headers(input.headers);
-      }
-      this.method = input.method;
-      this.mode = input.mode;
-      if (!body && input._bodyInit != null) {
-        body = input._bodyInit;
-        input.bodyUsed = true;
-      }
-    } else {
-      this.url = String(input);
-    }
-
-    this.credentials = options.credentials || this.credentials || 'omit';
-    if (options.headers || !this.headers) {
-      this.headers = new Headers(options.headers);
-    }
-    this.method = normalizeMethod(options.method || this.method || 'GET');
-    this.mode = options.mode || this.mode || null;
-    this.referrer = null;
-
-    if ((this.method === 'GET' || this.method === 'HEAD') && body) {
-      throw new TypeError('Body not allowed for GET or HEAD requests')
-    }
-    this._initBody(body);
-  }
-
-  Request.prototype.clone = function() {
-    return new Request(this, { body: this._bodyInit })
-  };
-
-  function decode(body) {
-    var form = new FormData();
-    body.trim().split('&').forEach(function(bytes) {
-      if (bytes) {
-        var split = bytes.split('=');
-        var name = split.shift().replace(/\+/g, ' ');
-        var value = split.join('=').replace(/\+/g, ' ');
-        form.append(decodeURIComponent(name), decodeURIComponent(value));
-      }
-    });
-    return form
-  }
-
-  function parseHeaders(rawHeaders) {
-    var headers = new Headers();
-    rawHeaders.split(/\r?\n/).forEach(function(line) {
-      var parts = line.split(':');
-      var key = parts.shift().trim();
-      if (key) {
-        var value = parts.join(':').trim();
-        headers.append(key, value);
-      }
-    });
-    return headers
-  }
-
-  Body.call(Request.prototype);
-
-  function Response(bodyInit, options) {
-    if (!options) {
-      options = {};
-    }
-
-    this.type = 'default';
-    this.status = 'status' in options ? options.status : 200;
-    this.ok = this.status >= 200 && this.status < 300;
-    this.statusText = 'statusText' in options ? options.statusText : 'OK';
-    this.headers = new Headers(options.headers);
-    this.url = options.url || '';
-    this._initBody(bodyInit);
-  }
-
-  Body.call(Response.prototype);
-
-  Response.prototype.clone = function() {
-    return new Response(this._bodyInit, {
-      status: this.status,
-      statusText: this.statusText,
-      headers: new Headers(this.headers),
-      url: this.url
-    })
-  };
-
-  Response.error = function() {
-    var response = new Response(null, {status: 0, statusText: ''});
-    response.type = 'error';
-    return response
-  };
-
-  var redirectStatuses = [301, 302, 303, 307, 308];
-
-  Response.redirect = function(url, status) {
-    if (redirectStatuses.indexOf(status) === -1) {
-      throw new RangeError('Invalid status code')
-    }
-
-    return new Response(null, {status: status, headers: {location: url}})
-  };
-
-  self.Headers = Headers;
-  self.Request = Request;
-  self.Response = Response;
-
-  self.fetch = function(input, init) {
-    return new Promise(function(resolve, reject) {
-      var request = new Request(input, init);
-      var xhr = new XMLHttpRequest();
-
-      xhr.onload = function() {
-        var options = {
-          status: xhr.status,
-          statusText: xhr.statusText,
-          headers: parseHeaders(xhr.getAllResponseHeaders() || '')
-        };
-        options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL');
-        var body = 'response' in xhr ? xhr.response : xhr.responseText;
-        resolve(new Response(body, options));
-      };
-
-      xhr.onerror = function() {
-        reject(new TypeError('Network request failed'));
-      };
-
-      xhr.ontimeout = function() {
-        reject(new TypeError('Network request failed'));
-      };
-
-      xhr.open(request.method, request.url, true);
-
-      if (request.credentials === 'include') {
-        xhr.withCredentials = true;
-      }
-
-      if ('responseType' in xhr && support.blob) {
-        xhr.responseType = 'blob';
-      }
-
-      request.headers.forEach(function(value, name) {
-        xhr.setRequestHeader(name, value);
-      });
-
-      xhr.send(typeof request._bodyInit === 'undefined' ? null : request._bodyInit);
-    })
-  };
-  self.fetch.polyfill = true;
-})(typeof self !== 'undefined' ? self : window);
-
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-/* global Reflect, Promise */
-
-
-
-var __assign = Object.assign || function __assign(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-    }
-    return t;
+  this.userId = userId;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function __read(o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-}
-
-function __spread() {
-    for (var ar = [], i = 0; i < arguments.length; i++)
-        ar = ar.concat(__read(arguments[i]));
-    return ar;
-}
-
-var BASE_PATH = "http://127.0.0.1:80";
-var NakamaApi = function (configuration) {
-    if (configuration === void 0) { configuration = {
-        basePath: BASE_PATH,
-        bearerToken: "",
-        password: "",
-        username: "",
-        timeoutMs: 5000,
-    }; }
-    return {
-        healthcheck: function (options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/healthcheck";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        getAccount: function (options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/account";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        updateAccount: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "PUT" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        authenticateCustom: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/authenticate/custom";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        authenticateDevice: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/authenticate/device";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        authenticateEmail: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/authenticate/email";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        authenticateFacebook: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/authenticate/facebook";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        authenticateGameCenter: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/authenticate/gamecenter";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        authenticateGoogle: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/authenticate/google";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        authenticateSteam: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/authenticate/steam";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        linkCustom: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/link/custom";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        linkDevice: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/link/device";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        linkEmail: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/link/email";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        linkFacebook: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/link/facebook";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        linkGameCenter: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/link/gamecenter";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        linkGoogle: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/link/google";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        linkSteam: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/link/steam";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        unlinkCustom: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/unlink/custom";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        unlinkDevice: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/unlink/device";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        unlinkEmail: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/unlink/email";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        unlinkFacebook: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/unlink/facebook";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        unlinkGameCenter: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/unlink/gamecenter";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        unlinkGoogle: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/unlink/google";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        unlinkSteam: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/account/unlink/steam";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listChannelMessages: function (channelId, limit, forward, cursor, options) {
-            if (options === void 0) { options = {}; }
-            if (channelId === null || channelId === undefined) {
-                throw new Error("'channelId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/channel/{channel_id}"
-                .replace("{channel_id}", encodeURIComponent(String(channelId)));
-            var queryParams = {
-                limit: limit,
-                forward: forward,
-                cursor: cursor,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        deleteFriends: function (ids, usernames, options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/friend";
-            var queryParams = {
-                ids: ids,
-                usernames: usernames,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "DELETE" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listFriends: function (options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/friend";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        addFriends: function (options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/friend";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        blockFriends: function (options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/friend/block";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        importFacebookFriends: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/friend/facebook";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listGroups: function (name, cursor, limit, options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/group";
-            var queryParams = {
-                name: name,
-                cursor: cursor,
-                limit: limit,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        createGroup: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/group";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        deleteGroup: function (groupId, options) {
-            if (options === void 0) { options = {}; }
-            if (groupId === null || groupId === undefined) {
-                throw new Error("'groupId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/group/{group_id}"
-                .replace("{group_id}", encodeURIComponent(String(groupId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "DELETE" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        updateGroup: function (groupId, body, options) {
-            if (options === void 0) { options = {}; }
-            if (groupId === null || groupId === undefined) {
-                throw new Error("'groupId' is a required parameter but is null or undefined.");
-            }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/group/{group_id}"
-                .replace("{group_id}", encodeURIComponent(String(groupId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "PUT" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        addGroupUsers: function (groupId, options) {
-            if (options === void 0) { options = {}; }
-            if (groupId === null || groupId === undefined) {
-                throw new Error("'groupId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/group/{group_id}/add"
-                .replace("{group_id}", encodeURIComponent(String(groupId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        joinGroup: function (groupId, options) {
-            if (options === void 0) { options = {}; }
-            if (groupId === null || groupId === undefined) {
-                throw new Error("'groupId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/group/{group_id}/join"
-                .replace("{group_id}", encodeURIComponent(String(groupId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        kickGroupUsers: function (groupId, options) {
-            if (options === void 0) { options = {}; }
-            if (groupId === null || groupId === undefined) {
-                throw new Error("'groupId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/group/{group_id}/kick"
-                .replace("{group_id}", encodeURIComponent(String(groupId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        leaveGroup: function (groupId, options) {
-            if (options === void 0) { options = {}; }
-            if (groupId === null || groupId === undefined) {
-                throw new Error("'groupId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/group/{group_id}/leave"
-                .replace("{group_id}", encodeURIComponent(String(groupId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        promoteGroupUsers: function (groupId, options) {
-            if (options === void 0) { options = {}; }
-            if (groupId === null || groupId === undefined) {
-                throw new Error("'groupId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/group/{group_id}/promote"
-                .replace("{group_id}", encodeURIComponent(String(groupId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listGroupUsers: function (groupId, options) {
-            if (options === void 0) { options = {}; }
-            if (groupId === null || groupId === undefined) {
-                throw new Error("'groupId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/group/{group_id}/user"
-                .replace("{group_id}", encodeURIComponent(String(groupId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        deleteLeaderboardRecord: function (leaderboardId, options) {
-            if (options === void 0) { options = {}; }
-            if (leaderboardId === null || leaderboardId === undefined) {
-                throw new Error("'leaderboardId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/leaderboard/{leaderboard_id}"
-                .replace("{leaderboard_id}", encodeURIComponent(String(leaderboardId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "DELETE" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listLeaderboardRecords: function (leaderboardId, ownerIds, limit, cursor, options) {
-            if (options === void 0) { options = {}; }
-            if (leaderboardId === null || leaderboardId === undefined) {
-                throw new Error("'leaderboardId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/leaderboard/{leaderboard_id}"
-                .replace("{leaderboard_id}", encodeURIComponent(String(leaderboardId)));
-            var queryParams = {
-                owner_ids: ownerIds,
-                limit: limit,
-                cursor: cursor,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        writeLeaderboardRecord: function (leaderboardId, body, options) {
-            if (options === void 0) { options = {}; }
-            if (leaderboardId === null || leaderboardId === undefined) {
-                throw new Error("'leaderboardId' is a required parameter but is null or undefined.");
-            }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/leaderboard/{leaderboard_id}"
-                .replace("{leaderboard_id}", encodeURIComponent(String(leaderboardId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listMatches: function (limit, authoritative, label, minSize, maxSize, options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/match";
-            var queryParams = {
-                limit: limit,
-                authoritative: authoritative,
-                label: label,
-                min_size: minSize,
-                max_size: maxSize,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        deleteNotifications: function (ids, options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/notification";
-            var queryParams = {
-                ids: ids,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "DELETE" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listNotifications: function (limit, cacheableCursor, options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/notification";
-            var queryParams = {
-                limit: limit,
-                cacheable_cursor: cacheableCursor,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        rpcFunc2: function (id, payload, httpKey, options) {
-            if (options === void 0) { options = {}; }
-            if (id === null || id === undefined) {
-                throw new Error("'id' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/rpc/{id}"
-                .replace("{id}", encodeURIComponent(String(id)));
-            var queryParams = {
-                payload: payload,
-                http_key: httpKey,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        rpcFunc: function (id, body, options) {
-            if (options === void 0) { options = {}; }
-            if (id === null || id === undefined) {
-                throw new Error("'id' is a required parameter but is null or undefined.");
-            }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/rpc/{id}"
-                .replace("{id}", encodeURIComponent(String(id)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        readStorageObjects: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/storage";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "POST" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        writeStorageObjects: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/storage";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "PUT" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        deleteStorageObjects: function (body, options) {
-            if (options === void 0) { options = {}; }
-            if (body === null || body === undefined) {
-                throw new Error("'body' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/storage/delete";
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "PUT" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            fetchOptions.body = JSON.stringify(body || {});
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listStorageObjects: function (collection, userId, limit, cursor, options) {
-            if (options === void 0) { options = {}; }
-            if (collection === null || collection === undefined) {
-                throw new Error("'collection' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/storage/{collection}"
-                .replace("{collection}", encodeURIComponent(String(collection)));
-            var queryParams = {
-                user_id: userId,
-                limit: limit,
-                cursor: cursor,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listStorageObjects2: function (collection, userId, limit, cursor, options) {
-            if (options === void 0) { options = {}; }
-            if (collection === null || collection === undefined) {
-                throw new Error("'collection' is a required parameter but is null or undefined.");
-            }
-            if (userId === null || userId === undefined) {
-                throw new Error("'userId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/storage/{collection}/{user_id}"
-                .replace("{collection}", encodeURIComponent(String(collection)))
-                .replace("{user_id}", encodeURIComponent(String(userId)));
-            var queryParams = {
-                limit: limit,
-                cursor: cursor,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        getUsers: function (ids, usernames, facebookIds, options) {
-            if (options === void 0) { options = {}; }
-            var urlPath = "/v2/user";
-            var queryParams = {
-                ids: ids,
-                usernames: usernames,
-                facebook_ids: facebookIds,
-            };
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-        listUserGroups: function (userId, options) {
-            if (options === void 0) { options = {}; }
-            if (userId === null || userId === undefined) {
-                throw new Error("'userId' is a required parameter but is null or undefined.");
-            }
-            var urlPath = "/v2/user/{user_id}/group"
-                .replace("{user_id}", encodeURIComponent(String(userId)));
-            var queryParams = {};
-            var urlQuery = "?" + Object.keys(queryParams)
-                .map(function (k) {
-                if (queryParams[k] instanceof Array) {
-                    return queryParams[k].reduce(function (prev, curr) {
-                        return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                    }, "");
-                }
-                else {
-                    if (queryParams[k] != null) {
-                        return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                    }
-                }
-            })
-                .join("");
-            var fetchOptions = __assign({ method: "GET" }, options);
-            var headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            };
-            if (configuration.bearerToken) {
-                headers["Authorization"] = "Bearer " + configuration.bearerToken;
-            }
-            else if (configuration.username) {
-                headers["Authorization"] = "Basic " + btoa(configuration.username + ":" + configuration.password);
-            }
-            fetchOptions.headers = __assign({}, headers, options.headers);
-            return Promise.race([
-                fetch(configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    }
-                    else {
-                        throw response;
-                    }
-                }),
-                new Promise(function (_, reject) {
-                    return setTimeout(reject, configuration.timeoutMs, "Request timed out.");
-                }),
-            ]);
-        },
-    };
-};
-
-var Session = (function () {
-    function Session(token, created_at, expires_at, username, user_id) {
-        this.token = token;
-        this.created_at = created_at;
-        this.expires_at = expires_at;
-        this.username = username;
-        this.user_id = user_id;
-    }
-    Session.prototype.isexpired = function (currenttime) {
-        return (this.expires_at - currenttime) < 0;
-    };
-    Session.restore = function (jwt) {
-        var createdAt = Math.floor(new Date().getTime() / 1000);
-        var parts = jwt.split('.');
-        if (parts.length != 3) {
-            throw 'jwt is not valid.';
-        }
-        var decoded = JSON.parse(atob(parts[1]));
-        var expiresAt = Math.floor(parseInt(decoded['exp']));
-        return new Session(jwt, createdAt, expiresAt, decoded['usn'], decoded['uid']);
-    };
-    return Session;
-}());
-
-var DefaultSocket = (function () {
-    function DefaultSocket(host, port, useSSL, verbose) {
-        if (useSSL === void 0) { useSSL = false; }
-        if (verbose === void 0) { verbose = false; }
-        this.host = host;
-        this.port = port;
-        this.useSSL = useSSL;
-        this.verbose = verbose;
-        this.cIds = {};
-    }
-    DefaultSocket.prototype.generatecid = function () {
-        return __spread(Array(30)).map(function () { return Math.random().toString(36)[3]; }).join('');
-    };
-    DefaultSocket.prototype.connect = function (session, createStatus) {
-        var _this = this;
-        if (createStatus === void 0) { createStatus = false; }
-        if (this.socket != undefined) {
-            return Promise.resolve(session);
-        }
-        var scheme = (this.useSSL) ? "wss://" : "ws://";
-        var url = "" + scheme + this.host + ":" + this.port + "/ws?lang=en&status=" + encodeURIComponent(createStatus.toString()) + "&token=" + encodeURIComponent(session.token);
-        var socket = new WebSocket(url);
-        this.socket = socket;
-        socket.onclose = function (evt) {
-            _this.ondisconnect(evt);
-            _this.socket = undefined;
-        };
-        socket.onerror = function (evt) {
-            _this.onerror(evt);
-        };
-        socket.onmessage = function (evt) {
-            var message = JSON.parse(evt.data);
-            if (_this.verbose && window && window.console) {
-                console.log("Response: %o", message);
-            }
-            if (message.cid == undefined) {
-                if (message.notifications) {
-                    message.notifications.notifications.forEach(function (n) {
-                        var notification = {
-                            code: n.code,
-                            create_time: n.create_time,
-                            id: n.id,
-                            persistent: n.persistent,
-                            sender_id: n.sender_id,
-                            subject: n.subject,
-                            content: n.content ? JSON.parse(n.content) : undefined
-                        };
-                        _this.onnotification(notification);
-                    });
-                }
-                else if (message.match_data) {
-                    message.match_data.data = message.match_data.data != null ? JSON.parse(atob(message.match_data.data)) : null;
-                    message.match_data.op_code = parseInt(message.match_data.op_code);
-                    _this.onmatchdata(message.match_data);
-                }
-                else if (message.match_presence_event) {
-                    _this.onmatchpresence(message.match_presence_event);
-                }
-                else if (message.matchmaker_matched) {
-                    _this.onmatchmakermatched(message.matchmaker_matched);
-                }
-                else if (message.status_presence_event) {
-                    _this.onstatuspresence(message.status_presence_event);
-                }
-                else if (message.stream_presence_event) {
-                    _this.onstreampresence(message.stream_presence_event);
-                }
-                else if (message.stream_data) {
-                    _this.onstreamdata(message.stream_data);
-                }
-                else if (message.channel_message) {
-                    message.channel_message.content = JSON.parse(message.channel_message.content);
-                    _this.onchannelmessage(message.channel_message);
-                }
-                else if (message.channel_presence_event) {
-                    _this.onchannelpresence(message.channel_presence_event);
-                }
-                else {
-                    if (_this.verbose && window && window.console) {
-                        console.log("Unrecognized message received: %o", message);
-                    }
-                }
-            }
-            else {
-                var executor = _this.cIds[message.cid];
-                if (!executor) {
-                    if (_this.verbose && window && window.console) {
-                        console.error("No promise executor for message: %o", message);
-                    }
-                    return;
-                }
-                delete _this.cIds[message.cid];
-                if (message.error) {
-                    executor.reject(message.error);
-                }
-                else {
-                    executor.resolve(message);
-                }
-            }
-        };
-        return new Promise(function (resolve, reject) {
-            socket.onopen = function (evt) {
-                if (_this.verbose && window && window.console) {
-                    console.log(evt);
-                }
-                resolve(session);
-            };
-            socket.onerror = function (evt) {
-                reject(evt);
-                socket.close();
-                _this.socket = undefined;
-            };
-        });
-    };
-    DefaultSocket.prototype.disconnect = function (fireDisconnectEvent) {
-        if (fireDisconnectEvent === void 0) { fireDisconnectEvent = true; }
-        if (this.socket != undefined) {
-            this.socket.close();
-        }
-        if (fireDisconnectEvent) {
-            this.ondisconnect({});
-        }
-    };
-    DefaultSocket.prototype.ondisconnect = function (evt) {
-        if (this.verbose && window && window.console) {
-            console.log(evt);
-        }
-    };
-    DefaultSocket.prototype.onerror = function (evt) {
-        if (this.verbose && window && window.console) {
-            console.log(evt);
-        }
-    };
-    DefaultSocket.prototype.onchannelmessage = function (channelMessage) {
-        if (this.verbose && window && window.console) {
-            console.log(channelMessage);
-        }
-    };
-    DefaultSocket.prototype.onchannelpresence = function (channelPresence) {
-        if (this.verbose && window && window.console) {
-            console.log(channelPresence);
-        }
-    };
-    DefaultSocket.prototype.onnotification = function (notification) {
-        if (this.verbose && window && window.console) {
-            console.log(notification);
-        }
-    };
-    DefaultSocket.prototype.onmatchdata = function (matchData) {
-        if (this.verbose && window && window.console) {
-            console.log(matchData);
-        }
-    };
-    DefaultSocket.prototype.onmatchpresence = function (matchPresence) {
-        if (this.verbose && window && window.console) {
-            console.log(matchPresence);
-        }
-    };
-    DefaultSocket.prototype.onmatchmakermatched = function (matchmakerMatched) {
-        if (this.verbose && window && window.console) {
-            console.log(matchmakerMatched);
-        }
-    };
-    DefaultSocket.prototype.onstatuspresence = function (statusPresence) {
-        if (this.verbose && window && window.console) {
-            console.log(statusPresence);
-        }
-    };
-    DefaultSocket.prototype.onstreampresence = function (streamPresence) {
-        if (this.verbose && window && window.console) {
-            console.log(streamPresence);
-        }
-    };
-    DefaultSocket.prototype.onstreamdata = function (streamData) {
-        if (this.verbose && window && window.console) {
-            console.log(streamData);
-        }
-    };
-    DefaultSocket.prototype.send = function (message) {
-        var _this = this;
-        var m = message;
-        return new Promise(function (resolve, reject) {
-            if (_this.socket == undefined) {
-                reject("Socket connection has not been established yet.");
-            }
-            else {
-                if (m.match_data_send) {
-                    m.match_data_send.data = btoa(JSON.stringify(m.match_data_send.data));
-                    m.match_data_send.op_code = m.match_data_send.op_code.toString();
-                    _this.socket.send(JSON.stringify(m));
-                    resolve();
-                }
-                else {
-                    if (m.channel_message_send) {
-                        m.channel_message_send.content = JSON.stringify(m.channel_message_send.content);
-                    }
-                    else if (m.channel_message_update) {
-                        m.channel_message_update.content = JSON.stringify(m.channel_message_update.content);
-                    }
-                    var cid = _this.generatecid();
-                    _this.cIds[cid] = {
-                        resolve: resolve,
-                        reject: reject
-                    };
-                    m.cid = cid;
-                    _this.socket.send(JSON.stringify(m));
-                }
-            }
-            if (_this.verbose && window && window.console) {
-                console.log("Sent message: %o", m);
-            }
-        });
-    };
-    return DefaultSocket;
-}());
-
-var DEFAULT_HOST = "127.0.0.1";
-var DEFAULT_PORT = "7350";
-var DEFAULT_SERVER_KEY = "defaultkey";
-var DEFAULT_TIMEOUT_MS = 7000;
-var Client = (function () {
-    function Client(serverkey, host, port, useSSL, timeout, verbose) {
-        if (serverkey === void 0) { serverkey = DEFAULT_SERVER_KEY; }
-        if (host === void 0) { host = DEFAULT_HOST; }
-        if (port === void 0) { port = DEFAULT_PORT; }
-        if (useSSL === void 0) { useSSL = false; }
-        if (timeout === void 0) { timeout = DEFAULT_TIMEOUT_MS; }
-        if (verbose === void 0) { verbose = false; }
-        this.serverkey = serverkey;
-        this.host = host;
-        this.port = port;
-        this.useSSL = useSSL;
-        this.timeout = timeout;
-        this.verbose = verbose;
-        var scheme = (useSSL) ? "https://" : "http://";
-        var basePath = "" + scheme + host + ":" + port;
-        this.configuration = {
-            basePath: basePath,
-            username: serverkey,
-            password: "",
-            timeoutMs: timeout,
-        };
-        this.apiClient = NakamaApi(this.configuration);
-    }
-    Client.prototype.addGroupUsers = function (session, groupId, ids) {
-        var _this = this;
-        this.configuration.bearerToken = (session && session.token);
-        var urlPath = "/v2/group/" + groupId + "/add";
-        var queryParams = {
-            user_ids: ids
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (response) {
-            return Promise.resolve(response != undefined);
-        });
-    };
-    Client.prototype.addFriends = function (session, ids, usernames) {
-        var _this = this;
-        this.configuration.bearerToken = (session && session.token);
-        var urlPath = "/v2/friend";
-        var queryParams = {
-            ids: ids,
-            usernames: usernames
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (response) {
-            return Promise.resolve(response != undefined);
-        });
-    };
-    Client.prototype.authenticateCustom = function (request) {
-        var _this = this;
-        var urlPath = "/v2/account/authenticate/custom";
-        var queryParams = {
-            username: request.username,
-            create: request.create
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        fetchOptions.body = JSON.stringify({
-            id: request.id
-        });
-        console.log;
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (apiSession) {
-            return Session.restore(apiSession.token || "");
-        });
-    };
-    Client.prototype.authenticateDevice = function (request) {
-        var _this = this;
-        var urlPath = "/v2/account/authenticate/device";
-        var queryParams = {
-            username: request.username,
-            create: request.create
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        fetchOptions.body = JSON.stringify({
-            id: request.id
-        });
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (apiSession) {
-            return Session.restore(apiSession.token || "");
-        });
-    };
-    Client.prototype.authenticateEmail = function (request) {
-        var _this = this;
-        var urlPath = "/v2/account/authenticate/email";
-        var queryParams = {
-            username: request.username,
-            create: request.create
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        fetchOptions.body = JSON.stringify({
-            email: request.email,
-            password: request.password
-        });
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (apiSession) {
-            return Session.restore(apiSession.token || "");
-        });
-    };
-    Client.prototype.authenticateFacebook = function (request) {
-        var _this = this;
-        var urlPath = "/v2/account/authenticate/facebook";
-        var queryParams = {
-            username: request.username,
-            create: request.create
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        fetchOptions.body = JSON.stringify({
-            token: request.token
-        });
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (apiSession) {
-            return Session.restore(apiSession.token || "");
-        });
-    };
-    Client.prototype.authenticateGoogle = function (request) {
-        var _this = this;
-        var urlPath = "/v2/account/authenticate/google";
-        var queryParams = {
-            username: request.username,
-            create: request.create
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        fetchOptions.body = JSON.stringify({
-            token: request.token
-        });
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (apiSession) {
-            return Session.restore(apiSession.token || "");
-        });
-    };
-    Client.prototype.authenticateGameCenter = function (request) {
-        var _this = this;
-        var urlPath = "/v2/account/authenticate/gamecenter";
-        var queryParams = {
-            username: request.username,
-            create: request.create
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        fetchOptions.body = JSON.stringify({
-            bundle_id: request.bundle_id,
-            player_id: request.player_id,
-            public_key_url: request.public_key_url,
-            salt: request.salt,
-            signature: request.signature,
-            timestamp_seconds: request.timestamp_seconds
-        });
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (apiSession) {
-            return Session.restore(apiSession.token || "");
-        });
-    };
-    Client.prototype.authenticateSteam = function (request) {
-        var _this = this;
-        var urlPath = "/v2/account/authenticate/steam";
-        var queryParams = {
-            username: request.username,
-            create: request.create
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        fetchOptions.body = JSON.stringify({
-            token: request.token
-        });
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (apiSession) {
-            return Session.restore(apiSession.token || "");
-        });
-    };
-    Client.prototype.blockFriends = function (session, ids, usernames) {
-        var _this = this;
-        this.configuration.bearerToken = (session && session.token);
-        var urlPath = "/v2/friend/block";
-        var queryParams = {
-            ids: ids,
-            usernames: usernames
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (response) {
-            return Promise.resolve(response != undefined);
-        });
-    };
-    Client.prototype.createGroup = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.createGroup(request).then(function (response) {
-            return Promise.resolve({
-                avatar_url: response.avatar_url,
-                create_time: response.create_time,
-                creator_id: response.creator_id,
-                description: response.description,
-                edge_count: response.edge_count,
-                id: response.id,
-                lang_tag: response.lang_tag,
-                max_count: response.max_count,
-                metadata: response.metadata ? JSON.parse(response.metadata) : null,
-                name: response.name,
-                open: response.open,
-                update_time: response.update_time
-            });
-        });
-    };
-    Client.prototype.createSocket = function (useSSL, verbose) {
-        if (useSSL === void 0) { useSSL = false; }
-        if (verbose === void 0) { verbose = false; }
-        return new DefaultSocket(this.host, this.port, useSSL, verbose);
-    };
-    Client.prototype.deleteFriends = function (session, ids, usernames) {
-        var _this = this;
-        this.configuration.bearerToken = (session && session.token);
-        var urlPath = "/v2/friend";
-        var queryParams = {
-            ids: ids,
-            usernames: usernames
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "DELETE" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (response) {
-            return Promise.resolve(response != undefined);
-        });
-    };
-    Client.prototype.deleteGroup = function (session, groupId) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.deleteGroup(groupId).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.deleteNotifications = function (session, ids) {
-        var _this = this;
-        this.configuration.bearerToken = (session && session.token);
-        var urlPath = "/v2/notification";
-        var queryParams = {
-            ids: ids
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "DELETE" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (response) {
-            return Promise.resolve(response != undefined);
-        });
-    };
-    Client.prototype.deleteStorageObjects = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.deleteStorageObjects(request).then(function (response) {
-            return Promise.resolve(response != undefined);
-        });
-    };
-    Client.prototype.getAccount = function (session) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.getAccount();
-    };
-    Client.prototype.importFacebookFriends = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.importFacebookFriends(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.getUsers = function (session, ids, usernames, facebookIds) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.getUsers(ids, usernames, facebookIds).then(function (response) {
-            var result = {
-                users: []
-            };
-            if (response.users == null) {
-                return Promise.resolve(result);
-            }
-            response.users.forEach(function (u) {
-                result.users.push({
-                    avatar_url: u.avatar_url,
-                    create_time: u.create_time,
-                    display_name: u.display_name,
-                    edge_count: u.edge_count,
-                    facebook_id: u.facebook_id,
-                    gamecenter_id: u.gamecenter_id,
-                    google_id: u.google_id,
-                    id: u.id,
-                    lang_tag: u.lang_tag,
-                    location: u.location,
-                    online: u.online,
-                    steam_id: u.steam_id,
-                    timezone: u.timezone,
-                    update_time: u.update_time,
-                    username: u.username,
-                    metadata: u.metadata ? JSON.parse(u.metadata) : null
-                });
-            });
-            return Promise.resolve(result);
-        });
-    };
-    Client.prototype.joinGroup = function (session, groupId) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.joinGroup(groupId, {}).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.kickGroupUsers = function (session, groupId, ids) {
-        var _this = this;
-        this.configuration.bearerToken = (session && session.token);
-        var urlPath = "/v2/group/" + groupId + "/kick";
-        var queryParams = {
-            user_ids: ids
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (response) {
-            return Promise.resolve(response != undefined);
-        });
-    };
-    Client.prototype.leaveGroup = function (session, groupId) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.leaveGroup(groupId, {}).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.listChannelMessages = function (session, channelId, limit, forward, cursor) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.listChannelMessages(channelId, limit, forward, cursor).then(function (response) {
-            var result = {
-                messages: [],
-                next_cursor: response.next_cursor,
-                prev_cursor: response.prev_cursor
-            };
-            if (response.messages == null) {
-                return Promise.resolve(result);
-            }
-            response.messages.forEach(function (m) {
-                result.messages.push({
-                    channel_id: m.channel_id,
-                    code: m.code,
-                    create_time: m.create_time,
-                    message_id: m.message_id,
-                    persistent: m.persistent,
-                    sender_id: m.sender_id,
-                    update_time: m.update_time,
-                    username: m.username,
-                    content: m.content ? JSON.parse(m.content) : null
-                });
-            });
-            return Promise.resolve(result);
-        });
-    };
-    Client.prototype.listGroupUsers = function (session, groupId) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.listGroupUsers(groupId).then(function (response) {
-            var result = {
-                group_users: []
-            };
-            if (response.group_users == null) {
-                return Promise.resolve(result);
-            }
-            response.group_users.forEach(function (gu) {
-                result.group_users.push({
-                    user: {
-                        avatar_url: gu.user.avatar_url,
-                        create_time: gu.user.create_time,
-                        display_name: gu.user.display_name,
-                        edge_count: gu.user.edge_count,
-                        facebook_id: gu.user.facebook_id,
-                        gamecenter_id: gu.user.gamecenter_id,
-                        google_id: gu.user.google_id,
-                        id: gu.user.id,
-                        lang_tag: gu.user.lang_tag,
-                        location: gu.user.location,
-                        online: gu.user.online,
-                        steam_id: gu.user.steam_id,
-                        timezone: gu.user.timezone,
-                        update_time: gu.user.update_time,
-                        username: gu.user.username,
-                        metadata: gu.user.metadata ? JSON.parse(gu.user.metadata) : null
-                    },
-                    state: gu.state
-                });
-            });
-            return Promise.resolve(result);
-        });
-    };
-    Client.prototype.listUserGroups = function (session, userId) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.listUserGroups(userId).then(function (response) {
-            var result = {
-                user_groups: []
-            };
-            if (response.user_groups == null) {
-                return Promise.resolve(result);
-            }
-            response.user_groups.forEach(function (ug) {
-                result.user_groups.push({
-                    group: {
-                        avatar_url: ug.group.avatar_url,
-                        create_time: ug.group.create_time,
-                        creator_id: ug.group.creator_id,
-                        description: ug.group.description,
-                        edge_count: ug.group.edge_count,
-                        id: ug.group.id,
-                        lang_tag: ug.group.lang_tag,
-                        max_count: ug.group.max_count,
-                        metadata: ug.group.metadata ? JSON.parse(ug.group.metadata) : null,
-                        name: ug.group.name,
-                        open: ug.group.open,
-                        update_time: ug.group.update_time
-                    },
-                    state: ug.state
-                });
-            });
-            return Promise.resolve(result);
-        });
-    };
-    Client.prototype.listGroups = function (session, name, cursor, limit) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.listGroups(name, cursor, limit).then(function (response) {
-            var result = {
-                groups: []
-            };
-            if (response.groups == null) {
-                return Promise.resolve(result);
-            }
-            result.cursor = response.cursor;
-            response.groups.forEach(function (ug) {
-                result.groups.push({
-                    avatar_url: ug.avatar_url,
-                    create_time: ug.create_time,
-                    creator_id: ug.creator_id,
-                    description: ug.description,
-                    edge_count: ug.edge_count,
-                    id: ug.id,
-                    lang_tag: ug.lang_tag,
-                    max_count: ug.max_count,
-                    metadata: ug.metadata ? JSON.parse(ug.metadata) : null,
-                    name: ug.name,
-                    open: ug.open,
-                    update_time: ug.update_time
-                });
-            });
-            return Promise.resolve(result);
-        });
-    };
-    Client.prototype.linkCustom = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.linkCustom(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.linkDevice = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.linkDevice(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.linkEmail = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.linkEmail(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.linkFacebook = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.linkFacebook(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.linkGoogle = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.linkGoogle(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.linkGameCenter = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.linkGameCenter(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.linkSteam = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.linkSteam(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.listFriends = function (session) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.listFriends().then(function (response) {
-            var result = {
-                friends: []
-            };
-            if (response.friends == null) {
-                return Promise.resolve(result);
-            }
-            response.friends.forEach(function (f) {
-                result.friends.push({
-                    user: {
-                        avatar_url: f.user.avatar_url,
-                        create_time: f.user.create_time,
-                        display_name: f.user.display_name,
-                        edge_count: f.user.edge_count,
-                        facebook_id: f.user.facebook_id,
-                        gamecenter_id: f.user.gamecenter_id,
-                        google_id: f.user.google_id,
-                        id: f.user.id,
-                        lang_tag: f.user.lang_tag,
-                        location: f.user.location,
-                        online: f.user.online,
-                        steam_id: f.user.steam_id,
-                        timezone: f.user.timezone,
-                        update_time: f.user.update_time,
-                        username: f.user.username,
-                        metadata: f.user.metadata ? JSON.parse(f.user.metadata) : null
-                    },
-                    state: f.state
-                });
-            });
-            return Promise.resolve(result);
-        });
-    };
-    Client.prototype.listLeaderboardRecords = function (session, leaderboardId, ownerIds, limit, cursor) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.listLeaderboardRecords(leaderboardId, ownerIds, limit, cursor).then(function (response) {
-            var list = {
-                next_cursor: response.next_cursor,
-                prev_cursor: response.prev_cursor,
-                owner_records: [],
-                records: []
-            };
-            if (response.owner_records != null) {
-                response.owner_records.forEach(function (o) {
-                    list.owner_records.push({
-                        expiry_time: o.expiry_time,
-                        leaderboard_id: o.leaderboard_id,
-                        metadata: o.metadata ? JSON.parse(o.metadata) : undefined,
-                        num_score: o.num_score,
-                        owner_id: o.owner_id,
-                        rank: Number(o.rank),
-                        score: Number(o.score),
-                        subscore: Number(o.subscore),
-                        update_time: o.update_time,
-                        username: o.username
-                    });
-                });
-            }
-            if (response.records != null) {
-                response.records.forEach(function (o) {
-                    list.records.push({
-                        expiry_time: o.expiry_time,
-                        leaderboard_id: o.leaderboard_id,
-                        metadata: o.metadata ? JSON.parse(o.metadata) : undefined,
-                        num_score: o.num_score,
-                        owner_id: o.owner_id,
-                        rank: Number(o.rank),
-                        score: Number(o.score),
-                        subscore: Number(o.subscore),
-                        update_time: o.update_time,
-                        username: o.username
-                    });
-                });
-            }
-            return Promise.resolve(list);
-        });
-    };
-    Client.prototype.listMatches = function (session, limit, authoritative, label, minSize, maxSize) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.listMatches(limit, authoritative, label, minSize, maxSize);
-    };
-    Client.prototype.listNotifications = function (session, limit, cacheableCursor) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.listNotifications(limit, cacheableCursor).then(function (response) {
-            var result = {
-                cacheable_cursor: response.cacheable_cursor,
-                notifications: [],
-            };
-            if (response.notifications == null) {
-                return Promise.resolve(result);
-            }
-            response.notifications.forEach(function (n) {
-                result.notifications.push({
-                    code: n.code,
-                    create_time: n.create_time,
-                    id: n.id,
-                    persistent: n.persistent,
-                    sender_id: n.sender_id,
-                    subject: n.subject,
-                    content: n.content ? JSON.parse(n.content) : undefined
-                });
-            });
-            return Promise.resolve(result);
-        });
-    };
-    Client.prototype.listStorageObjects = function (session, collection, userId, limit, cursor) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.listStorageObjects(collection, userId, limit, cursor).then(function (response) {
-            var result = {
-                objects: [],
-                cursor: response.cursor
-            };
-            if (response.objects == null) {
-                return Promise.resolve(result);
-            }
-            response.objects.forEach(function (o) {
-                result.objects.push({
-                    collection: o.collection,
-                    key: o.key,
-                    permission_read: o.permission_read,
-                    permission_write: o.permission_write,
-                    value: o.value ? JSON.parse(o.value) : null,
-                    version: o.version,
-                    user_id: o.user_id,
-                    create_time: o.create_time,
-                    update_time: o.update_time
-                });
-            });
-            return Promise.resolve(result);
-        });
-    };
-    Client.prototype.promoteGroupUsers = function (session, groupId, ids) {
-        var _this = this;
-        this.configuration.bearerToken = (session && session.token);
-        var urlPath = "/v2/group/" + groupId + "/promote";
-        var queryParams = {
-            user_ids: ids
-        };
-        var urlQuery = "?" + Object.keys(queryParams)
-            .map(function (k) {
-            if (queryParams[k] instanceof Array) {
-                return queryParams[k].reduce(function (prev, curr) {
-                    return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
-                }, "");
-            }
-            else {
-                if (queryParams[k] != null) {
-                    return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
-                }
-            }
-        })
-            .join("");
-        var fetchOptions = __assign({ method: "POST" });
-        var headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        };
-        if (this.configuration.bearerToken) {
-            headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
-        }
-        else if (this.configuration.username) {
-            headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        fetchOptions.headers = __assign({}, headers);
-        return Promise.race([
-            fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            }),
-            new Promise(function (_, reject) {
-                return setTimeout(reject, _this.configuration.timeoutMs, "Request timed out.");
-            }),
-        ]).then(function (response) {
-            return Promise.resolve(response != undefined);
-        });
-    };
-    Client.prototype.readStorageObjects = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.readStorageObjects(request).then(function (response) {
-            var result = { objects: [] };
-            if (response.objects == null) {
-                return Promise.resolve(result);
-            }
-            response.objects.forEach(function (o) {
-                result.objects.push({
-                    collection: o.collection,
-                    key: o.key,
-                    permission_read: o.permission_read,
-                    permission_write: o.permission_write,
-                    value: o.value ? JSON.parse(o.value) : null,
-                    version: o.version,
-                    user_id: o.user_id,
-                    create_time: o.create_time,
-                    update_time: o.update_time
-                });
-            });
-            return Promise.resolve(result);
-        });
-    };
-    Client.prototype.rpc = function (session, id, input) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.rpcFunc(id, JSON.stringify(input)).then(function (response) {
-            return Promise.resolve({
-                id: response.id,
-                payload: (!response.payload) ? null : JSON.parse(response.payload)
-            });
-        });
-    };
-    Client.prototype.rpcGet = function (id, session, httpKey, input) {
-        var _this = this;
-        if (!httpKey || httpKey == "") {
-            this.configuration.bearerToken = (session && session.token);
-        }
-        else {
-            this.configuration.username = undefined;
-            this.configuration.bearerToken = undefined;
-        }
-        return this.apiClient.rpcFunc2(id, input && JSON.stringify(input) || "", httpKey)
-            .then(function (response) {
-            _this.configuration.username = _this.serverkey;
-            return Promise.resolve({
-                id: response.id,
-                payload: (!response.payload) ? null : JSON.parse(response.payload)
-            });
-        }).catch(function (err) {
-            _this.configuration.username = _this.serverkey;
-            throw err;
-        });
-    };
-    Client.prototype.unlinkCustom = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.unlinkCustom(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.unlinkDevice = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.unlinkDevice(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.unlinkEmail = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.unlinkEmail(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.unlinkFacebook = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.unlinkFacebook(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.unlinkGoogle = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.unlinkGoogle(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.unlinkGameCenter = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.unlinkGameCenter(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.unlinkSteam = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.unlinkSteam(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.updateAccount = function (session, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.updateAccount(request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.updateGroup = function (session, groupId, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.updateGroup(groupId, request).then(function (response) {
-            return response !== undefined;
-        });
-    };
-    Client.prototype.writeLeaderboardRecord = function (session, leaderboardId, request) {
-        this.configuration.bearerToken = (session && session.token);
-        return this.apiClient.writeLeaderboardRecord(leaderboardId, {
-            metadata: request.metadata ? JSON.stringify(request.metadata) : undefined,
-            score: request.score,
-            subscore: request.subscore
-        }).then(function (response) {
-            return Promise.resolve({
-                expiry_time: response.expiry_time,
-                leaderboard_id: response.leaderboard_id,
-                metadata: response.metadata ? JSON.parse(response.metadata) : undefined,
-                num_score: response.num_score,
-                owner_id: response.owner_id,
-                score: Number(response.score),
-                subscore: Number(response.subscore),
-                update_time: response.update_time,
-                username: response.username
-            });
-        });
-    };
-    Client.prototype.writeStorageObjects = function (session, objects) {
-        this.configuration.bearerToken = (session && session.token);
-        var request = { objects: [] };
-        objects.forEach(function (o) {
-            request.objects.push({
-                collection: o.collection,
-                key: o.key,
-                permission_read: o.permission_read,
-                permission_write: o.permission_write,
-                value: JSON.stringify(o.value),
-                version: o.version
-            });
-        });
-        return this.apiClient.writeStorageObjects(request);
-    };
-    return Client;
-}());
-
-exports.Client = Client;
-exports.Session = Session;
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
-
+exports.default = Session;
 },{}],"src/tank-game/realtime-server/client.ts":[function(require,module,exports) {
 "use strict";
 
@@ -8543,112 +3583,991 @@ var http_1 = __importDefault(require("./http"));
 
 var game_framework_1 = require("../game-framework");
 
-var nakama_js_1 = require("@heroiclabs/nakama-js");
+var session_1 = __importDefault(require("./session"));
 
-var NakamaClient = /*#__PURE__*/function () {
-  function NakamaClient() {
-    _classCallCheck(this, NakamaClient);
+var Client = /*#__PURE__*/function () {
+  function Client() {
+    _classCallCheck(this, Client);
 
-    this.gameStorage = new game_framework_1.GameStorage();
-    this.connect();
+    this._gameStorage = new game_framework_1.GameStorage();
+    this._socketListeners = new Map();
   }
 
-  _createClass(NakamaClient, [{
-    key: "connect",
-    value: function connect() {
+  _createClass(Client, [{
+    key: "getMatches",
+    value: function getMatches() {
+      return http_1.default.get('/api/matches');
+    }
+  }, {
+    key: "addMatch",
+    value: function addMatch(name) {
+      var payload = {
+        matchName: name
+      };
+      return http_1.default.post('/api/matches', payload);
+    }
+  }, {
+    key: "addUser",
+    value: function addUser() {
       var _this = this;
 
-      if (this.gameStorage.session) {
-        this.connectToSocket();
+      if (!isNaN(this._gameStorage.userId)) {
         return;
       }
 
-      var userId = this.gameStorage.userId;
-      if (!userId) userId = game_framework_1.MathLib.getRandomInt(1000).toString();
+      var userId = this._gameStorage.userId;
+      if (!userId) userId = game_framework_1.MathLib.getRandomInt(1000);
       var payload = {
-        userId: "some-user-".concat(userId)
+        userId: userId
       };
       http_1.default.post('/api/users', payload).then(function (response) {
-        console.info("Successfully authenticated:", response);
-        _this.gameStorage.userId = payload.userId;
-        _this.gameStorage.session = response.data;
-
-        _this.connectToSocket();
-
-        _this.getMatches(response.data);
+        _this._gameStorage.session = new session_1.default(userId);
+        _this._gameStorage.userId = userId;
       });
     }
   }, {
-    key: "getMatches",
-    value: function getMatches(session) {
-      http_1.default.post('/api/matches', session).then(function (response) {
-        console.log(response);
-      });
+    key: "getMatch",
+    value: function getMatch(matchId) {
+      return http_1.default.get("/api/matches/".concat(matchId));
     }
   }, {
-    key: "connectToSocket",
-    value: function connectToSocket() {
+    key: "getMatchState",
+    value: function getMatchState(matchId) {
+      return http_1.default.get("/api/matches/".concat(matchId, "/states"));
+    }
+  }, {
+    key: "connect",
+    value: function connect(matchId, userId, afterJoinMatch) {
       var _this2 = this;
 
-      var useSSL = false;
-      var verboseLogging = false;
-      var createStatus = false;
-      this._socket = this._createClient().createSocket(useSSL, verboseLogging);
-      console.log(this._socket);
-      var session = this.gameStorage.session;
-
-      this._socket.connect(session, createStatus).then(function (session) {
-        console.log('socket session', session);
-
-        _this2.createMatch();
+      return http_1.default.post("/api/matches/".concat(matchId, "/users/").concat(userId), null).then(function (response) {
+        _this2.connectToWebSocket(afterJoinMatch);
       });
     }
   }, {
-    key: "createMatch",
-    value: function createMatch() {
+    key: "connectToWebSocket",
+    value: function connectToWebSocket(afterJoinMatch) {
       var _this3 = this;
 
-      this._socket.send({
-        match_create: {}
-      }).then(function (response) {
-        console.log("Created match with ID:", response.match);
-        _this3.gameStorage.matchId = response.match.match_id;
+      this._webSocket = new WebSocket("ws://localhost:3000");
+      console.log('connect');
 
-        _this3.addOpponentToMatch(response.match.match_id);
-      });
-    }
-  }, {
-    key: "addOpponentToMatch",
-    value: function addOpponentToMatch(matchId) {
-      var session = this.gameStorage.session;
+      this._webSocket.onopen = function (ev) {
+        console.log('connected');
+        if (afterJoinMatch != null) afterJoinMatch();
+      };
 
-      this._socket.send({
-        match_join: {
-          match_id: matchId,
-          token: session.token
+      this._webSocket.onclose = function (ev) {
+        console.log('disconnected');
+      };
+
+      this._webSocket.onmessage = function (messageEvent) {
+        console.log(messageEvent);
+        var gameData = JSON.parse(messageEvent.data);
+
+        var listeners = _this3._socketListeners.get(gameData.type);
+
+        console.log(listeners);
+        if (!listeners) return;
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = listeners[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var listener = _step.value;
+            listener(gameData);
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return != null) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
         }
-      }).then(function (response) {
-        console.log("match join", response.match);
-        var match = response.match;
-        match.presences.forEach(function (opponent) {
-          console.log("User id %o, username %o.", opponent.user_id, opponent.username);
-        });
-      });
+      };
+
+      this._webSocket.onerror = function (error) {
+        console.log(error);
+      };
     }
   }, {
-    key: "_createClient",
-    value: function _createClient() {
-      var client = new nakama_js_1.Client("defaultkey", "95.216.171.225", '7350');
-      client.useSSL = true;
-      return client;
+    key: "addSocketListener",
+    value: function addSocketListener(eventType, listener) {
+      var socketListeners = this._socketListeners.get(eventType);
+
+      if (!socketListeners) {
+        socketListeners = [];
+
+        this._socketListeners.set(eventType, socketListeners);
+      }
+
+      socketListeners.push(listener);
+    }
+  }, {
+    key: "sendGameData",
+    value: function sendGameData(data) {
+      if (this._webSocket == null) {
+        throw new Error('WebSocket is not connect');
+      }
+
+      this._webSocket.send(JSON.stringify(data));
+    }
+  }, {
+    key: "disconnect",
+    value: function disconnect(matchId, userId) {
+      return http_1.default.delete("/api/matches/".concat(matchId, "/users/").concat(userId), null);
+    }
+  }], [{
+    key: "instance",
+    get: function get() {
+      if (this._instance == null) this._instance = new Client();
+      return this._instance;
     }
   }]);
 
-  return NakamaClient;
+  return Client;
 }();
 
-exports.default = NakamaClient;
-},{"./http":"src/tank-game/realtime-server/http.ts","../game-framework":"src/tank-game/game-framework.ts","@heroiclabs/nakama-js":"node_modules/@heroiclabs/nakama-js/dist/nakama-js.umd.js"}],"src/tank-game/game.ts":[function(require,module,exports) {
+exports.default = Client;
+},{"./http":"src/tank-game/realtime-server/http.ts","../game-framework":"src/tank-game/game-framework.ts","./session":"src/tank-game/realtime-server/session.ts"}],"src/tank-game/tank/tank.ts":[function(require,module,exports) {
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var game_framework_1 = require("../game-framework");
+
+var double_barreled_tank_tower_1 = require("./double-barreled-tank-tower");
+
+var simple_tank_tower_1 = require("./simple-tank-tower");
+
+var simple_tank_bumper_1 = require("./simple-tank-bumper");
+
+var ammunition_1 = require("./ammunition");
+
+var tank_directions_1 = require("./tank-directions");
+
+var GameData_1 = require("../realtime-server/GameData");
+
+var client_1 = __importDefault(require("../realtime-server/client"));
+
+var Damage = /*#__PURE__*/function (_game_framework_1$Bas) {
+  _inherits(Damage, _game_framework_1$Bas);
+
+  function Damage(positionX, positionY) {
+    var _this;
+
+    _classCallCheck(this, Damage);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Damage).call(this));
+    _this.health = 100;
+
+    _this.setPosition(positionX, positionY);
+
+    return _this;
+  }
+
+  _createClass(Damage, [{
+    key: "draw",
+    value: function draw(ctx, deviceRatio) {
+      ctx.rect(this.positionX, this.positionY, this.health, 10);
+      ctx.fillStyle = game_framework_1.Colors.green;
+      ctx.fillRect(this.positionX, this.positionY, this.health, 10);
+    }
+  }, {
+    key: "setPosition",
+    value: function setPosition(positionX, positionY) {
+      this.positionX = positionX;
+      this.positionY = positionY;
+    }
+  }, {
+    key: "remove",
+    value: function remove(damage) {
+      this.health -= damage;
+    }
+  }, {
+    key: "isLastDamage",
+    value: function isLastDamage(damage) {
+      return this.health - damage < 0;
+    }
+  }]);
+
+  return Damage;
+}(game_framework_1.BaseDrawObject);
+
+exports.Damage = Damage;
+
+var Tank = /*#__PURE__*/function (_game_framework_1$Bas2) {
+  _inherits(Tank, _game_framework_1$Bas2);
+
+  function Tank(startPositionX, startPositionY, speed) {
+    var _this2;
+
+    _classCallCheck(this, Tank);
+
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Tank).call(this));
+    _this2.ammunition = new ammunition_1.TankAmunnition();
+    _this2._currentDirection = tank_directions_1.TankDirections.Up;
+    _this2.positionX = startPositionX;
+    _this2.positionY = startPositionY;
+    _this2.speed = speed;
+    _this2._bumber = new simple_tank_bumper_1.SimpleTankBumber(startPositionX, startPositionY);
+    _this2._towers = [new simple_tank_tower_1.SimpleTankTower(startPositionX, startPositionY), new double_barreled_tank_tower_1.DoubleBarreledTankTower(startPositionX, startPositionY)];
+    _this2.tower = _this2._towers[0];
+    _this2._storage = new game_framework_1.GameStorage();
+    _this2.damage = new Damage(startPositionX - 50, startPositionY + 60);
+    return _this2;
+  }
+
+  _createClass(Tank, [{
+    key: "addAmunnition",
+    value: function addAmunnition(ammunition) {
+      this.ammunition.add(ammunition);
+    }
+  }, {
+    key: "changeTower",
+    value: function changeTower() {
+      var _this3 = this;
+
+      var tankTower = this._towers.filter(function (el) {
+        return el != _this3.tower;
+      })[0];
+
+      tankTower.setPosition(this.positionX, this.positionY);
+      tankTower.turn(this._currentDirection);
+      this.tower = tankTower;
+    }
+  }, {
+    key: "move",
+    value: function move(direction) {
+      if (this._currentDirection != direction) {
+        this._turn(direction);
+
+        return;
+      }
+
+      switch (direction) {
+        case tank_directions_1.TankDirections.Up:
+          this.positionY -= this.speed * this.deviceRatio;
+          break;
+
+        case tank_directions_1.TankDirections.Down:
+          this.positionY += this.speed * this.deviceRatio;
+          break;
+
+        case tank_directions_1.TankDirections.Right:
+          this.positionX += this.speed * this.deviceRatio;
+          break;
+
+        case tank_directions_1.TankDirections.Left:
+          this.positionX -= this.speed * this.deviceRatio;
+          break;
+      }
+
+      var client = client_1.default.instance;
+      client.sendGameData(new GameData_1.GameData(this._storage.userId, GameData_1.GameEventType.ChangePosition, {
+        positionX: this.positionX,
+        positionY: this.positionY,
+        direction: direction
+      }));
+    }
+  }, {
+    key: "_turn",
+    value: function _turn(direction) {
+      var directions = [tank_directions_1.TankDirections.Up, tank_directions_1.TankDirections.Right, tank_directions_1.TankDirections.Down, tank_directions_1.TankDirections.Left];
+      var currentDirectionIndex = directions.indexOf(this._currentDirection);
+      var currentDirectionScope = this.getCurrentDirectionScope(directions, currentDirectionIndex);
+      console.log(currentDirectionScope);
+      var currentDirectionScopeIndex = currentDirectionScope.indexOf(this._currentDirection);
+      var whereDirectionIndex = currentDirectionScope.indexOf(direction);
+
+      if (whereDirectionIndex == -1) {
+        whereDirectionIndex = 2;
+      }
+
+      if (whereDirectionIndex > currentDirectionScopeIndex) {
+        currentDirectionIndex++;
+        if (currentDirectionIndex > directions.length - 1) currentDirectionIndex = 0;
+
+        this._bumber.turn(false);
+
+        this.tower.turn(direction);
+      } else {
+        currentDirectionIndex--;
+        if (currentDirectionIndex < 0) currentDirectionIndex = directions.length - 1;
+
+        this._bumber.turn(true);
+
+        this.tower.turn(direction);
+      }
+
+      this._currentDirection = directions[currentDirectionIndex];
+    }
+  }, {
+    key: "getCurrentDirectionScope",
+    value: function getCurrentDirectionScope(directions, currentIndex) {
+      var scope = [directions[currentIndex]];
+      var nextIndex = currentIndex + 1;
+      var prevIndex = currentIndex - 1;
+
+      if (nextIndex > directions.length - 1) {
+        nextIndex = 0;
+      }
+
+      if (prevIndex < 0) {
+        prevIndex = directions.length - 1;
+      }
+
+      scope.unshift(directions[prevIndex]);
+      scope.push(directions[nextIndex]);
+      console.log("scope indexes", prevIndex, currentIndex, nextIndex);
+      return scope;
+    }
+  }, {
+    key: "fire",
+    value: function fire() {
+      return this.tower.fire(this.ammunition, this._currentDirection);
+    }
+  }, {
+    key: "draw",
+    value: function draw(ctx, deviceRatio) {
+      this.deviceRatio = deviceRatio;
+
+      this._bumber.setPosition(this.positionX, this.positionY);
+
+      this._bumber.draw(ctx, deviceRatio);
+
+      this.tower.setPosition(this.positionX, this.positionY);
+      this.tower.draw(ctx, deviceRatio);
+      this.damage.setPosition(this.positionX - 50, this.positionY + 60);
+      this.damage.draw(ctx, deviceRatio);
+    }
+  }]);
+
+  return Tank;
+}(game_framework_1.BaseDrawObject);
+
+exports.Tank = Tank;
+},{"../game-framework":"src/tank-game/game-framework.ts","./double-barreled-tank-tower":"src/tank-game/tank/double-barreled-tank-tower.ts","./simple-tank-tower":"src/tank-game/tank/simple-tank-tower.ts","./simple-tank-bumper":"src/tank-game/tank/simple-tank-bumper.ts","./ammunition":"src/tank-game/tank/ammunition.ts","./tank-directions":"src/tank-game/tank/tank-directions.ts","../realtime-server/GameData":"src/tank-game/realtime-server/GameData.ts","../realtime-server/client":"src/tank-game/realtime-server/client.ts"}],"src/tank-game/enemies/enemy.ts":[function(require,module,exports) {
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var game_framework_1 = require("../game-framework");
+
+var bullet_1 = require("../bullets/bullet");
+
+var tank_1 = require("../tank/tank");
+
+var tank_directions_1 = require("../tank/tank-directions");
+
+var Enemy = /*#__PURE__*/function (_game_framework_1$Bas) {
+  _inherits(Enemy, _game_framework_1$Bas);
+
+  function Enemy(startPositionX, startPositionY, speedLevel) {
+    var _this;
+
+    _classCallCheck(this, Enemy);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Enemy).call(this));
+    _this.positionX = startPositionX;
+    _this.positionY = startPositionY;
+    _this._speedLevel = speedLevel;
+    _this._head = new EnemyHead();
+    _this._gun1 = new EnemyGun();
+    _this._gun2 = new EnemyGun();
+    _this.damage = new tank_1.Damage(startPositionX, startPositionY - 20);
+    _this.width = 30;
+    _this.height = 60;
+    return _this;
+  }
+
+  _createClass(Enemy, [{
+    key: "draw",
+    value: function draw(ctx, deviceRatio) {
+      this._head.draw(ctx, deviceRatio, this.positionX, this.positionY);
+
+      this._gun1.draw(ctx, deviceRatio, this.positionX - 12 * deviceRatio, this.positionY + 30 * deviceRatio);
+
+      this._gun2.draw(ctx, deviceRatio, this.positionX + 50 * deviceRatio, this.positionY + 30 * deviceRatio);
+
+      this.damage.setPosition(this.positionX, this.positionY - 20);
+      this.damage.draw(ctx, deviceRatio);
+      this.move(deviceRatio);
+    }
+  }, {
+    key: "move",
+    value: function move(deviceRatio) {
+      this.positionY += game_framework_1.MathLib.getRandomInt(2) * this._speedLevel * deviceRatio;
+    }
+  }, {
+    key: "fire",
+    value: function fire() {
+      return this._gun1.fire();
+    }
+  }]);
+
+  return Enemy;
+}(game_framework_1.BaseDrawObject);
+
+exports.Enemy = Enemy;
+
+var EnemyHead = /*#__PURE__*/function (_game_framework_1$Bas2) {
+  _inherits(EnemyHead, _game_framework_1$Bas2);
+
+  function EnemyHead() {
+    var _this2;
+
+    _classCallCheck(this, EnemyHead);
+
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(EnemyHead).call(this));
+    _this2._imageHead = new game_framework_1.GameImage("/assets/img/enemy head.png");
+    _this2.width = 50;
+    _this2.height = 75;
+    return _this2;
+  }
+
+  _createClass(EnemyHead, [{
+    key: "_drawPart",
+    value: function _drawPart(ctx, deviceRatio) {
+      ctx.drawImage(this._imageHead, this.positionX, this.positionY, this.width * deviceRatio, this.height * deviceRatio);
+    }
+  }]);
+
+  return EnemyHead;
+}(game_framework_1.BaseDrawObjectPart);
+
+var EnemyGun = /*#__PURE__*/function (_game_framework_1$Bas3) {
+  _inherits(EnemyGun, _game_framework_1$Bas3);
+
+  function EnemyGun() {
+    var _this3;
+
+    _classCallCheck(this, EnemyGun);
+
+    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(EnemyGun).call(this));
+    _this3.width = 12;
+    _this3.height = 12;
+    _this3._imageGun = new game_framework_1.GameImage("/assets/img/enemy gun.png");
+    _this3._pistols = [new EnemyGunPistol(), new EnemyGunPistol(), new EnemyGunPistol(), new EnemyGunPistol()];
+    return _this3;
+  }
+
+  _createClass(EnemyGun, [{
+    key: "_drawPart",
+    value: function _drawPart(ctx, deviceRatio) {
+      ctx.drawImage(this._imageGun, this.positionX, this.positionY, this.width * deviceRatio, this.height * deviceRatio);
+
+      for (var i = 0; i < this._pistols.length; i++) {
+        this._pistols[i].draw(ctx, deviceRatio, this.positionX + this._pistols[i].width * deviceRatio * i, this.positionY + 10 * deviceRatio);
+      }
+    }
+  }, {
+    key: "fire",
+    value: function fire() {
+      return [new bullet_1.Bullet(this.positionX, this.positionY, tank_directions_1.TankDirections.Up)];
+    }
+  }]);
+
+  return EnemyGun;
+}(game_framework_1.BaseDrawObjectPart);
+
+var EnemyGunPistol = /*#__PURE__*/function (_game_framework_1$Bas4) {
+  _inherits(EnemyGunPistol, _game_framework_1$Bas4);
+
+  function EnemyGunPistol() {
+    var _this4;
+
+    _classCallCheck(this, EnemyGunPistol);
+
+    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(EnemyGunPistol).call(this));
+    _this4._imageGunPistol = new game_framework_1.GameImage("/assets/img/enemy gun pistol.png");
+    _this4.width = 3;
+    _this4.height = 20;
+    return _this4;
+  }
+
+  _createClass(EnemyGunPistol, [{
+    key: "_drawPart",
+    value: function _drawPart(ctx, deviceRatio) {
+      ctx.drawImage(this._imageGunPistol, this.positionX, this.positionY, this.width * deviceRatio, this.height * deviceRatio);
+    }
+  }]);
+
+  return EnemyGunPistol;
+}(game_framework_1.BaseDrawObjectPart);
+},{"../game-framework":"src/tank-game/game-framework.ts","../bullets/bullet":"src/tank-game/bullets/bullet.ts","../tank/tank":"src/tank-game/tank/tank.ts","../tank/tank-directions":"src/tank-game/tank/tank-directions.ts"}],"src/tank-game/components/BaseComponent.ts":[function(require,module,exports) {
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var BaseComponent = /*#__PURE__*/function () {
+  function BaseComponent() {
+    _classCallCheck(this, BaseComponent);
+  }
+
+  _createClass(BaseComponent, [{
+    key: "registerEvents",
+    value: function registerEvents() {}
+  }]);
+
+  return BaseComponent;
+}();
+
+exports.BaseComponent = BaseComponent;
+},{}],"src/tank-game/components/MatchComponent.ts":[function(require,module,exports) {
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var BaseComponent_1 = require("./BaseComponent");
+
+var game_framework_1 = require("../game-framework");
+
+var client_1 = __importDefault(require("../realtime-server/client"));
+
+var GameData_1 = require("../realtime-server/GameData");
+
+var Match = function Match() {
+  _classCallCheck(this, Match);
+};
+
+exports.Match = Match;
+
+var MatchComponent = /*#__PURE__*/function (_BaseComponent_1$Base) {
+  _inherits(MatchComponent, _BaseComponent_1$Base);
+
+  function MatchComponent(match, _joinMatch) {
+    var _this;
+
+    _classCallCheck(this, MatchComponent);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MatchComponent).call(this));
+    _this._joinMatch = _joinMatch;
+    _this._match = match;
+    _this._storage = new game_framework_1.GameStorage();
+    _this._client = client_1.default.instance;
+    return _this;
+  }
+
+  _createClass(MatchComponent, [{
+    key: "render",
+    value: function render() {
+      var buttonId = "join_to_match_".concat(this._match.id);
+      var isJoin = this._storage.matchId == this._match.id;
+      var buttonText = isJoin ? 'Unjoin' : 'Join';
+      return "<div class=\"match\">".concat(this._match.name, " <button type=\"button\" id=\"").concat(buttonId, "\">").concat(buttonText, "</button></div>");
+    }
+  }, {
+    key: "registerEvents",
+    value: function registerEvents() {
+      var _this2 = this;
+
+      var buttonId = "join_to_match_".concat(this._match.id);
+      document.getElementById(buttonId).addEventListener('click', function (event) {
+        console.log('join click', _this2._storage.userId);
+
+        if (!isNaN(_this2._storage.matchId) && _this2._storage.matchId != 0) {
+          var matchId = _this2._storage.matchId;
+
+          _this2._client.disconnect(matchId, _this2._storage.userId).then(function (response) {
+            var previousButtonId = "join_to_match_".concat(matchId);
+            console.log(previousButtonId);
+            document.getElementById(previousButtonId).innerText = 'Join';
+
+            _this2._client.sendGameData(new GameData_1.GameData(_this2._storage.userId, GameData_1.GameEventType.UnJoinPlayer));
+
+            _this2._joinMatch(matchId);
+          });
+        }
+
+        if (_this2._storage.matchId == _this2._match.id) {
+          _this2._storage.matchId = 0;
+          return;
+        }
+
+        _this2._client.connect(_this2._match.id, _this2._storage.userId, function () {
+          var position = _this2._joinMatch(_this2._match.id);
+
+          _this2._client.sendGameData(new GameData_1.GameData(_this2._storage.userId, GameData_1.GameEventType.JoinPlayer, position));
+        }).then(function (response) {
+          console.log(response);
+          document.getElementById(buttonId).innerText = 'Unjoin';
+          _this2._storage.matchId = _this2._match.id;
+        });
+      });
+    }
+  }]);
+
+  return MatchComponent;
+}(BaseComponent_1.BaseComponent);
+
+exports.MatchComponent = MatchComponent;
+},{"./BaseComponent":"src/tank-game/components/BaseComponent.ts","../game-framework":"src/tank-game/game-framework.ts","../realtime-server/client":"src/tank-game/realtime-server/client.ts","../realtime-server/GameData":"src/tank-game/realtime-server/GameData.ts"}],"src/tank-game/components/MatchesComponent.ts":[function(require,module,exports) {
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var BaseComponent_1 = require("./BaseComponent");
+
+var MatchComponent_1 = require("./MatchComponent");
+
+var MatchesComponent = /*#__PURE__*/function (_BaseComponent_1$Base) {
+  _inherits(MatchesComponent, _BaseComponent_1$Base);
+
+  function MatchesComponent(_elementId, _matches, _joinMatch) {
+    var _this;
+
+    _classCallCheck(this, MatchesComponent);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MatchesComponent).call(this));
+    _this._elementId = _elementId;
+    _this._matches = _matches;
+    _this._joinMatch = _joinMatch;
+    return _this;
+  }
+
+  _createClass(MatchesComponent, [{
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+
+      this._components = this._matches.map(function (x) {
+        return new MatchComponent_1.MatchComponent(x, _this2._joinMatch);
+      });
+      document.getElementById(this._elementId).innerHTML = this._components.map(function (x) {
+        return x.render();
+      }).join('');
+
+      this._components.forEach(function (x) {
+        return x.registerEvents();
+      });
+    }
+  }, {
+    key: "update",
+    value: function update(matches) {
+      this._matches = matches;
+
+      this._clear();
+
+      this.render();
+    }
+  }, {
+    key: "add",
+    value: function add(match) {
+      this._matches.push(match);
+
+      this.update(this._matches);
+    }
+  }, {
+    key: "_clear",
+    value: function _clear() {
+      document.getElementById(this._elementId).innerHTML = "";
+    }
+  }]);
+
+  return MatchesComponent;
+}(BaseComponent_1.BaseComponent);
+
+exports.default = MatchesComponent;
+},{"./BaseComponent":"src/tank-game/components/BaseComponent.ts","./MatchComponent":"src/tank-game/components/MatchComponent.ts"}],"src/tank-game/tank/box.ts":[function(require,module,exports) {
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var game_framework_1 = require("../game-framework");
+
+var list_1 = require("../../common/list");
+
+var Box = /*#__PURE__*/function (_game_framework_1$Bas) {
+  _inherits(Box, _game_framework_1$Bas);
+
+  function Box(strategy, sceneWidth, sceneHeight) {
+    var _this;
+
+    _classCallCheck(this, Box);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Box).call(this));
+    _this._startPositionX = Math.random() * sceneWidth;
+    _this._startPositionY = Math.random() * sceneHeight;
+    _this._interval = randomRange(150, 300);
+    _this._isShowImage = true;
+    _this._image = new game_framework_1.GameImage("/assets/img/".concat(BoxTypeImage[strategy.imageType], ".png"));
+    return _this;
+  }
+
+  _createClass(Box, [{
+    key: "draw",
+    value: function draw(ctx, deviceRatio) {
+      if (this._isShowImage) {
+        ctx.drawImage(this._image, this._startPositionX, this._startPositionY, 100, 100);
+      }
+
+      this._isShowImage = !this._isShowImage;
+      this._interval--;
+    }
+  }]);
+
+  return Box;
+}(game_framework_1.BaseDrawObject);
+
+exports.Box = Box;
+
+function randomRange(min, max) {
+  return ~~(Math.random() * (max - min + 1)) + min;
+}
+
+exports.randomRange = randomRange;
+
+var BaseBoxStrategy = /*#__PURE__*/function () {
+  function BaseBoxStrategy(imageType) {
+    _classCallCheck(this, BaseBoxStrategy);
+
+    this._imageType = imageType;
+  }
+
+  _createClass(BaseBoxStrategy, [{
+    key: "imageType",
+    get: function get() {
+      return this._imageType;
+    }
+  }]);
+
+  return BaseBoxStrategy;
+}();
+
+var WeaponBoxStrategy = /*#__PURE__*/function (_BaseBoxStrategy) {
+  _inherits(WeaponBoxStrategy, _BaseBoxStrategy);
+
+  function WeaponBoxStrategy() {
+    _classCallCheck(this, WeaponBoxStrategy);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(WeaponBoxStrategy).apply(this, arguments));
+  }
+
+  _createClass(WeaponBoxStrategy, [{
+    key: "apply",
+    value: function apply() {
+      throw new Error("Method not implemented.");
+    }
+  }]);
+
+  return WeaponBoxStrategy;
+}(BaseBoxStrategy);
+
+var HealthBoxStrategy = /*#__PURE__*/function (_BaseBoxStrategy2) {
+  _inherits(HealthBoxStrategy, _BaseBoxStrategy2);
+
+  function HealthBoxStrategy() {
+    _classCallCheck(this, HealthBoxStrategy);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(HealthBoxStrategy).apply(this, arguments));
+  }
+
+  _createClass(HealthBoxStrategy, [{
+    key: "apply",
+    value: function apply() {
+      throw new Error("Method not implemented.");
+    }
+  }]);
+
+  return HealthBoxStrategy;
+}(BaseBoxStrategy);
+
+var BoxStrategyFactory = /*#__PURE__*/function () {
+  function BoxStrategyFactory() {
+    _classCallCheck(this, BoxStrategyFactory);
+  }
+
+  _createClass(BoxStrategyFactory, null, [{
+    key: "create",
+    value: function create(typeImage) {
+      switch (typeImage) {
+        case BoxTypeImage.MinShrapnel:
+        case BoxTypeImage.MaxShrapnel:
+        case BoxTypeImage.MinPistols:
+        case BoxTypeImage.MaxPistols:
+          return new WeaponBoxStrategy(typeImage);
+
+        case BoxTypeImage.MaxHealth:
+        case BoxTypeImage.AverageHeath:
+        case BoxTypeImage.MinHealth:
+          return new HealthBoxStrategy(typeImage);
+
+        default:
+          throw new Error("Unknown BoxTypeImage");
+      }
+    }
+  }]);
+
+  return BoxStrategyFactory;
+}();
+
+var BoxFactory = /*#__PURE__*/function () {
+  function BoxFactory() {
+    _classCallCheck(this, BoxFactory);
+  }
+
+  _createClass(BoxFactory, null, [{
+    key: "create",
+    value: function create(sceneWidth, sceneHeight) {
+      var boxTypes = [BoxTypeImage.MinShrapnel, BoxTypeImage.MaxShrapnel, BoxTypeImage.MinPistols, BoxTypeImage.MaxPistols, BoxTypeImage.MaxHealth, BoxTypeImage.AverageHeath, BoxTypeImage.MinHealth];
+      var boxLength = randomRange(15, 30);
+      var boxes = new list_1.List();
+
+      for (var i = 0; i < boxLength; i++) {
+        var boxTypeIndex = randomRange(0, boxTypes.length - 1);
+        var boxType = boxTypes[boxTypeIndex];
+        boxes.push(new Box(BoxStrategyFactory.create(boxType), sceneWidth, sceneHeight));
+      }
+
+      return boxes;
+    }
+  }]);
+
+  return BoxFactory;
+}();
+
+exports.BoxFactory = BoxFactory;
+var BoxTypeImage;
+
+(function (BoxTypeImage) {
+  BoxTypeImage[BoxTypeImage["MinShrapnel"] = 10] = "MinShrapnel";
+  BoxTypeImage[BoxTypeImage["MaxShrapnel"] = 30] = "MaxShrapnel";
+  BoxTypeImage[BoxTypeImage["MinPistols"] = 10] = "MinPistols";
+  BoxTypeImage[BoxTypeImage["MaxPistols"] = 30] = "MaxPistols";
+  BoxTypeImage[BoxTypeImage["MinHealth"] = 25] = "MinHealth";
+  BoxTypeImage[BoxTypeImage["AverageHeath"] = 50] = "AverageHeath";
+  BoxTypeImage[BoxTypeImage["MaxHealth"] = 100] = "MaxHealth";
+})(BoxTypeImage || (BoxTypeImage = {}));
+},{"../game-framework":"src/tank-game/game-framework.ts","../../common/list":"src/common/list.ts"}],"src/tank-game/game.ts":[function(require,module,exports) {
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -8681,15 +4600,23 @@ Object.defineProperty(exports, "__esModule", {
 
 var tank_1 = require("./tank/tank");
 
+var tank_directions_1 = require("./tank/tank-directions");
+
 var ammunition_1 = require("./tank/ammunition");
 
 var game_framework_1 = require("./game-framework");
 
 var enemy_1 = require("./enemies/enemy");
 
+var list_1 = require("../common/list");
+
 var client_1 = __importDefault(require("./realtime-server/client"));
 
-var list_1 = require("../common/list");
+var MatchesComponent_1 = __importDefault(require("./components/MatchesComponent"));
+
+var GameData_1 = require("./realtime-server/GameData");
+
+var box_1 = require("./tank/box");
 
 var RechargeTankTower = /*#__PURE__*/function () {
   function RechargeTankTower(endRifflePosition, step) {
@@ -8775,7 +4702,7 @@ var TankPanelAmmunition = /*#__PURE__*/function () {
   function TankPanelAmmunition(ammunition) {
     _classCallCheck(this, TankPanelAmmunition);
 
-    this._panel = document.getElementsByClassName('tank-ammunition-panel-inner')[0];
+    this._panel = document.getElementsByClassName("tank-ammunition-panel-inner")[0];
     this.init(ammunition);
     ammunition.onchange(this.change);
   }
@@ -8809,7 +4736,7 @@ var TankPanelAmmunition = /*#__PURE__*/function () {
         }
       }
 
-      this._panel.innerHTML = sections.join('');
+      this._panel.innerHTML = sections.join("");
     }
   }, {
     key: "change",
@@ -8819,12 +4746,16 @@ var TankPanelAmmunition = /*#__PURE__*/function () {
   }, {
     key: "drawPanelSection",
     value: function drawPanelSection(key, value) {
-      return '<div class="form-group">' + "<label>".concat(key, "</label>") + "<span id=\"".concat(key, "\">").concat(value, "</span>") + '</div>';
+      return '<div class="form-group">' + "<label>".concat(key, "</label>") + "<span id=\"".concat(key, "\">").concat(value, "</span>") + "</div>";
     }
   }]);
 
   return TankPanelAmmunition;
 }();
+
+var MatchState = function MatchState() {
+  _classCallCheck(this, MatchState);
+};
 
 var TankGame = /*#__PURE__*/function () {
   function TankGame(enemyCount, enemySpeedLevel) {
@@ -8832,49 +4763,57 @@ var TankGame = /*#__PURE__*/function () {
 
     this.enemyCount = enemyCount;
     this.enemySpeedLevel = enemySpeedLevel;
-    this._client = new client_1.default();
+    this._enemies = new list_1.List();
   }
 
   _createClass(TankGame, [{
     key: "start",
-    value: function start() {
+    value: function start(state) {
+      var _this2 = this;
+
       var game = new game_framework_1.Game("scene", this.sceneWidth, this.sceneHeight);
-      var tank = new tank_1.Tank(game.scene.width / 2, game.scene.height - 50 * game.scene.devicePixelRatio, 10);
+      var position = state == null ? {
+        positionX: game.scene.width / 2,
+        positionY: game.scene.height - 50 * game.scene.devicePixelRatio
+      } : state.players[game_framework_1.GameStorage.instance.userId].position;
+      var tank = new tank_1.Tank(position.positionX, position.positionY, 10);
+      if (state != null) tank._currentDirection = position.direction;
       var startTankAmmunition = new ammunition_1.TankAmunnition();
       startTankAmmunition.bullets = 20;
       startTankAmmunition.shrapnels = 30;
       tank.addAmunnition(startTankAmmunition);
       this.tankPanelAmmunition = new TankPanelAmmunition(tank.ammunition);
-      var enemies = this.generateEnemies(this.enemyCount, this.enemySpeedLevel, game.scene.width);
-      var keyboardsEvents = {
-        'ArrowUp': function ArrowUp() {
-          return tank.move(tank_1.TankDirections.Up);
-        },
-        'ArrowDown': function ArrowDown() {
-          return tank.move(tank_1.TankDirections.Down);
-        },
-        'ArrowRight': function ArrowRight() {
-          return tank.move(tank_1.TankDirections.Right);
-        },
-        'ArrowLeft': function ArrowLeft() {
-          return tank.move(tank_1.TankDirections.Left);
-        },
-        'Space': function Space() {
-          return tankFire();
-        },
-        'KeyC': function KeyC() {
-          return tank.changeTower();
-        }
-      };
+      var keyboardsEvents = new Map([["ArrowUp", function () {
+        return tank.move(tank_directions_1.TankDirections.Up);
+      }], ["ArrowDown", function () {
+        return tank.move(tank_directions_1.TankDirections.Down);
+      }], ["ArrowRight", function () {
+        return tank.move(tank_directions_1.TankDirections.Right);
+      }], ["ArrowLeft", function () {
+        return tank.move(tank_directions_1.TankDirections.Left);
+      }], ["Space", function () {
+        return tankFire();
+      }], ["KeyC", function () {
+        return tank.changeTower();
+      }]]);
 
-      if (this.matchId) {
-        this._client.addOpponentToMatch(this.matchId);
+      if (!!state && !!state.players) {
+        Object.keys(state.players).forEach(function (key) {
+          if (key != game_framework_1.GameStorage.instance.userId.toString()) {
+            var _position = state.players[key].position;
+
+            _this2._addEnemyWithoutDraw(parseInt(key), _position.positionX, _position.positionY, _position.direction);
+          }
+        });
       }
 
-      game.scene.addDrawObjects(enemies);
+      var boxes = box_1.BoxFactory.create(game.scene.width, game.scene.height);
+      game.scene.addRandomDrawObjects(boxes);
+      game.scene.addDrawObjects(this._enemies);
       game.scene.addDrawObject(tank);
       game.registerKeyBoardEvents(keyboardsEvents);
       game.run();
+      var selfEnemies = this._enemies;
 
       function tankFire() {
         var bullets = tank.fire();
@@ -8887,8 +4826,8 @@ var TankGame = /*#__PURE__*/function () {
             var bullet = _step2.value;
             game.scene.addDrawObject(bullet);
             var shrapnel = bullet;
-            var animation = typeof shrapnel.createStrikeAnimation == 'function' ? shrapnel.createStrikeAnimation() : null;
-            var event = new game_framework_1.ClashPhysicEvent(bullet, enemies, animation);
+            var animation = typeof shrapnel.createStrikeAnimation == "function" ? shrapnel.createStrikeAnimation() : null;
+            var event = new game_framework_1.ClashPhysicEvent(bullet, selfEnemies, animation);
             game.scene.addPhysicEvent(event);
 
             if (shrapnel.strikingDistance && animation) {
@@ -8917,9 +4856,9 @@ var TankGame = /*#__PURE__*/function () {
     }
   }, {
     key: "restart",
-    value: function restart() {
+    value: function restart(state) {
       this.game.destroy();
-      this.start();
+      this.start(state);
     }
   }, {
     key: "generateGhosts",
@@ -8935,6 +4874,17 @@ var TankGame = /*#__PURE__*/function () {
       return ghostArray;
     }
   }, {
+    key: "dropEnemy",
+    value: function dropEnemy(enemyId) {
+      var tank = this._enemies.find(function (x) {
+        return x.userId == enemyId;
+      });
+
+      this._enemies.remove(tank);
+
+      this.game.scene.removeDrawObject(tank);
+    }
+  }, {
     key: "generateEnemies",
     value: function generateEnemies(enemyCount, enemySpeedLevel, sceneWidth) {
       var enemies = new list_1.List();
@@ -8946,6 +4896,38 @@ var TankGame = /*#__PURE__*/function () {
       }
 
       return enemies;
+    }
+  }, {
+    key: "_addEnemyWithoutDraw",
+    value: function _addEnemyWithoutDraw(enemyId, startPositionX, startPositionY, direction) {
+      var enemyTank = new tank_1.Tank(startPositionX, startPositionY, 10);
+      enemyTank._currentDirection = direction;
+      enemyTank.userId = enemyId;
+
+      this._enemies.push(enemyTank);
+
+      return enemyTank;
+    }
+  }, {
+    key: "addEnemy",
+    value: function addEnemy(enemyId, startPositionX, startPositionY, direction) {
+      var enemyTank = this._addEnemyWithoutDraw(enemyId, startPositionX, startPositionY, direction);
+
+      this.game.scene.addDrawObject(enemyTank);
+    }
+  }, {
+    key: "changePositionEnemy",
+    value: function changePositionEnemy(enemyId, positionX, positionY, direction) {
+      var enemyTanks = this._enemies.filter(function (x) {
+        return x.userId == enemyId;
+      });
+
+      if (!enemyTanks || enemyTanks.length == 0) return;
+      var enemyTank = enemyTanks[0];
+      enemyTank.positionX = positionX;
+      enemyTank.positionY = positionY;
+
+      enemyTank._turn(direction);
     }
   }, {
     key: "sceneWidth",
@@ -8963,11 +4945,68 @@ var TankGame = /*#__PURE__*/function () {
 }();
 
 var tankGame = new TankGame(1, 1);
-tankGame.start();
-document.getElementById('startNewGame').addEventListener('click', function (event) {
-  tankGame.enemyCount = getIntValueFromInput('enemyCount', 1);
-  tankGame.enemySpeedLevel = getIntValueFromInput('enemySpeedLevel', 1);
-  tankGame.matchId = getValueFromInput('matchId', '');
+var client = client_1.default.instance;
+client.addUser();
+client.addSocketListener(GameData_1.GameEventType.JoinPlayer, function (gameData) {
+  if (gameData.userId == game_framework_1.GameStorage.instance.userId) return;
+  tankGame.addEnemy(gameData.userId, gameData.data.positionX, gameData.data.positionY, gameData.data.direction);
+  console.log("addEnemy");
+});
+client.addSocketListener(GameData_1.GameEventType.UnJoinPlayer, function (gameData) {
+  if (gameData.userId == game_framework_1.GameStorage.instance.userId) return;
+  tankGame.dropEnemy(gameData.userId);
+  console.log("dropEnemy");
+});
+client.addSocketListener(GameData_1.GameEventType.ChangePosition, function (gameData) {
+  if (gameData.userId == game_framework_1.GameStorage.instance.userId) return;
+  tankGame.changePositionEnemy(gameData.userId, gameData.data.positionX, gameData.data.positionY, gameData.data.direction);
+  console.log("changePositionEnemy");
+});
+
+function joinMatch(matchId) {
+  client.getMatchState(matchId).then(function (response) {
+    console.log("match state", matchId, response.data);
+
+    if (tankGame.game == null) {
+      tankGame.start(response.data);
+      client.connectToWebSocket();
+    } else {
+      tankGame.restart(response.data);
+    }
+
+    window.focus();
+
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+  });
+  if (tankGame.game == null) return null;
+  var randomPositionX = Math.random() * (tankGame.game.scene.width - 50) * tankGame.game.scene.devicePixelRatio;
+  var randomPositionY = Math.random() * (tankGame.game.scene.height - 50) * tankGame.game.scene.devicePixelRatio;
+  return {
+    direction: tank_directions_1.TankDirections.Down,
+    positionX: randomPositionX,
+    positionY: randomPositionY
+  };
+}
+
+var matches = new MatchesComponent_1.default("matches", [], joinMatch);
+client.getMatches().then(function (response) {
+  matches.update(response.data);
+});
+
+if (game_framework_1.GameStorage.instance.matchId > 0) {
+  joinMatch(game_framework_1.GameStorage.instance.matchId);
+} else {
+  tankGame.start();
+}
+
+document.getElementById("startNewGame").addEventListener("click", function (event) {
+  tankGame.enemyCount = getIntValueFromInput("enemyCount", 1);
+  tankGame.enemySpeedLevel = getIntValueFromInput("enemySpeedLevel", 1);
+  client.getMatches().then(function (response) {
+    matches.update(response.data);
+  });
   tankGame.restart();
   window.focus();
 
@@ -8975,8 +5014,15 @@ document.getElementById('startNewGame').addEventListener('click', function (even
     document.activeElement.blur();
   }
 });
+document.getElementById("add-match").addEventListener("click", function (event) {
+  var matchName = getValueFromInput("match-name");
+  if (matchName === null || matchName.match(/^ *$/) !== null) return;
+  client.addMatch(matchName).then(function (response) {
+    matches.add(response.data);
+  });
+});
 
-function getValueFromInput(inputId, defaultValue) {
+function getValueFromInput(inputId) {
   return document.getElementById(inputId).value;
 }
 
@@ -8985,7 +5031,7 @@ function getIntValueFromInput(inputId, defaultValue) {
   var intValue = parseInt(value);
   return isNaN(intValue) ? defaultValue : intValue;
 }
-},{"./tank/tank":"src/tank-game/tank/tank.ts","./tank/ammunition":"src/tank-game/tank/ammunition.ts","./game-framework":"src/tank-game/game-framework.ts","./enemies/enemy":"src/tank-game/enemies/enemy.ts","./realtime-server/client":"src/tank-game/realtime-server/client.ts","../common/list":"src/common/list.ts"}],"node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./tank/tank":"src/tank-game/tank/tank.ts","./tank/tank-directions":"src/tank-game/tank/tank-directions.ts","./tank/ammunition":"src/tank-game/tank/ammunition.ts","./game-framework":"src/tank-game/game-framework.ts","./enemies/enemy":"src/tank-game/enemies/enemy.ts","../common/list":"src/common/list.ts","./realtime-server/client":"src/tank-game/realtime-server/client.ts","./components/MatchesComponent":"src/tank-game/components/MatchesComponent.ts","./realtime-server/GameData":"src/tank-game/realtime-server/GameData.ts","./tank/box":"src/tank-game/tank/box.ts"}],"node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -9013,7 +5059,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54537" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58137" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

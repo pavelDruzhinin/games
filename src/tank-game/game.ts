@@ -18,7 +18,7 @@ import { List } from "../common/list";
 import Client from "./realtime-server/client";
 import MatchesComponent from "./components/MatchesComponent";
 import { GameEventType, GameData } from "./realtime-server/GameData";
-import { Box, BoxFactory, randomRange } from "./tank/box";
+import { Box, BoxFactory } from "./tank/box";
 
 export class RechargeTankTower {
   startRifflePosition = 0;
@@ -197,10 +197,7 @@ class TankGame {
       });
     }
 
-    let boxes = BoxFactory.create(
-      this.game.scene.width,
-      this.game.scene.height
-    );
+    let boxes = BoxFactory.create(game.scene.width, game.scene.height);
 
     game.scene.addRandomDrawObjects(boxes);
     game.scene.addDrawObjects(this._enemies);

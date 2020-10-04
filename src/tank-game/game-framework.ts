@@ -4,7 +4,7 @@ import { BaseBullet } from "./bullets/base-bullet";
 import { IDamagable } from "./tank/tank";
 import { TankDirections } from "./tank/tank-directions";
 import Session from "./realtime-server/session";
-import { randomRange } from "./tank/box";
+// import { randomRange } from "./tank/box";
 // import { Session } from "@heroiclabs/nakama-js";
 
 export class GameStorage {
@@ -291,18 +291,18 @@ export class Scene {
       this._randomDrawObjects.push(randomDrawObject);
     }
 
-    function* addBoxOnScene(boxes: List<BaseDrawObject>, scene: Scene) {
-      for (const box of boxes) {
-        const random = randomRange(3, 60);
-        yield setTimeout(() => {
-          scene.addDrawObject(box);
-        }, random * 1000);
-      }
-    }
+    // function* addBoxOnScene(boxes: List<BaseDrawObject>, scene: Scene) {
+    //   for (const box of boxes) {
+    // const random = randomRange(3, 60);
+    // yield setTimeout(() => {
+    //   scene.addDrawObject(box);
+    //     // }, random * 1000);
+    //   }
+    // }
 
-    const boxIterator = addBoxOnScene(this._randomDrawObjects, this);
+    // const boxIterator = addBoxOnScene(this._randomDrawObjects, this);
 
-    boxIterator.next();
+    // boxIterator.next();
   }
 
   addDrawObject(drawObject: BaseDrawObject) {
@@ -384,7 +384,7 @@ export class Scene {
 
 export class Game {
   scene: Scene;
-  private _interval: NodeJS.Timeout;
+  private _interval: number;
 
   constructor(canvasId: string, width: number, height: number) {
     this.scene = new Scene(canvasId, width, height);
