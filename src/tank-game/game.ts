@@ -363,6 +363,10 @@ client.addSocketListener(GameEventType.ChangePosition, (gameData: GameData) => {
   console.log("changePositionEnemy");
 });
 
+client.addSocketListener(GameEventType.NewBox, (gameData: GameData) => {
+  console.log("newBox");
+});
+
 function joinMatch(matchId: number) {
   client.getMatchState(matchId).then((response: any) => {
     console.log("match state", matchId, response.data);

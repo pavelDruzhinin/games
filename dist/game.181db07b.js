@@ -1707,6 +1707,7 @@ var GameEventType;
   GameEventType[GameEventType["JoinPlayer"] = 0] = "JoinPlayer";
   GameEventType[GameEventType["UnJoinPlayer"] = 1] = "UnJoinPlayer";
   GameEventType[GameEventType["ChangePosition"] = 2] = "ChangePosition";
+  GameEventType[GameEventType["NewBox"] = 3] = "NewBox";
 })(GameEventType = exports.GameEventType || (exports.GameEventType = {}));
 },{}],"node_modules/axios/lib/helpers/bind.js":[function(require,module,exports) {
 'use strict';
@@ -4962,6 +4963,9 @@ client.addSocketListener(GameData_1.GameEventType.ChangePosition, function (game
   tankGame.changePositionEnemy(gameData.userId, gameData.data.positionX, gameData.data.positionY, gameData.data.direction);
   console.log("changePositionEnemy");
 });
+client.addSocketListener(GameData_1.GameEventType.NewBox, function (gameData) {
+  console.log("newBox");
+});
 
 function joinMatch(matchId) {
   client.getMatchState(matchId).then(function (response) {
@@ -5059,7 +5063,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58590" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65451" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

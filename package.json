@@ -6,7 +6,8 @@
   "scripts": {
     "build": "parcel build index.html",
     "dev": "parcel index.html",
-    "proxy": "node server/app.js"
+    "proxy": "node server/app.js",
+    "box-scheduler": "node server/box-scheduler.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "@heroiclabs/nakama-js": "^2.0.1",
+    "agenda": "^3.1.0",
     "axios": "^0.19.2",
     "body-parser": "^1.19.0",
     "buffer": "^5.5.0",
