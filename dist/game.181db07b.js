@@ -4410,15 +4410,15 @@ var list_1 = require("../../common/list");
 var Box = /*#__PURE__*/function (_game_framework_1$Bas) {
   _inherits(Box, _game_framework_1$Bas);
 
-  function Box(strategy, sceneWidth, sceneHeight) {
+  function Box(strategy, sceneWidth, sceneHeight, positionX, positionY, interval) {
     var _this;
 
     _classCallCheck(this, Box);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Box).call(this));
-    _this._startPositionX = Math.random() * sceneWidth;
-    _this._startPositionY = Math.random() * sceneHeight;
-    _this._interval = randomRange(150, 300);
+    _this._startPositionX = positionX;
+    _this._startPositionY = positionY;
+    _this._interval = interval;
     _this._isShowImage = true;
     _this._image = new game_framework_1.GameImage("/assets/img/".concat(BoxTypeImage[strategy.imageType], ".png"));
     return _this;
@@ -4428,10 +4428,10 @@ var Box = /*#__PURE__*/function (_game_framework_1$Bas) {
     key: "draw",
     value: function draw(ctx, deviceRatio) {
       if (this._isShowImage) {
-        ctx.drawImage(this._image, this._startPositionX, this._startPositionY, 100, 100);
+        ctx.drawImage(this._image, this._startPositionX, this._startPositionY, 30, 30);
       }
 
-      this._isShowImage = !this._isShowImage;
+      this._isShowImage = !(this._interval % 5 == 0);
       this._interval--;
     }
   }]);
@@ -4531,6 +4531,8 @@ var BoxStrategyFactory = /*#__PURE__*/function () {
   return BoxStrategyFactory;
 }();
 
+exports.BoxStrategyFactory = BoxStrategyFactory;
+
 var BoxFactory = /*#__PURE__*/function () {
   function BoxFactory() {
     _classCallCheck(this, BoxFactory);
@@ -4546,7 +4548,7 @@ var BoxFactory = /*#__PURE__*/function () {
       for (var i = 0; i < boxLength; i++) {
         var boxTypeIndex = randomRange(0, boxTypes.length - 1);
         var boxType = boxTypes[boxTypeIndex];
-        boxes.push(new Box(BoxStrategyFactory.create(boxType), sceneWidth, sceneHeight));
+        boxes.push();
       }
 
       return boxes;
@@ -4567,7 +4569,7 @@ var BoxTypeImage;
   BoxTypeImage[BoxTypeImage["MinHealth"] = 25] = "MinHealth";
   BoxTypeImage[BoxTypeImage["AverageHeath"] = 50] = "AverageHeath";
   BoxTypeImage[BoxTypeImage["MaxHealth"] = 100] = "MaxHealth";
-})(BoxTypeImage || (BoxTypeImage = {}));
+})(BoxTypeImage = exports.BoxTypeImage || (exports.BoxTypeImage = {}));
 },{"../game-framework":"src/tank-game/game-framework.ts","../../common/list":"src/common/list.ts"}],"src/tank-game/game.ts":[function(require,module,exports) {
 "use strict";
 
@@ -4765,6 +4767,7 @@ var TankGame = /*#__PURE__*/function () {
     this.enemyCount = enemyCount;
     this.enemySpeedLevel = enemySpeedLevel;
     this._enemies = new list_1.List();
+    this._boxes = {};
   }
 
   _createClass(TankGame, [{
@@ -4809,7 +4812,6 @@ var TankGame = /*#__PURE__*/function () {
       }
 
       var boxes = box_1.BoxFactory.create(game.scene.width, game.scene.height);
-      game.scene.addRandomDrawObjects(boxes);
       game.scene.addDrawObjects(this._enemies);
       game.scene.addDrawObject(tank);
       game.registerKeyBoardEvents(keyboardsEvents);
@@ -4931,6 +4933,15 @@ var TankGame = /*#__PURE__*/function () {
       enemyTank._turn(direction);
     }
   }, {
+    key: "addBox",
+    value: function addBox(nextKey, positionX, positionY, boxType, interval) {
+      var boxTypes = [box_1.BoxTypeImage.MinShrapnel, box_1.BoxTypeImage.MaxShrapnel, box_1.BoxTypeImage.MinPistols, box_1.BoxTypeImage.MaxPistols, box_1.BoxTypeImage.MaxHealth, box_1.BoxTypeImage.AverageHeath, box_1.BoxTypeImage.MinHealth];
+      var box = new box_1.Box(box_1.BoxStrategyFactory.create(boxTypes[boxType]), this.game.scene.width, this.game.scene.height, positionX, positionY, interval);
+      this._boxes[nextKey] = box;
+      this.game.scene.addDrawObject(box);
+      console.log("add new box", box);
+    }
+  }, {
     key: "sceneWidth",
     get: function get() {
       return 800;
@@ -4964,7 +4975,13 @@ client.addSocketListener(GameData_1.GameEventType.ChangePosition, function (game
   console.log("changePositionEnemy");
 });
 client.addSocketListener(GameData_1.GameEventType.NewBox, function (gameData) {
-  console.log("newBox");
+  console.log("create new box behaviour");
+  var _gameData$data = gameData.data,
+      boxLocation = _gameData$data.boxLocation,
+      boxType = _gameData$data.boxType,
+      nextKey = _gameData$data.nextKey,
+      interval = _gameData$data.interval;
+  tankGame.addBox(nextKey, boxLocation.positionX, boxLocation.positionY, boxType, interval);
 });
 
 function joinMatch(matchId) {
@@ -5063,7 +5080,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65451" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55357" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

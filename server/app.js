@@ -129,7 +129,7 @@ class MatchStateMachine {
 
     if (!gameEventType)
       throw new Error(
-        "MatchStateMachine: not found event for type" + gameData.type
+        "MatchStateMachine: not found event for type " + gameData.type
       );
 
     const matchStates = await matchStateRepository.get();
@@ -137,7 +137,7 @@ class MatchStateMachine {
     if (!matchState) {
       console.log("matchStates", matchStates);
       throw new Error(
-        "MatchStateMachine: not found state for event " + gameEventType
+        "MatchStateMachine: not found state or match for event " + gameEventType
       );
     }
 
@@ -171,8 +171,21 @@ class MatchStateMachine {
   }
 
   async _createNewBox(matchState, userId, data) {
+    const { boxLocation, boxType, nextKey, interval } = data;
+    if (!matchState.boxes) {
+      matchState.boxes = {};
+    }
+
+    matchState.boxes[nextKey] = {
+      position: boxLocation,
+      type: boxType,
+      interval,
+    };
+
     const dateNow = new Date();
     console.log(`[${dateNow.toLocaleString()}]: Create new box!`);
+
+    await matchStateRepository.update(matchState);
   }
 }
 

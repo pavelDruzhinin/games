@@ -11,13 +11,16 @@ export class Box extends BaseDrawObject {
   constructor(
     strategy: BaseBoxStrategy,
     sceneWidth: number,
-    sceneHeight: number
+    sceneHeight: number,
+    positionX: number,
+    positionY: number,
+    interval: number
   ) {
     super();
 
-    this._startPositionX = Math.random() * sceneWidth;
-    this._startPositionY = Math.random() * sceneHeight;
-    this._interval = randomRange(150, 300);
+    this._startPositionX = positionX;
+    this._startPositionY = positionY;
+    this._interval = interval;
     this._isShowImage = true;
 
     this._image = new GameImage(
@@ -31,12 +34,12 @@ export class Box extends BaseDrawObject {
         this._image,
         this._startPositionX,
         this._startPositionY,
-        100,
-        100
+        30,
+        30
       );
     }
 
-    this._isShowImage = !this._isShowImage;
+    this._isShowImage = !(this._interval % 5 == 0);
 
     this._interval--;
   }
@@ -71,7 +74,7 @@ class HealthBoxStrategy extends BaseBoxStrategy {
   }
 }
 
-class BoxStrategyFactory {
+export class BoxStrategyFactory {
   static create(typeImage: BoxTypeImage) {
     switch (typeImage) {
       case BoxTypeImage.MinShrapnel:
@@ -107,16 +110,14 @@ export class BoxFactory {
       const boxTypeIndex = randomRange(0, boxTypes.length - 1);
       const boxType = boxTypes[boxTypeIndex];
 
-      boxes.push(
-        new Box(BoxStrategyFactory.create(boxType), sceneWidth, sceneHeight)
-      );
+      boxes.push();
     }
 
     return boxes;
   }
 }
 
-enum BoxTypeImage {
+export enum BoxTypeImage {
   MinShrapnel = 10,
   MaxShrapnel = 30,
   MinPistols = 10,

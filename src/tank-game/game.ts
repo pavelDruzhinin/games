@@ -18,7 +18,7 @@ import { List } from "../common/list";
 import Client from "./realtime-server/client";
 import MatchesComponent from "./components/MatchesComponent";
 import { GameEventType, GameData } from "./realtime-server/GameData";
-import { Box, BoxFactory } from "./tank/box";
+import { Box, BoxFactory, BoxStrategyFactory, BoxTypeImage } from "./tank/box";
 
 export class RechargeTankTower {
   startRifflePosition = 0;
@@ -132,6 +132,11 @@ class TankPanelAmmunition {
 
 class MatchState {
   players: any;
+  boxes: any;
+}
+
+interface ObjectKeys<T> {
+  [key: string]: T;
 }
 
 class TankGame {
@@ -139,6 +144,7 @@ class TankGame {
   game: Game;
   matchId: string;
   private _enemies: List<Tank> = new List<Tank>();
+  private _boxes: ObjectKeys<object> = {};
 
   constructor(public enemyCount: number, public enemySpeedLevel: number) {}
 
@@ -199,7 +205,7 @@ class TankGame {
 
     let boxes = BoxFactory.create(game.scene.width, game.scene.height);
 
-    game.scene.addRandomDrawObjects(boxes);
+    //game.scene.addRandomDrawObjects(boxes);
     game.scene.addDrawObjects(this._enemies);
     game.scene.addDrawObject(tank);
     game.registerKeyBoardEvents(keyboardsEvents);
@@ -324,6 +330,37 @@ class TankGame {
     enemyTank.positionY = positionY;
     enemyTank._turn(direction);
   }
+
+  addBox(
+    nextKey: string,
+    positionX: number,
+    positionY: number,
+    boxType: number,
+    interval: number
+  ) {
+    const boxTypes = [
+      BoxTypeImage.MinShrapnel,
+      BoxTypeImage.MaxShrapnel,
+      BoxTypeImage.MinPistols,
+      BoxTypeImage.MaxPistols,
+      BoxTypeImage.MaxHealth,
+      BoxTypeImage.AverageHeath,
+      BoxTypeImage.MinHealth,
+    ];
+
+    const box = new Box(
+      BoxStrategyFactory.create(boxTypes[boxType]),
+      this.game.scene.width,
+      this.game.scene.height,
+      positionX,
+      positionY,
+      interval
+    );
+
+    this._boxes[nextKey] = box;
+    this.game.scene.addDrawObject(box);
+    console.log("add new box", box);
+  }
 }
 
 var tankGame = new TankGame(1, 1);
@@ -364,7 +401,15 @@ client.addSocketListener(GameEventType.ChangePosition, (gameData: GameData) => {
 });
 
 client.addSocketListener(GameEventType.NewBox, (gameData: GameData) => {
-  console.log("newBox");
+  console.log("create new box behaviour");
+  const { boxLocation, boxType, nextKey, interval } = gameData.data;
+  tankGame.addBox(
+    nextKey,
+    boxLocation.positionX,
+    boxLocation.positionY,
+    boxType,
+    interval
+  );
 });
 
 function joinMatch(matchId: number) {
